@@ -1,0 +1,153 @@
+﻿@page "/users"
+
+@using DMS.ViewModels
+@using DMS.Services
+
+@inject IIdentityService identService
+@inject IToastService toastService
+
+
+<AuthorizeView Roles="Admin">
+    <h3>Users</h3>
+    <div class="row mb-3">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+                    <EditForm Context="formContext" Model="UserModel" OnValidSubmit="OnValidSubmit">
+                        <div class="form-inline">
+                            <div class="form-group mb-2">
+                                <label for="inputUserName" class="sr-only">User Name</label>
+                                <input @bind="UserModel.UserName" class="form-control" id="inputUserName" placeholder="User Name">
+                            </div>
+                            <div class="form-group mx-sm-3 mb-2">
+                                <label for="inputEmail" class="sr-only">Email</label>
+                                <input @bind="UserModel.Email" type="email" class="form-control" id="inputEmail" placeholder="Email">
+                            </div>
+                            <button type="submit" class="btn btn-success mb-2">Add User</button>
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    @if (AppUsers == null)
+                    {
+                        <p>Loading...</p>
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary mb-3" href="#">Add User</a>
+                        <table class="table">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>User Name</th>
+                                    <th>Admin</th>
+                                    <th>Archive</th>
+                                    <th>Public</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in AppUsers)
+                                {
+                                    <tr>
+                                        <td>@user.UserName</td>
+                                        @if (user.IsAdmin)
+                                        {
+                                            <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_ADMIN))"><i class="oi oi-check"></i></a></td>
+                                        }
+                                        else
+                                        {
+                                            <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_ADMIN))"><i class="oi oi-x"></i></a></td>
+                                        }
+                                        @if (user.IsArchive)
+                                        {
+                                            <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_ARCHIVE))"><i class="oi oi-check"></i></a></td>
+                                        }
+                                        else
+                                        {
+                                            <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_ARCHIVE))"><i class="oi oi-x"></i></a></td>
+                                        }
+                                        @if (user.IsPublic)
+                                        {
+                                            <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_PUBLIC))"><i class="oi oi-check"></i></a></td>
+                                        }
+                                        else
+                                        {
+                                            <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_PUBLIC))"><i class="oi oi-x"></i></a></td>
+                                        }
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</AuthorizeView>
+
+
+@code {
+
+    public List<AppUser> AppUsers { get; set; }
+
+    private CreateUserModel UserModel { get; set; } = new CreateUserModel();
+
+    public async Task LoadUsers()
+    {
+        UserModel = new CreateUserModel();
+        AppUsers = await identService.GetUsersAsync().ConfigureAwait(false);
+    }
+
+    public async Task OnValidSubmit()
+    {
+        var user = await identService.CreateUserAsync(UserModel?.UserName, UserModel?.Email).ConfigureAwait(false);
+        if(user == null)
+        {
+            toastService.ShowError("Adding user failed", "Error");
+        }
+        else
+        {
+            toastService.ShowSuccess($"User {UserModel?.UserName} added successfully", "Success");
+            await LoadUsers().ConfigureAwait(false);
+        }
+        
+    }
+
+    public async Task AddToRole(string userName, string role)
+    {
+        var result = await identService.AddUserRoleAsync(userName, role).ConfigureAwait(false);
+        if(!result)
+        {
+            toastService.ShowError($"Failed to add user {userName} to {role} role", "Error");
+        }
+        else
+        {
+            toastService.ShowSuccess($"User {userName} added to {role} role successfully", "Success");
+            await LoadUsers().ConfigureAwait(false);
+        }
+    }
+
+    public async Task RemoveFromRole(string userName, string role)
+    {
+        var result = await identService.RemoveUserRoleAsync(userName, role).ConfigureAwait(false);
+        if(!result)
+        {
+            toastService.ShowError($"Failed to remove user {userName} from {role} role", "Error");
+        }
+        else
+        {
+            toastService.ShowSuccess($"User {userName} removed from {role} role successfully", "Success");
+            await LoadUsers().ConfigureAwait(false);
+        }    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers().ConfigureAwait(false);
+    }
+}

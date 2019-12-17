@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DMS.Data
 {
-    public class DmsDbContext : IdentityDbContext
+    public class DmsContext : IdentityDbContext
     {
-        public DmsDbContext(DbContextOptions<DmsDbContext> options)
+        public DmsContext(DbContextOptions<DmsContext> options)
             : base(options)
         {
         }

@@ -1,4 +1,10 @@
 ﻿@inherits LayoutComponentBase
+@using Blazored.Toast.Configuration
+
+<BlazoredToasts Position="ToastPosition.TopCenter"
+                Timeout="2"
+                SuccessIconClass="oi oi-check"
+                ErrorIconClass="oi oi-x" />
 
 <div class="sidebar">
     <NavMenu />

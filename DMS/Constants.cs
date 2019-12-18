@@ -13,5 +13,9 @@ namespace DMS
         public const string USER_ADMIN = "admin";
         public const string USER_ADMIN_EMAIL = "admin@dms";
         public const string USER_DEFAULT_PWD = "123456";
+
+        public const int USERNAME_MAX_LENGTH = 256;
+        public const int REPO_NAME_MAX_LENGTH = 100;
+        public const int REPO_DESC_MAX_LENGTH = 250;
     }
 }

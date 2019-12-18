@@ -33,10 +33,10 @@ namespace DMS.Data
             // Repository
             builder.Entity<Repository>(e =>
             {
-                e.Property(p => p.Name).HasMaxLength(100).IsRequired();
-                e.Property(p => p.Description).HasMaxLength(250);
-                e.Property(p => p.CreatedBy).HasMaxLength(256).IsRequired();
-                e.Property(p => p.UpdatedBy).HasMaxLength(256).IsRequired();
+                e.Property(p => p.Name).HasMaxLength(Constants.REPO_NAME_MAX_LENGTH).IsRequired();
+                e.Property(p => p.Description).HasMaxLength(Constants.REPO_DESC_MAX_LENGTH);
+                e.Property(p => p.CreatedBy).HasMaxLength(Constants.USERNAME_MAX_LENGTH).IsRequired();
+                e.Property(p => p.UpdatedBy).HasMaxLength(Constants.USERNAME_MAX_LENGTH).IsRequired();
                 e.Property(p => p.CreatedOn).HasDefaultValueSql("getdate()").ValueGeneratedOnAdd();
                 e.Property(p => p.UpdatedOn).HasDefaultValueSql("getdate()").ValueGeneratedOnAddOrUpdate();
 

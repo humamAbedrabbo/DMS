@@ -13,12 +13,13 @@ namespace DMS.Services
     public class AdminService : IAdminService
     {
         private readonly DmsContext context;
-        private readonly AppUser currentUser;
+        private readonly ICurrentUserService currentUserService;
+        private AppUser currentUser;
 
         public AdminService(DmsContext context, ICurrentUserService currentUserService)
         {
             this.context = context;
-            currentUser = currentUserService.GetCurrentUserAsync().Result;
+            this.currentUserService = currentUserService;
         }
 
         public async Task<List<Repository>> GetRepositoriesAsync()
@@ -30,29 +31,32 @@ namespace DMS.Services
         public async Task<Repository> GetRepositoryByIdAsync(int repositoryId)
         {
             var repository = await context.Repositories.FindAsync(repositoryId).ConfigureAwait(false);
-            if (repository == null)
-                throw new EntityNotFoundException("Repository", $"with id='{repositoryId}'");
 
             return repository;
         }
 
         public async Task<Repository> GetRepositoryByNameAsync(string name)
         {
-            var repository = await context.Repositories.SingleOrDefaultAsync(x => x.Name == name).ConfigureAwait(false);
-            if (repository == null)
-                throw new EntityNotFoundException("Repository", $"with name='{name}'");
+            var repository = await context.Repositories.FirstOrDefaultAsync(x => x.Name == name).ConfigureAwait(false);
 
             return repository;
         }
 
         public async Task<Repository> AddRepositoryAsync(CreateRepositoryModel model)
         {
-            if ((await GetRepositoryByNameAsync(model.Name).ConfigureAwait(false)) != null)
+            if(currentUser == null)
+            {
+                currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
+            }
+
+            Repository repository = await GetRepositoryByNameAsync(model.Name).ConfigureAwait(false);
+
+            if (repository != null)
             {
                 throw new EntityExistException("Repository", $"with name = '{model.Name}'");
             }
 
-            Repository repository = new Repository
+            repository = new Repository
             {
                 Name = model.Name,
                 Description = model.Description,
@@ -76,6 +80,11 @@ namespace DMS.Services
 
         public async Task<bool> UpdateRepositoryAsync(UpdateRepositoryModel model)
         {
+            if (currentUser == null)
+            {
+                currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
+            }
+
             Repository repository = await GetRepositoryByIdAsync(model.Id).ConfigureAwait(false);
             bool isModified = false;
 
@@ -117,6 +126,11 @@ namespace DMS.Services
 
         public async Task<Repository> DeleteRepositoryAsync(int repositoryId)
         {
+            if (currentUser == null)
+            {
+                currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
+            }
+
             Repository repository = await GetRepositoryByIdAsync(repositoryId).ConfigureAwait(false);
 
             if (repository == null)

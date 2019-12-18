@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DMS.Exceptions
 {
-    public class EntityNotFoundException : ApplicationException
+    public class EntityNotFoundException : DmsException
     {
         public EntityNotFoundException()
             :base()

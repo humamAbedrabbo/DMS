@@ -2,7 +2,7 @@
 
 namespace DMS.Exceptions
 {
-    public class EntityExistException : ApplicationException
+    public class EntityExistException : DmsException
     {
         public EntityExistException()
             : base()

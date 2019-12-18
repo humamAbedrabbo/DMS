@@ -1,0 +1,128 @@
+﻿@page "/repos"
+
+@using DMS.ViewModels
+@using DMS.Services
+@using DMS.Models
+
+@inject IAdminService adminService
+@inject IToastService toastService
+
+<AuthorizeView Roles="Admin">
+    <h3>Repositories</h3>
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <EditForm Context="formRepoContext" Model="RepositoryModel" OnValidSubmit="OnValidCreateSubmit">
+                        <div class="form-inline">
+                            <div class="form-group mb-2">
+                                <label for="inputName" class="sr-only">Repository Name</label>
+                                <input @bind="RepositoryModel.Name" class="form-control" id="inputName" placeholder="Repository Name">
+                            </div>
+                            <div class="form-group mx-sm-3 mb-2">
+                                <label for="inputDesc" class="sr-only">Description</label>
+                                <input @bind="RepositoryModel.Description" class="form-control" id="inputDesc" placeholder="Description">
+                            </div>
+
+                            <div class="form-group mx-sm-3 mb-2">
+                                <label for="inputStorage" class="sr-only">Storage Type</label>
+                                <select @bind="RepositoryModel.StorageType" class="form-control" id="inputStorage">
+                                    <option value="@StorageType.Database">Database</option>
+                                    <option value="@StorageType.Files">Files</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-success mb-2">Add Repository</button>
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    @if (Repositories == null)
+                    {
+                        <p>Loading...</p>
+                    }
+                    else
+                    {
+                        <table class="table">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Repository Name</th>
+                                    <th>Storage Type</th>
+                                    <th>Created By</th>
+                                    <th>Created On</th>
+                                    <th>Updated By</th>
+                                    <th>Updated On</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var repo in Repositories)
+                                {
+                                    <tr>
+                                        <td>@repo.Name</td>
+                                        <td class="text-warning">@repo.StorageType.ToString()</td>
+                                        <td class="text-secondary">@repo.CreatedBy</td>
+                                        <td class="text-secondary">@repo.CreatedOn.ToShortDateString()</td>
+                                        <td class="text-secondary">@repo.UpdatedBy</td>
+                                        <td class="text-secondary">@repo.UpdatedOn.ToShortDateString()</td>
+                                        <td>
+                                            <a class="btn-sm btn-secondary mr-1" href="#"><i class="oi oi-pencil"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</AuthorizeView>
+
+@code {
+    public List<Repository> Repositories { get; set; }
+
+    private CreateRepositoryModel RepositoryModel { get; set; } = new CreateRepositoryModel();
+
+    public async Task LoadRepositories()
+    {
+        RepositoryModel = new CreateRepositoryModel();
+        Repositories = await adminService.GetRepositoriesAsync();
+    }
+
+    public async Task OnValidCreateSubmit()
+    {
+
+        try
+        {
+            var repo = await adminService.AddRepositoryAsync(RepositoryModel).ConfigureAwait(false);
+            if (repo != null)
+            {
+                toastService.ShowSuccess($"Repository '{RepositoryModel.Name}' created successfully");
+            }
+            else
+            {
+                toastService.ShowError($"Failed to create repository '{RepositoryModel.Name}'");
+            }
+        }
+        catch (DMS.Exceptions.DmsException ex)
+        {
+            toastService.ShowError($"Failed to create repository '{RepositoryModel.Name}'. {ex.Message}");
+        }
+
+        await LoadRepositories();
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRepositories();
+    }
+}

@@ -17,7 +17,12 @@ namespace DMS.Models
             '/',
             '|',
             '&',
-            '$'
+            '$',
+            '>',
+            '<',
+            '*',
+            '?',
+            ':'
         };
 
         public static string[] ForbiddenNames =
@@ -45,6 +50,7 @@ namespace DMS.Models
         public bool IsDeleted { get; set; }
 
         public List<Folder> Childs { get; set; }
+        public List<Document> Documents { get; set; }
 
         public void AddChildFolder(Folder child)
         {

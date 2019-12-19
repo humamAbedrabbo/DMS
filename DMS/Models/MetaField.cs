@@ -20,5 +20,15 @@ namespace DMS.Models
         public DateTime CreatedOn { get; set; }
         public DateTime UpdatedOn { get; set; }
         public bool IsDeleted { get; set; }
+
+        public string GetDefaultTitle()
+        {
+            if (string.IsNullOrEmpty(Name))
+                return null;
+            if (string.IsNullOrEmpty(Group))
+                return Name;
+            else
+                return Name.Split(".")[1];
+        }
     }
 }

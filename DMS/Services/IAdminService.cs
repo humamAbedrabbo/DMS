@@ -26,5 +26,15 @@ namespace DMS.Services
         Task<List<Folder>> GetFoldersWithChildsAsync();
         Task<List<Folder>> GetChildFoldersAsync(int? parentFolderId, int? repositoryId = null);
         #endregion
+
+        #region MetaField Query And CRUD Operations
+        public Task<List<MetaField>> GetMetaFieldsAsync();
+        public Task<MetaField> GetMetaByIdAsync(int fieldId);
+        public Task<List<MetaField>> GetMetaFieldsByNameAsync(string name);
+        public Task<List<MetaField>> GetMetaFieldsByTitleAsync(string name);
+        public Task<MetaField> AddMetaFieldAsync(MetaField model);
+        public Task<bool> UpdateMetaFieldAsync(MetaField model);
+        public Task<MetaField> DeleteMetaFieldAsync(int fieldId); 
+        #endregion
     }
 }

@@ -353,5 +353,119 @@ namespace DMS.Services
         }
 
         #endregion
+
+        #region MetaField Query And CRUD Operations
+        public async Task<List<MetaField>> GetMetaFieldsAsync()
+        {
+            var metaFields = await context.MetaFields.ToListAsync().ConfigureAwait(false);
+            return metaFields;
+        }
+
+        public async Task<MetaField> GetMetaByIdAsync(int fieldId)
+        {
+            var metaField = await context.MetaFields.FindAsync(fieldId).ConfigureAwait(false);
+
+            return metaField;
+        }
+
+        public async Task<List<MetaField>> GetMetaFieldsByNameAsync(string name)
+        {
+            var metaFields = await context.MetaFields.Where(x => x.Name == name).ToListAsync().ConfigureAwait(false);
+
+            return metaFields;
+        }
+
+        public async Task<List<MetaField>> GetMetaFieldsByTitleAsync(string name)
+        {
+            var metaFields = await context.MetaFields.Where(x => x.Title == name).ToListAsync().ConfigureAwait(false);
+
+            return metaFields;
+        }
+
+        public async Task<MetaField> AddMetaFieldAsync(MetaField model)
+        {
+            if (currentUser == null)
+            {
+                currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
+            }
+
+            if(string.IsNullOrEmpty(model.Title))
+            {
+                model.Title = model.GetDefaultTitle();
+            }
+
+            model.CreatedBy = currentUser.UserName;
+            model.UpdatedBy = currentUser.UserName;
+
+            context.MetaFields.Add(model);
+            try
+            {
+                await context.SaveChangesAsync().ConfigureAwait(false);
+
+                return model;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> UpdateMetaFieldAsync(MetaField model)
+        {
+            if (currentUser == null)
+            {
+                currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
+            }
+
+            if (string.IsNullOrEmpty(model.Title))
+            {
+                model.Title = model.GetDefaultTitle();
+            }
+
+            model.UpdatedBy = currentUser.UserName;
+            context.Entry(model).State = EntityState.Modified;
+
+            try
+            {
+                await context.SaveChangesAsync().ConfigureAwait(false);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public async Task<MetaField> DeleteMetaFieldAsync(int fieldId)
+        {
+            if (currentUser == null)
+            {
+                currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
+            }
+
+            MetaField metaField = await GetMetaByIdAsync(fieldId).ConfigureAwait(false);
+
+            if (metaField == null)
+            {
+                throw new EntityNotFoundException("Repository", $"with id = '{fieldId}'");
+            }
+
+            try
+            {
+                metaField.IsDeleted = true;
+                metaField.UpdatedBy = currentUser.UserName;
+
+                await context.SaveChangesAsync().ConfigureAwait(false);
+
+                return metaField;
+            }
+            catch (Exception ex)
+            {
+                return metaField;
+            }
+
+        } 
+        #endregion
     }
 }

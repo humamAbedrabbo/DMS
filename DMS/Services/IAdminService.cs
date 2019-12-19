@@ -12,6 +12,7 @@ namespace DMS.Services
         Task<Repository> DeleteRepositoryAsync(int repositoryId);
         Task<List<Repository>> GetRepositoriesAsync();
         Task<Repository> GetRepositoryByIdAsync(int repositoryId);
+        Task<Repository> GetRepositoryByIdWithFolderTreeAsync(int repositoryId);
         Task<Repository> GetRepositoryByNameAsync(string name);
         Task<bool> UpdateRepositoryAsync(UpdateRepositoryModel model);
         #endregion
@@ -21,7 +22,9 @@ namespace DMS.Services
         Task<Folder> GetFolderyByIdAsync(int folderId);
         Task<Folder> AddFolderyAsync(CreateFolderModel model);
         Task<bool> UpdateFolderAsync(UpdateFolderModel model);
-        Task<Folder> DeleteFolderAsync(int folderId); 
+        Task<Folder> DeleteFolderAsync(int folderId);
+        Task<List<Folder>> GetFoldersWithChildsAsync();
+        Task<List<Folder>> GetChildFoldersAsync(int? parentFolderId, int? repositoryId = null);
         #endregion
     }
 }

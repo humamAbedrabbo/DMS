@@ -36,6 +36,21 @@ namespace DMS.Services
             return repository;
         }
 
+        public async Task<Repository> GetRepositoryByIdWithFolderTreeAsync(int repositoryId)
+        {
+            var repository = await GetRepositoryByIdAsync(repositoryId);
+
+            var folders = await context.Folders
+                .Include(x => x.Parent)
+                .Include(x => x.Childs)
+                .Where(x => x.RepositoryId == repository.Id)
+                .ToListAsync().ConfigureAwait(false);
+
+            repository.Folders = folders.Where(x => !x.ParentId.HasValue).ToList();
+
+            return repository;
+        }
+
         public async Task<Repository> GetRepositoryByNameAsync(string name)
         {
             var repository = await context.Repositories.FirstOrDefaultAsync(x => x.Name == name).ConfigureAwait(false);
@@ -164,7 +179,30 @@ namespace DMS.Services
                 await context.Folders
                 .Include(x => x.Repository)
                 .Include(x => x.Parent)
+                .ToListAsync().ConfigureAwait(false);
+
+            return folders;
+        }
+
+        public async Task<List<Folder>> GetFoldersWithChildsAsync()
+        {
+            var folders =
+                await context.Folders
+                .Include(x => x.Repository)
+                .Include(x => x.Parent)
                 .Include(x => x.Childs)
+                .ToListAsync().ConfigureAwait(false);
+
+            return folders;
+        }
+
+        public async Task<List<Folder>> GetChildFoldersAsync(int? parentFolderId ,int? repositoryId = null)
+        {
+            var folders =
+                await context.Folders
+                .Include(x => x.Repository)
+                .Include(x => x.Parent)
+                .Where(x => (!repositoryId.HasValue || x.RepositoryId == repositoryId) && x.ParentId == parentFolderId)
                 .ToListAsync().ConfigureAwait(false);
 
             return folders;

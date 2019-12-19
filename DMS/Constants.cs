@@ -20,5 +20,9 @@ namespace DMS
 
         public const int FOLDER_NAME_MAX_LENGTH = 248;
         public const int FOLDER_DESC_MAX_LENGTH = 250;
+
+        public const int METAFIELD_NAME_MAX_LENGTH = 50;
+        public const int METAFIELD_TITLE_MAX_LENGTH = 100;
+        public const int METAFIELD_DESC_MAX_LENGTH = 250;
     }
 }

@@ -16,6 +16,7 @@ namespace DMS.Data
         }
 
         public DbSet<Repository> Repositories { get; set; }
+        public DbSet<Folder> Folders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -43,6 +44,35 @@ namespace DMS.Data
                 e.HasQueryFilter(p => !p.IsDeleted);
 
                 e.HasIndex(p => p.Name).IsUnique();
+                e.HasIndex(p => p.CreatedBy);
+                e.HasIndex(p => p.UpdatedBy);
+                e.HasIndex(p => p.CreatedOn);
+                e.HasIndex(p => p.UpdatedOn);
+            });
+
+            // Folder
+            builder.Entity<Folder>(e =>
+            {
+                e.Property(p => p.Name).HasMaxLength(Constants.FOLDER_NAME_MAX_LENGTH).IsRequired();
+                e.Property(p => p.Description).HasMaxLength(Constants.FOLDER_DESC_MAX_LENGTH);
+                e.Property(p => p.CreatedBy).HasMaxLength(Constants.USERNAME_MAX_LENGTH).IsRequired();
+                e.Property(p => p.UpdatedBy).HasMaxLength(Constants.USERNAME_MAX_LENGTH).IsRequired();
+                e.Property(p => p.CreatedOn).HasDefaultValueSql("getdate()").ValueGeneratedOnAdd();
+                e.Property(p => p.UpdatedOn).HasDefaultValueSql("getdate()").ValueGeneratedOnAddOrUpdate();
+
+                e.HasOne(p => p.Repository)
+                    .WithMany(p => p.Folders)
+                    .HasForeignKey(p => p.RepositoryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(p => p.Parent)
+                    .WithMany(p => p.Childs)
+                    .HasForeignKey(p => p.ParentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasQueryFilter(p => !p.IsDeleted);
+
+                e.HasIndex(p => new { p.RepositoryId, p.Name, p.ParentId });
                 e.HasIndex(p => p.CreatedBy);
                 e.HasIndex(p => p.UpdatedBy);
                 e.HasIndex(p => p.CreatedOn);

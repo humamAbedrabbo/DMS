@@ -22,5 +22,7 @@ namespace DMS.Models
         public DateTime CreatedOn { get; set; }
         public DateTime UpdatedOn { get; set; }
         public bool IsDeleted { get; set; }
+
+        public List<Folder> Folders { get; set; }
     }
 }

@@ -1,48 +1,27 @@
-﻿using DMS.Models;
-using DMS.ViewModels;
-using System.Collections.Generic;
+﻿using DAS.Models;
+using DAS.ViewModels;
 using System.Threading.Tasks;
 
-namespace DMS.Services
+namespace DAS.Services
 {
     public interface IAdminService
     {
-        #region Repository Query And CRUD Operations
-        Task<Repository> AddRepositoryAsync(CreateRepositoryModel model);
-        Task<Repository> DeleteRepositoryAsync(int repositoryId);
-        Task<List<Repository>> GetRepositoriesAsync();
-        Task<Repository> GetRepositoryByIdAsync(int repositoryId);
-        Task<Repository> GetRepositoryByIdWithFolderTreeAsync(int repositoryId);
-        Task<Repository> GetRepositoryByNameAsync(string name);
-        Task<bool> UpdateRepositoryAsync(UpdateRepositoryModel model);
-        #endregion
-
-        #region Folder Query And CRUD Operations
-        Task<List<Folder>> GetFoldersAsync();
-        Task<Folder> GetFolderByIdAsync(int folderId);
-        Task<Folder> AddFolderAsync(CreateFolderModel model);
-        Task<bool> UpdateFolderAsync(UpdateFolderModel model);
-        Task<Folder> DeleteFolderAsync(int folderId);
-        Task<List<Folder>> GetFoldersWithChildsAsync();
-        Task<List<Folder>> GetChildFoldersAsync(int? parentFolderId, int? repositoryId = null);
-        #endregion
-
-        #region Document Query And CRUD Operations
-        public Task<List<Document>> GetDocumentsAsync(int folderId);
-        public Task<Document> GetDocumentyByIdAsync(int documentId);
-        public Task<Document> AddDocumentAsync(CreateDocumentModel model);
-        public Task<bool> UpdateDocumentAsync(UpdateDocumentModel model);
-        public Task<Document> DeleteDocumentAsync(int documentId); 
-        #endregion
-
-        #region MetaField Query And CRUD Operations
-        public Task<List<MetaField>> GetMetaFieldsAsync();
-        public Task<MetaField> GetMetaByIdAsync(int fieldId);
-        public Task<List<MetaField>> GetMetaFieldsByNameAsync(string name);
-        public Task<List<MetaField>> GetMetaFieldsByTitleAsync(string name);
-        public Task<MetaField> AddMetaFieldAsync(MetaField model);
-        public Task<bool> UpdateMetaFieldAsync(MetaField model);
-        public Task<MetaField> DeleteMetaFieldAsync(int fieldId); 
-        #endregion
+        Task<DocumentMeta> AddDocumentMetaValue(int id, string name, string value = null);
+        Task<FolderMeta> AddFolderMetaValue(int id, string name, string value = null);
+        Task<MetaField> AddMetaField(MetaField model);
+        Task<RepositoryMeta> AddRepoMetaValue(int id, string name, string value = null);
+        Task<DocumentDetailModel> DeleteDocument(int? id, string username);
+        Task<DocumentMeta> DeleteDocumentMetaValue(int id, string name);
+        Task<FolderDetailModel> DeleteFolder(int? id, string username);
+        Task<FolderMeta> DeleteFolderMetaValue(int id, string name);
+        Task<MetaField> DeleteMetaField(int? id, string force = null);
+        Task<RepositoryMeta> DeleteRepoMetaValue(int id, string name);
+        Task<RepoDetailModel> DeleteRepository(int? id, string username);
+        Task<RepoDetailModel> AddRepository(RepoAddModel model);
+        Task UpdateRepository(string id, RepoUpdateModel model);
+        Task<DocumentMeta> SetDocumentMetaValue(int id, string name, string value = null);
+        Task<FolderMeta> SetFolderMetaValue(int id, string name, string value = null);
+        Task<RepositoryMeta> SetRepoMetaValue(int id, string name, string value = null);
+        Task UpdateMetaField(int? id, MetaField model);
     }
 }

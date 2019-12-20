@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DMS.Exceptions
+namespace DAS.Exceptions
 {
-    public class EntityNotFoundException : DmsException
+    public class EntityNotFoundException : DasException
     {
         public EntityNotFoundException()
             :base()

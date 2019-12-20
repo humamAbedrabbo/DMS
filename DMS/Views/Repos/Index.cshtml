@@ -1,0 +1,152 @@
+﻿@model IEnumerable<DAS.ViewModels.RepoDetailModel>
+
+<div class="row">
+    <div class="col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Repository Name</td>
+                    <td>Title</td>
+                    <td>Storage</td>
+                    <td>Description</td>
+                    <td>
+                        <a class="btn-sm" href="#"><i class="fa fa-plus" data-toggle="modal" data-target="#newRepoModal"></i></a>
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var repo in Model)
+                {
+                    <tr>
+                        <td>@repo.Name</td>
+                        <td>@repo.Title</td>
+                        <td>@repo.Storage</td>
+                        <td>@repo.Description</td>
+                        <td>
+                            <a class="btn-sm mr-1" asp-controller="Repos" asp-action="Explore" asp-route-repoId="@repo.Id"><i class="fa fa-folder-open"></i></a>
+                            <a class="btn-sm mr-1" href="#"><i class="fa fa-pencil"></i></a>
+                            <a class="btn-sm mr-1" data-toggle="collapse" href="#meta-@repo.Id"><i class="fa fa-asterisk"></i></a>
+                        </td>
+                    </tr>
+                    <tr id="meta-@repo.Id" class="collapse">
+                        <td colspan="5">
+                            <div class="row p-4">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <td>Field</td>
+                                            <td>Value</td>
+                                            <td>
+                                                <a class="btn-sm" data-toggle="modal" data-target="#setRepoMetaModal" data-repoid="@repo.Id"><i class="fa fa-plus mr-1"></i></a>
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach(var meta in repo.Meta)
+                                        {
+                                            <tr>
+                                                <td>@meta.Key</td>
+                                                <td>@meta.Value</td>
+                                                <td>
+                                                    <a class="btn-sm" data-toggle="modal" data-target="#setRepoMetaModal" data-repoid="@repo.Id" data-name="@meta.Key" data-value="@meta.Value"><i class="fa fa-pencil mr-1"></i></a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="newRepoModal">
+    <div class="modal-dialog" role="document">
+        <form method="post" asp-controller="Repos" asp-action="Create">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Repository</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="name">Repository Name</label>
+                        <input id="name" name="Name" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input id="title" name="Title" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="storage">Storage</label>
+                        <select id="storage" name="Storage" asp-items="Html.GetEnumSelectList<DAS.Models.StorageType>()" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="Description" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </form>
+        
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="setRepoMetaModal">
+    <div class="modal-dialog" role="document">
+        <form method="post" asp-controller="Repos" asp-action="SetRepoMeta">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Set Meta</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="repositoryId" name="RepositoryId" class="form-control" />
+                    
+                    <div class="form-group">
+                        <label for="name">Field Name</label>
+                        <input id="name" name="Name" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="value">Value</label>
+                        <input id="value" name="Value" class="form-control" />
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+@section scripts
+{
+<script>
+    $('#setRepoMetaModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) 
+        var repoId = button.data('repoid') 
+        var metaName = button.data('name') 
+        var metaValue = button.data('value') 
+        var modal = $(this)
+
+        modal.find('.modal-body #repositoryId').val(repoId)
+        modal.find('.modal-body #name').val(metaName)
+        modal.find('.modal-body #value').val(metaValue)
+    })
+</script>
+}

@@ -1,4 +1,4 @@
-﻿namespace DMS.ViewModels
+﻿namespace DAS.ViewModels
 {
     public class CreateUserModel
     {

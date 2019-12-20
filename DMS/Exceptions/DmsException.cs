@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace DMS.Exceptions
+namespace DAS.Exceptions
 {
-    public class DmsException : ApplicationException
+    public class DasException : ApplicationException
     {
-        public DmsException()
+        public DasException()
             : base()
         {
         }
 
-        public DmsException(string message)
+        public DasException(string message)
             : base(message)
         {
         }

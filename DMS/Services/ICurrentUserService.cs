@@ -1,7 +1,7 @@
-﻿using DMS.ViewModels;
+﻿using DAS.ViewModels;
 using System.Threading.Tasks;
 
-namespace DMS.Services
+namespace DAS.Services
 {
     public interface ICurrentUserService
     {

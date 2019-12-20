@@ -1,11 +1,11 @@
-﻿using DMS.ViewModels;
+﻿using DAS.ViewModels;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DMS.Services
+namespace DAS.Services
 {
     public class CurrentUserService : ICurrentUserService
     {

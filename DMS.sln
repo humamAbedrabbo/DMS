@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29609.76
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMS", "DMS\DMS.csproj", "{80AB34D4-6E25-457D-8D89-1FB53A6ABDD1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAS", "DMS\DAS.csproj", "{80AB34D4-6E25-457D-8D89-1FB53A6ABDD1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

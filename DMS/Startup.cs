@@ -13,12 +13,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using DMS.Areas.Identity;
-using DMS.Data;
-using DMS.Services;
+using DAS.Areas.Identity;
+using DAS.Data;
+using DAS.Services;
 using Blazored.Toast;
 
-namespace DMS
+namespace DAS
 {
     public class Startup
     {
@@ -33,7 +33,7 @@ namespace DMS
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DmsContext>(options =>
+            services.AddDbContext<DasContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
 
@@ -45,7 +45,7 @@ namespace DMS
                 options.User.RequireUniqueEmail = false;
                 })
                 .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<DmsContext>();
+                .AddEntityFrameworkStores<DasContext>();
 
             services.AddMvc();
             services.AddRazorPages();
@@ -56,7 +56,11 @@ namespace DMS
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddScoped<IIdentityService, IdentityService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+            services.AddScoped<ISearchService, SearchService>();
             services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<IArchiveService, ArchiveService>();
+            services.AddScoped<IListsService, ListsService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

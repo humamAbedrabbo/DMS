@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DMS.ViewModels
+namespace DAS.ViewModels
 {
     public class AppUser
     {

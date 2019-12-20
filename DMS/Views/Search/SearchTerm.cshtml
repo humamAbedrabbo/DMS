@@ -1,0 +1,20 @@
+﻿@model IEnumerable<DAS.ViewModels.SearchResult>
+
+<h5>Advanced Search</h5>
+
+<div class="row">
+    <div class="col-12">
+        <a asp-controller="Search" asp-action="Index" class="btn btn-secondary mb-3">Search Again</a>
+
+        @foreach(var r in Model)
+        {
+            @foreach(var m in r.Results)
+            {
+                <p>
+                    (@m.TypeName) <a class="btn-link" href="#">@m.Name</a>
+                </p>
+            }
+            
+        }
+    </div>
+</div>

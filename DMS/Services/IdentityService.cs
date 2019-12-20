@@ -1,20 +1,20 @@
-﻿using DMS.Data;
-using DMS.ViewModels;
+﻿using DAS.Data;
+using DAS.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DMS.Services
+namespace DAS.Services
 {
     public class IdentityService : IIdentityService
     {
-        private readonly DmsContext context;
+        private readonly DasContext context;
         private readonly UserManager<IdentityUser> um;
         private readonly RoleManager<IdentityRole> rm;
 
-        public IdentityService(DmsContext context, UserManager<IdentityUser> um, RoleManager<IdentityRole> rm)
+        public IdentityService(DasContext context, UserManager<IdentityUser> um, RoleManager<IdentityRole> rm)
         {
             this.context = context;
             this.um = um;

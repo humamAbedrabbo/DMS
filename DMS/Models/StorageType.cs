@@ -1,8 +1,8 @@
-﻿namespace DMS.Models
+﻿namespace DAS.Models
 {
     public enum StorageType
     {
         Database,
-        Files
+        Directory
     }
 }

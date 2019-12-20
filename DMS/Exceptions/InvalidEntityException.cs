@@ -1,6 +1,6 @@
-﻿namespace DMS.Exceptions
+﻿namespace DAS.Exceptions
 {
-    public class InvalidEntityException : DmsException
+    public class InvalidEntityException : DasException
     {
         public InvalidEntityException()
             : base()

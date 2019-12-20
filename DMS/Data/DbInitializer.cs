@@ -1,26 +1,33 @@
-﻿using DMS.Models;
-using DMS.Services;
-using DMS.ViewModels;
+﻿using DAS.Models;
+using DAS.Services;
+using DAS.Utils;
+using DAS.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DMS.Data
+namespace DAS.Data
 {
     public class DbInitializer
     {
-        public static void Initialize(DmsContext context, IConfiguration config, IServiceProvider serviceProvider)
+        public static void Initialize(DasContext context, IConfiguration config, IServiceProvider serviceProvider)
         {
+            AppSettingsProvider.DefaultUploadFolder = config["DefaultUploadFolder"];
+            AppSettingsProvider.TempFolder = config["TempFolder"];
+            Directory.CreateDirectory(AppSettingsProvider.DefaultUploadFolder);
+            Directory.CreateDirectory(AppSettingsProvider.TempFolder);
+
             var initializer = new DbInitializer();
             initializer.Seed(context, serviceProvider);
         }
 
-        private void Seed(DmsContext context, IServiceProvider serviceProvider)
+        private void Seed(DasContext context, IServiceProvider serviceProvider)
         {
             context.Database.Migrate();
 
@@ -41,26 +48,22 @@ namespace DMS.Data
             }
 
             adminUser = identService.GetUserAsync(Constants.USER_ADMIN).Result;
-            
-            // Add Default Repository
-            if(!context.Repositories.Any())
+
+            if ((context.Repositories.Count()) == 0)
             {
-                var repository = new Repository
+                var repo = new Repository
                 {
                     Name = "Default",
-                    CreatedBy = adminUser.UserName,
-                    UpdatedBy = adminUser.UserName
+                    Title = "Default",
+                    StorageType = StorageType.Directory,
+                    Path = AppSettingsProvider.DefaultUploadFolder,
+                    CreatedBy = "admin",
+                    CreatedOn = DateTime.Now,
+                    UpdatedBy = "admin",
+                    UpdatedOn = DateTime.Now,
+                    IsDeleted = false
                 };
-
-                repository.Folders = new List<Folder>();
-                repository.Folders.Add(new Folder
-                {
-                    Name = "Root",
-                    CreatedBy = adminUser.UserName,
-                    UpdatedBy = adminUser.UserName
-                });
-
-                context.Repositories.Add(repository);
+                context.Repositories.Add(repo);
                 context.SaveChanges();
             }
         }

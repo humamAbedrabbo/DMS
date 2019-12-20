@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace DMS.Exceptions
+namespace DAS.Exceptions
 {
-    public class EntityExistException : DmsException
+    public class EntityExistException : DasException
     {
         public EntityExistException()
             : base()

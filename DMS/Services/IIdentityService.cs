@@ -1,9 +1,9 @@
-﻿using DMS.ViewModels;
+﻿using DAS.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DMS.Services
+namespace DAS.Services
 {
     public interface IIdentityService
     {

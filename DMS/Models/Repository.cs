@@ -24,6 +24,5 @@ namespace DMS.Models
         public bool IsDeleted { get; set; }
 
         public List<Folder> Folders { get; set; }
-        public List<Document> Documents { get; set; }
     }
 }

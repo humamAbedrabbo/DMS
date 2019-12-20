@@ -6,11 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20191217235146_RepositorySchema.cs" />
-    <Compile Remove="Migrations\20191217235146_RepositorySchema.Designer.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Blazored.Toast" Version="2.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.0" />
@@ -23,12 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="wwwroot\font-awesome\webfonts\fa-brands-400.svg" />
-    <None Include="wwwroot\font-awesome\webfonts\fa-brands-400.woff2" />
-    <None Include="wwwroot\font-awesome\webfonts\fa-regular-400.svg" />
-    <None Include="wwwroot\font-awesome\webfonts\fa-regular-400.woff2" />
-    <None Include="wwwroot\font-awesome\webfonts\fa-solid-900.svg" />
-    <None Include="wwwroot\font-awesome\webfonts\fa-solid-900.woff2" />
+    <None Include="wwwroot\css\font-awesome\webfonts\fa-brands-400.svg" />
+    <None Include="wwwroot\css\font-awesome\webfonts\fa-brands-400.woff2" />
+    <None Include="wwwroot\css\font-awesome\webfonts\fa-regular-400.svg" />
+    <None Include="wwwroot\css\font-awesome\webfonts\fa-regular-400.woff2" />
+    <None Include="wwwroot\css\font-awesome\webfonts\fa-solid-900.svg" />
+    <None Include="wwwroot\css\font-awesome\webfonts\fa-solid-900.woff2" />
   </ItemGroup>
 
 </Project>

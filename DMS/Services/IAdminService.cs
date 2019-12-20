@@ -19,12 +19,20 @@ namespace DMS.Services
 
         #region Folder Query And CRUD Operations
         Task<List<Folder>> GetFoldersAsync();
-        Task<Folder> GetFolderyByIdAsync(int folderId);
-        Task<Folder> AddFolderyAsync(CreateFolderModel model);
+        Task<Folder> GetFolderByIdAsync(int folderId);
+        Task<Folder> AddFolderAsync(CreateFolderModel model);
         Task<bool> UpdateFolderAsync(UpdateFolderModel model);
         Task<Folder> DeleteFolderAsync(int folderId);
         Task<List<Folder>> GetFoldersWithChildsAsync();
         Task<List<Folder>> GetChildFoldersAsync(int? parentFolderId, int? repositoryId = null);
+        #endregion
+
+        #region Document Query And CRUD Operations
+        public Task<List<Document>> GetDocumentsAsync(int folderId);
+        public Task<Document> GetDocumentyByIdAsync(int documentId);
+        public Task<Document> AddDocumentAsync(CreateDocumentModel model);
+        public Task<bool> UpdateDocumentAsync(UpdateDocumentModel model);
+        public Task<Document> DeleteDocumentAsync(int documentId); 
         #endregion
 
         #region MetaField Query And CRUD Operations

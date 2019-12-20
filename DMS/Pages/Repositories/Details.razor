@@ -2,9 +2,11 @@
 
 @using MW.Blazor
 @using DMS.Models
+@using DMS.ViewModels
 @using DMS.Services
 
 @inject IAdminService adminService
+@inject IToastService toastService
 
 <h3>Repository: @Repository?.Name</h3>
 <div class="row d-flex flex-grow-1">
@@ -25,25 +27,40 @@
 
     </div>
     <div class="col-8">
-        @if(selectedNode != null)
+        @if (selectedNode != null)
         {
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">@selectedNode.Name</h5>
-                <h6 class="card-subtitle mb-2 text-muted">@selectedNode.Description</h6>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">@selectedNode.Name</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">@selectedNode.Description</h6>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Cras justo odio</li>
+                    <li class="list-group-item">Dapibus ac facilisis in</li>
+                    <li class="list-group-item">Vestibulum at eros</li>
+                </ul>
+                <div class="card-body">
+                    <EditForm Model="ChildFolder" OnValidSubmit="OnAddChildFolder">
+                        <div class="form-inline">
+                            <div class="form-group mb-2">
+                                <label for="inputName" class="sr-only">Folder Name</label>
+                                <InputText @bind-Value="ChildFolder.Name" class="form-control" id="inputName" placeholder="Folder Name"></InputText>
+                                <InputNumber @bind-Value="ChildFolder.ParentId" class="form-control" id="inputName1" ></InputNumber>
+                                <InputNumber @bind-Value="ChildFolder.RepositoryId" class="form-control" id="inputName2" ></InputNumber>
+                            </div>
+                            <div class="form-group mx-sm-3 mb-2">
+                                <label for="inputDesc" class="sr-only">Description</label>
+                                <InputText @bind-Value="ChildFolder.Description" class="form-control" id="inputDesc" placeholder="Description"></InputText>
+                            </div>
+
+                            <button type="submit" class="btn btn-success mb-2">Add Child Folder</button>
+                        </div>
+                    </EditForm>
+
+                </div>
             </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">Cras justo odio</li>
-                <li class="list-group-item">Dapibus ac facilisis in</li>
-                <li class="list-group-item">Vestibulum at eros</li>
-            </ul>
-            <div class="card-body">
-                <a href="#" class="btn btn-primary mr-1">Edit</a>
-                <a href="#" class="btn btn-primary mr-1">Add Child Folder</a>
-            </div>
-        </div>
         }
-        
+
     </div>
 </div>
 
@@ -55,7 +72,7 @@
 
     public Repository Repository { get; set; }
 
-    public Folder ChildFolder { get; set; } = new Folder();
+    public CreateFolderModel ChildFolder { get; set; } = new CreateFolderModel();
 
     IEnumerable<Folder> Folders;
 
@@ -72,16 +89,39 @@
 
     protected override async Task OnInitializedAsync()
     {
-        
-        Repository = await adminService.GetRepositoryByIdWithFolderTreeAsync(1).ConfigureAwait(false);
+
+        await LoadRepository();
+    }
+
+    public async Task LoadRepository()
+    {
+        ChildFolder = new CreateFolderModel();
+        Repository = await adminService.GetRepositoryByIdWithFolderTreeAsync(Id);
         Folders = Repository.Folders;
-        
         
     }
 
-    public void OnUpdateFolder()
+    public async Task OnAddChildFolder()
     {
+        ChildFolder.ParentId = selectedNode.Id;
+        ChildFolder.RepositoryId = selectedNode.RepositoryId;
+        CreateFolderModel model = new CreateFolderModel();
+        model.Name = ChildFolder.Name;
+        model.Description = ChildFolder.Description;
+        model.RepositoryId = Repository.Id;
+        model.ParentId = ChildFolder.ParentId;
 
+        var folder = await adminService.AddFolderAsync(model);
+        if (folder != null)
+        {
+            toastService.ShowSuccess($"Folder '{ChildFolder.Name}' added successfully");
+            await LoadRepository();
+
+        }
+        else
+        {
+            toastService.ShowError($"Failed to add folder '{ChildFolder.Name}'");
+        }
     }
 
 }

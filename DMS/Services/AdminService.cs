@@ -208,7 +208,7 @@ namespace DMS.Services
             return folders;
         }
 
-        public async Task<Folder> GetFolderyByIdAsync(int folderId)
+        public async Task<Folder> GetFolderByIdAsync(int folderId)
         {
             var folder = 
                 await context.Folders
@@ -221,25 +221,25 @@ namespace DMS.Services
             return folder;
         }
 
-        public async Task<Folder> AddFolderyAsync(CreateFolderModel model)
+        public async Task<Folder> AddFolderAsync(CreateFolderModel model)
         {
             if (currentUser == null)
             {
                 currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
             }
 
-            //Repository repository = await GetRepositoryByIdAsync(model.RepositoryId).ConfigureAwait(false);
+            Folder parent = null;
 
-            //if (repository == null)
-            //{
-            //    throw new EntityNotFoundException("Repository", $"with id = '{model.RepositoryId}'");
-            //}
+            if (model.ParentId.HasValue)
+            {
+                parent = await GetFolderByIdAsync(model.ParentId.Value).ConfigureAwait(false);
+            }
 
             var folder = new Folder
             {
                 Name = model.Name,
                 RepositoryId = model.RepositoryId,
-                ParentId = model.ParentId,
+                Parent = parent,
                 Description = model.Description,
                 CreatedBy = currentUser.UserName,
                 UpdatedBy = currentUser.UserName
@@ -253,7 +253,7 @@ namespace DMS.Services
             context.Folders.Add(folder);
             try
             {
-                await context.SaveChangesAsync().ConfigureAwait(false);
+                await context.SaveChangesAsync();
 
                 return folder;
             }
@@ -270,7 +270,7 @@ namespace DMS.Services
                 currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
             }
 
-            Folder folder = await GetFolderyByIdAsync(model.Id).ConfigureAwait(false);
+            Folder folder = await GetFolderByIdAsync(model.Id).ConfigureAwait(false);
             bool isModified = false;
 
             if (folder == null)
@@ -321,7 +321,7 @@ namespace DMS.Services
                 currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
             }
 
-            Folder folder = await GetFolderyByIdAsync(folderId).ConfigureAwait(false);
+            Folder folder = await GetFolderByIdAsync(folderId).ConfigureAwait(false);
 
             if (folder == null)
             {
@@ -465,7 +465,144 @@ namespace DMS.Services
                 return metaField;
             }
 
-        } 
+        }
+        #endregion
+
+        #region Document Query And CRUD Operations
+        public async Task<List<Document>> GetDocumentsAsync(int folderId)
+        {
+            var docs =
+                await context.Documents
+                .Include(x => x.Folder)
+                .Where(x => x.FolderId == folderId)
+                .ToListAsync().ConfigureAwait(false);
+
+            return docs;
+        }
+
+        public async Task<Document> GetDocumentyByIdAsync(int documentId)
+        {
+            var doc =
+                await context.Documents
+                .Include(x => x.Folder)
+                .Where(x => x.Id == documentId)
+                .FirstOrDefaultAsync().ConfigureAwait(false);
+
+            return doc;
+        }
+
+        public async Task<Document> AddDocumentAsync(CreateDocumentModel model)
+        {
+            if (currentUser == null)
+            {
+                currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
+            }
+
+            //Repository repository = await GetRepositoryByIdAsync(model.RepositoryId).ConfigureAwait(false);
+
+            //if (repository == null)
+            //{
+            //    throw new EntityNotFoundException("Repository", $"with id = '{model.RepositoryId}'");
+            //}
+
+            var doc = new Document
+            {
+                Name = model.Name,
+                FolderId = model.FolderId,
+                Description = model.Description,
+                CreatedBy = currentUser.UserName,
+                UpdatedBy = currentUser.UserName
+            };
+
+            context.Documents.Add(doc);
+            try
+            {
+                await context.SaveChangesAsync().ConfigureAwait(false);
+
+                return doc;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> UpdateDocumentAsync(UpdateDocumentModel model)
+        {
+            if (currentUser == null)
+            {
+                currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
+            }
+
+            Document doc = await GetDocumentyByIdAsync(model.Id).ConfigureAwait(false);
+            bool isModified = false;
+
+            if (doc == null)
+            {
+                throw new EntityNotFoundException("Document", $"with name = '{model.Name}'");
+            }
+
+            if (doc.Name != model.Name)
+            {
+                doc.Name = model.Name;
+                isModified = true;
+            }
+
+            if (doc.Description != model.Description)
+            {
+                doc.Description = model.Description;
+                isModified = true;
+            }
+
+            if (isModified)
+            {
+                doc.UpdatedBy = currentUser.UserName;
+
+                try
+                {
+                    await context.SaveChangesAsync().ConfigureAwait(false);
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public async Task<Document> DeleteDocumentAsync(int documentId)
+        {
+            if (currentUser == null)
+            {
+                currentUser = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
+            }
+
+            Document doc = await GetDocumentyByIdAsync(documentId).ConfigureAwait(false);
+
+            if (doc == null)
+            {
+                throw new EntityNotFoundException("Document", $"with id = '{documentId}'");
+            }
+
+            try
+            {
+                doc.IsDeleted = true;
+                doc.UpdatedBy = currentUser.UserName;
+
+                await context.SaveChangesAsync().ConfigureAwait(false);
+
+                return doc;
+            }
+            catch (Exception ex)
+            {
+                return doc;
+            }
+
+        }
+
         #endregion
     }
 }

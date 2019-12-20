@@ -52,6 +52,14 @@ namespace DMS.Data
                     UpdatedBy = adminUser.UserName
                 };
 
+                repository.Folders = new List<Folder>();
+                repository.Folders.Add(new Folder
+                {
+                    Name = "Root",
+                    CreatedBy = adminUser.UserName,
+                    UpdatedBy = adminUser.UserName
+                });
+
                 context.Repositories.Add(repository);
                 context.SaveChanges();
             }

@@ -97,7 +97,7 @@ namespace DMS.Models
 
         private bool ValidateDescription()
         {
-            if (string.IsNullOrEmpty(Name))
+            if (string.IsNullOrEmpty(Description))
                 return true;
 
             if (Description.Length > Constants.FOLDER_DESC_MAX_LENGTH)

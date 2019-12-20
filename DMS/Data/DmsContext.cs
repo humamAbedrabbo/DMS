@@ -64,13 +64,11 @@ namespace DMS.Data
 
                 e.HasOne(p => p.Repository)
                     .WithMany(p => p.Folders)
-                    .HasForeignKey(p => p.RepositoryId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .HasForeignKey(p => p.RepositoryId); ;
 
                 e.HasOne(p => p.Parent)
                     .WithMany(p => p.Childs)
-                    .HasForeignKey(p => p.ParentId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .HasForeignKey(p => p.ParentId);
 
                 e.HasQueryFilter(p => !p.IsDeleted);
 
@@ -91,20 +89,13 @@ namespace DMS.Data
                 e.Property(p => p.CreatedOn).HasDefaultValueSql("getdate()").ValueGeneratedOnAdd();
                 e.Property(p => p.UpdatedOn).HasDefaultValueSql("getdate()").ValueGeneratedOnAddOrUpdate();
 
-                e.HasOne(p => p.Repository)
-                    .WithMany(p => p.Documents)
-                    .HasForeignKey(p => p.RepositoryId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
                 e.HasOne(p => p.Folder)
                     .WithMany(p => p.Documents)
-                    .HasForeignKey(p => p.FolderId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .HasForeignKey(p => p.FolderId);
 
                 e.HasQueryFilter(p => !p.IsDeleted);
 
                 e.HasIndex(p => new { p.FolderId, p.Name });
-                e.HasIndex(p => new { p.RepositoryId, p.Name });
                 e.HasIndex(p => p.CreatedBy);
                 e.HasIndex(p => p.UpdatedBy);
                 e.HasIndex(p => p.CreatedOn);

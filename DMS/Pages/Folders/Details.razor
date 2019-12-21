@@ -1,5 +1,5 @@
-﻿@page "/repo/{id:int}"
-@attribute [Authorize(Roles = "Admin")]
+﻿@page "/folders/{id:int}"
+@attribute [Authorize(Roles = "Admin, Archive, Public")]
 
 @using DAS.ViewModels
 @using DAS.Services
@@ -13,22 +13,22 @@
 @inject IToastService toastService
 @inject IJSRuntime JSRuntime;
 
-<h3>Repository: @Repo.Name</h3>
-<small class="text-secondary font-italic">created on @Repo.CreatedOn.ToString("dd-MM-yyyy") by @Repo.CreatedBy, last update on @Repo.UpdatedOn.ToString("dd-MM-yyyy hh:mm") by @Repo.UpdatedBy</small>
+<h3>Folder: @CurrentFolder.Name</h3>
+<small class="text-secondary font-italic">created on @CurrentFolder.CreatedOn.ToString("dd-MM-yyyy") by @CurrentFolder.CreatedBy, last update on @CurrentFolder.UpdatedOn.ToString("dd-MM-yyyy hh:mm") by @CurrentFolder.UpdatedBy</small>
+
+
 
 <div class="row">
     <div class="col-6">
         <div class="card">
             <div class="card-body">
-                <div class="card-title"><h5>@Repo.Title</h5></div>
-                <div class="card-text">@Repo.Description</div>
+                <div class="card-title"><h5>@CurrentFolder.Title</h5></div>
+                <div class="card-text">@CurrentFolder.Description</div>
             </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">Storage: <span class="font-weight-bold">@Repo.Storage.ToString()</span></li>
-            </ul>
             <div class="card-body">
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#id_AddFolder">Add Folder</button>
             </div>
+
         </div>
     </div>
 </div>
@@ -39,7 +39,7 @@
             <div class="card-body">
                 <div class="card-title"><h5>Meta Fields</h5></div>
                 <div class="mb-2">
-                    <EditForm Context="formRepoMetaContext" Model="Item" OnValidSubmit="OnValidSetValue">
+                    <EditForm Context="formMetaContext" Model="Item" OnValidSubmit="OnValidSetValue">
                         <div class="form-inline">
                             <div class="form-group mx-sm-3 mb-2">
                                 <label for="id_name" class="sr-only">Field Name</label>
@@ -85,7 +85,7 @@
                                 {
                                     <tr class="d-flex">
                                         <td class="bg-light col-6">@meta.Title</td>
-                                        <td class="col-6">@Repo.Meta[meta.Name]</td>
+                                        <td class="col-6">@CurrentFolder.Meta[meta.Name]</td>
                                     </tr>
                                 }
 
@@ -102,15 +102,27 @@
         <div class="card d-flex flex-grow-1 flex-column">
             <div class="card-body">
                 <div class="card-title"><h5>Folders</h5></div>
-                @if (TreeItems != null)
-                {
-                    <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
-                        <TitleTemplate>
+                
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Library</li>
+                    </ol>
+                </nav>
+
+                <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs?.OrderBy(x => x.Type))" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
+                    <TitleTemplate>
+                        @if (context.Type == TreeNodeType.Folder)
+                        {
                             <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
-                            <a href="@context.Url">@context.Name</a>
-                        </TitleTemplate>
-                    </Tree>
-                }
+                        }
+                        else
+                        {
+                            <i class="oi oi-file mr-1"></i>
+                        }
+                        <a href="@context.Url">@context.Name</a>
+                    </TitleTemplate>
+                </Tree>
             </div>
         </div>
     </div>
@@ -152,24 +164,20 @@
     </div>
 </div>
 
-
-
 @code {
 
     [Parameter]
     public int Id { get; set; }
 
-    private RepoDetailModel Repo { get; set; } = new RepoDetailModel();
-
-    private FolderAddModel FolderAddModel { get; set; } = new FolderAddModel();
+    private FolderDetailModel CurrentFolder { get; set; } = new FolderDetailModel();
 
     private MetaItemEditModel Item { get; set; } = new MetaItemEditModel();
 
-    private AppUser currentUser;
+    private FolderAddModel FolderAddModel { get; set; } = new FolderAddModel();
 
     private IEnumerable<MetaField> Fields;
 
-    private IEnumerable<MetaField> ActiveFields => Fields?.Where(x => Repo != null && Repo.Meta != null && Repo.Meta.ContainsKey(x.Name));
+    private IEnumerable<MetaField> ActiveFields => Fields?.Where(x => CurrentFolder != null && CurrentFolder.Meta != null && CurrentFolder.Meta.ContainsKey(x.Name));
 
     private IEnumerable<TreeModel> TreeItems;
 
@@ -177,19 +185,21 @@
 
     private TreeModel selectedNode;
 
+    private AppUser currentUser;
+
     public async Task OnValidSetValue()
     {
-        if (Repo != null && Item != null && !string.IsNullOrEmpty(Item.Name))
+        if (CurrentFolder != null && Item != null && !string.IsNullOrEmpty(Item.Name))
         {
-            await adminService.SetRepoMetaValue(Repo.Id, Item.Name, Item.Value);
-            Repo = await listsService.GetRepositoryById(Id.ToString());
+            await adminService.SetFolderMetaValue(CurrentFolder.Id, Item.Name, Item.Value);
+            CurrentFolder = await listsService.GetFolderById(Id);
         }
     }
 
     public async Task OnValidSubmitFolder()
     {
-        FolderAddModel.RepositoryId = Repo.Id.ToString();
-        FolderAddModel.ParentId = null;
+        FolderAddModel.RepositoryId = CurrentFolder.RepositoryId.ToString();
+        FolderAddModel.ParentId = CurrentFolder.Id;
         FolderAddModel.UserName = currentUser.UserName;
 
         var folder = await arcService.AddFolder(FolderAddModel);
@@ -208,15 +218,14 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        Repo = await listsService.GetRepositoryById(Id.ToString());
-        // TreeItems = await listsService.GetRepositoryFoldersTree(Repo.Id);
+        currentUser = await currentUserService.GetCurrentUserAsync();
+        CurrentFolder = await listsService.GetFolderById(Id);
         await LoadTree();
     }
 
     protected override async Task OnInitializedAsync()
     {
         Fields = await listsService.GetMetaFieldsList();
-        currentUser = await currentUserService.GetCurrentUserAsync();
     }
 
     protected override void OnInitialized()
@@ -227,7 +236,6 @@
 
     private async Task LoadTree()
     {
-        TreeItems = await listsService.GetRepositoryFoldersTree(Id);
+        TreeItems = await listsService.GetTree(CurrentFolder.RepositoryId, Id);
     }
-
 }

@@ -102,27 +102,34 @@
         <div class="card d-flex flex-grow-1 flex-column">
             <div class="card-body">
                 <div class="card-title"><h5>Folders</h5></div>
-                
+
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Library</li>
+                        <li class="breadcrumb-item"><a href="repo/@CurrentFolder?.RepositoryId">@CurrentFolder?.Repository</a></li>
+                        @if (CurrentFolder.ParentId.HasValue)
+                        {
+                            <li class="breadcrumb-item"><a href="folders/@CurrentFolder?.ParentId.Value">@CurrentFolder?.Parent</a></li>
+                        }
+                        <li class="breadcrumb-item active" aria-current="page">@CurrentFolder?.Name</li>
                     </ol>
                 </nav>
+                @if (TreeItems != null)
+                {
+                    <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs?.OrderBy(x => x.Type))" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
+                        <TitleTemplate>
+                            @if (context.Type == TreeNodeType.Folder)
+                                {
+                                <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
+                                }
+                                else
+                                {
+                                <i class="oi oi-file mr-1"></i>
+                                }
+                            <a href="@context.Url">@context.Name</a>
+                        </TitleTemplate>
+                    </Tree>
 
-                <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs?.OrderBy(x => x.Type))" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
-                    <TitleTemplate>
-                        @if (context.Type == TreeNodeType.Folder)
-                        {
-                            <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
-                        }
-                        else
-                        {
-                            <i class="oi oi-file mr-1"></i>
-                        }
-                        <a href="@context.Url">@context.Name</a>
-                    </TitleTemplate>
-                </Tree>
+                }
             </div>
         </div>
     </div>

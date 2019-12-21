@@ -14,6 +14,9 @@ namespace DAS.ViewModels
         public int Id { get; set; }
         public string Name { get; set; }
         public string Title { get; set; }
-        public Dictionary<string,string> Meta { get; set; }
+        public int? ParentId { get; set; }
+        public TreeModel Parent { get; set; }
+        public Dictionary<string, string> Meta { get; set; }
+        public List<TreeModel> Childs { get; set; }
     }
 }

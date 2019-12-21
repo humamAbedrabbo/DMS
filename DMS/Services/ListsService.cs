@@ -110,6 +110,32 @@ namespace DAS.Services
             }
         }
 
+        public async Task<IEnumerable<TreeModel>> GetRepositoryFoldersTree(int repoId)
+        {
+            var nodes = await context.Folders
+                .Include(x => x.MetaData)
+                .Where(x => x.RepositoryId == repoId)
+                .OrderBy(x => x.ParentId)
+                .Select(x => new TreeModel
+                {
+                    Id = x.Id,
+                    RepositoryId = x.RepositoryId,
+                    Name = x.Name,
+                    Title = x.Title,
+                    Type = TreeNodeType.Folder,
+                    ParentId = x.ParentId
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            foreach (var node in nodes)
+            {
+                node.Childs = nodes.Where(x => x.ParentId == node.Id).ToList();
+            }
+
+            return nodes.Where(x => !x.ParentId.HasValue).ToList();
+        }
+
         public async Task<IEnumerable<RepoDetailModel>> GetRepositoryList()
         {
             try

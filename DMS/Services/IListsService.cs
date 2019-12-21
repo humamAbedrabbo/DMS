@@ -17,5 +17,6 @@ namespace DAS.Services
         Task<IEnumerable<RepoDetailModel>> GetRepositoryList();
         Task<IEnumerable<TreeModel>> GetTree(int repoId, int? folderId);
         Task<FolderBreadcrumbModel> GetFolderBreadcrumb(int folderId);
+        Task<IEnumerable<TreeModel>> GetRepositoryFoldersTree(int repoId);
     }
 }

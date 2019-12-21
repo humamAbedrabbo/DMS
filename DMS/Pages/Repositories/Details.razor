@@ -97,9 +97,12 @@
         <div class="card d-flex flex-grow-1 flex-column">
             <div class="card-body">
                 <div class="card-title"><h5>Folders</h5></div>
-                <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
-                    <TitleTemplate>@context.Name</TitleTemplate>
-                </Tree>
+                @if (TreeItems != null)
+                {
+                    <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
+                        <TitleTemplate>@context.Name</TitleTemplate>
+                    </Tree>
+                }
             </div>
         </div>
     </div>
@@ -118,37 +121,11 @@
 
     private IEnumerable<MetaField> ActiveFields => Fields?.Where(x => Repo != null && Repo.Meta != null && Repo.Meta.ContainsKey(x.Name));
 
-    class TreeItem
-    {
-        public string Name { get; set; }
-        public List<TreeItem> Childs { get; set; }
-    }
+    private IEnumerable<TreeModel> TreeItems;
 
-    private IEnumerable<TreeItem> TreeItems = new[]
-    {
-        new TreeItem
-        {
-            Name = "Item1",
-            Childs = new List<TreeItem>
-            {
-                new TreeItem { Name = "ABC1" },
-                new TreeItem { Name = "DEF1" }
-            }
-        },
-        new TreeItem
-        {
-            Name = "Item2",
-            Childs = new List<TreeItem>
-            {
-                new TreeItem { Name = "ABC2" },
-                new TreeItem { Name = "DEF2" }
-            }
-        }
-    };
-    
-    IList<TreeItem> ExpandedNodes = new List<TreeItem>();
-    
-    private TreeItem selectedNode;
+    IList<TreeModel> ExpandedNodes = new List<TreeModel>();
+
+    private TreeModel selectedNode;
 
     public async Task OnValidSetValue()
     {
@@ -162,6 +139,7 @@
     protected override async Task OnParametersSetAsync()
     {
         Repo = await listsService.GetRepositoryById(Id.ToString());
+        TreeItems = await listsService.GetRepositoryFoldersTree(Id);
     }
 
     protected override async Task OnInitializedAsync()

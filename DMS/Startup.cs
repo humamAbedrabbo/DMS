@@ -17,6 +17,7 @@ using DAS.Areas.Identity;
 using DAS.Data;
 using DAS.Services;
 using Blazored.Toast;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DAS
 {
@@ -47,7 +48,8 @@ namespace DAS
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<DasContext>();
 
-            services.AddMvc();
+            services.AddMvc(options => options.EnableEndpointRouting = false)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
@@ -82,6 +84,8 @@ namespace DAS
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseMvcWithDefaultRoute();
 
             app.UseAuthentication();
             app.UseAuthorization();

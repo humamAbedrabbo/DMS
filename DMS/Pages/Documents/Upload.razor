@@ -1,0 +1,128 @@
+﻿@page "/docs/upload/{Id:int}"
+@attribute [Authorize(Roles = "Admin, Archive")]
+
+@using MW.Blazor
+@using DAS.Models
+@using DAS.ViewModels
+@using DAS.Services
+
+@inject IAdminService adminService
+@inject IListsService listsService
+@inject IArchiveService arcService
+@inject ICurrentUserService currentUserService
+@inject IToastService toastService
+@inject IJSRuntime JSRuntime;
+
+<h3>Repository: @Repo.Name - Upload</h3>
+
+<div class="row d-flex flex-grow-1">
+    <div class="col-4 d-flex flex-column flex-grow-1">
+        <div class="card d-flex flex-grow-1 flex-column">
+            <div class="card-body">
+                <div class="card-title"><h5>Folders</h5></div>
+                @if (TreeItems != null)
+                {
+                    <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
+                        <TitleTemplate>
+                            <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
+                            @context.Name
+                        </TitleTemplate>
+                    </Tree>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-8 d-flex flex-column flex-grow-1">
+        <div class="card">
+            <div class="card-header">
+                Upload Document
+            </div>
+            <div class="card-body">
+                <EditForm Context="myForm" Model="UploadModel" OnValidSubmit="OnUpload">
+
+                    <div id="imgContainer" class="form-group">
+                    </div>
+
+                    @*<div class="form-group">
+                        <img id="docThumbnail" src="" alt="Thumbnail" />
+                    </div>*@
+
+                    <input readonly type="hidden" name="documentId" id="documentId" class="form-control" />
+                    <input name="repositoryId" type="hidden" id="repositoryId" class="form-control" value="@Repo.Id" />
+                    <input name="path" id="path" type="hidden" class="form-control" />
+                    <input readonly class="form-control" type="hidden" id="checkInKey" name="checkInKey"  />
+                    <input class="form-control" type="hidden" id="userName" name="userName" value="@currentUser?.UserName" />
+
+                    <div class="form-group">
+                        <label for="parentName">Parent Folder</label>
+                        <input name="parentId" id="parentId" class="form-control" type="hidden" value="@selectedNode?.Id" />
+                        <input readonly id="parentName" class="form-control" value="@selectedNode?.Name" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="uploadFile">Select File</label>
+                        <input type="file" class="form-control" id="uploadFile" name="file" />
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input name="title" id="title" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea rows="3" class="form-control" id="description" name="description"></textarea>
+                    </div>
+
+                    <button type="submit" id="btnUpload" class="btn btn-primary mr-1">Upload file</button>
+
+                </EditForm>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private RepoDetailModel Repo { get; set; } = new RepoDetailModel();
+    private UploadViewModel UploadModel { get; set; } = new UploadViewModel();
+    private AppUser currentUser;
+    private IEnumerable<TreeModel> TreeItems;
+
+    IList<TreeModel> ExpandedNodes = new List<TreeModel>();
+
+    private TreeModel selectedNode;
+
+    private async Task OnUpload()
+    {
+        await JSRuntime.InvokeVoidAsync("btnUpload");
+        
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Repo = await listsService.GetRepositoryById(Id.ToString());
+        // TreeItems = await listsService.GetRepositoryFoldersTree(Repo.Id);
+        await LoadTree();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await currentUserService.GetCurrentUserAsync();
+        await JSRuntime.InvokeVoidAsync("onUploadFormReady");
+    }
+
+    protected override void OnInitialized()
+    {
+        ExpandedNodes.Add(TreeItems?.Skip(1).First());
+        ExpandedNodes.Add(TreeItems?.Skip(1).Take(1).First().Childs.Skip(1).First());
+    }
+
+    private async Task LoadTree()
+    {
+        TreeItems = await listsService.GetRepositoryFoldersTree(Id);
+    }
+}

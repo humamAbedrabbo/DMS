@@ -477,51 +477,28 @@ namespace DAS.Services
             var model = new FolderBreadcrumbModel();
             int? parentId = null;
             StringBuilder sb = new StringBuilder();
-            Stack<Folder> stack = new Stack<Folder>();
-            
-            var f = await context.Folders.Include(x => x.Repository).FirstOrDefaultAsync(x => x.Id == folderId).ConfigureAwait(false);
-            
+
+            var f = await context.Folders.FindAsync(folderId).ConfigureAwait(false);
 
             if (f != null)
             {
-                sb.AppendLine("<nav aria-label='breadcrumb'>");
-                sb.AppendLine("<ol class='breadcrumb'>");
-                sb.AppendLine($"<li class='breadcrumb-item'><a href='repo/{f.RepositoryId}'>{f.Repository.Name}</a></li>");
-
-                stack.Push(f);
-
                 model.Id = f.Id;
                 model.Name = f.Name;
                 model.Title = f.Title;
                 model.RepositoryId = f.RepositoryId;
                 model.ParentId = f.ParentId;
-                
+
                 parentId = f.ParentId;
-                while(parentId.HasValue)
+                while (parentId.HasValue)
                 {
                     f = await context.Folders.FindAsync(parentId).ConfigureAwait(false);
                     if (f == null)
                         break;
 
-                    // sb.Append($"{f.Name}/");
-                    stack.Push(f);
+                    sb.Append($"{f.Name}/");
                     parentId = f.ParentId;
                 }
             }
-
-            foreach (var item in stack)
-            {
-                if(item.Id != folderId)
-                {
-                    sb.AppendLine($"<li class='breadcrumb-item'><a href='folders/{item.Id}'>{item.Name}</a></li>");
-                }
-                else
-                {
-                    sb.AppendLine($"<li class='breadcrumb-item active' aria-current='page'>{item.Name}</li>");
-                }
-            }
-            sb.AppendLine("</ol></nav>");
-
             model.Path = sb.ToString();
             return model;
         }

@@ -1,5 +1,5 @@
 ﻿@page "/repo/{id:int}"
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin, Archive")]
 
 @using DAS.ViewModels
 @using DAS.Services
@@ -26,9 +26,12 @@
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">Storage: <span class="font-weight-bold">@Repo.Storage.ToString()</span></li>
             </ul>
-            <div class="card-body">
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#id_AddFolder">Add Folder</button>
-            </div>
+            <AuthorizeView Roles="Admin">
+                <div class="card-body">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#id_AddFolder">Add Folder</button>
+                </div>
+            </AuthorizeView>
+
         </div>
     </div>
 </div>
@@ -38,40 +41,43 @@
         <div class="card d-flex flex-grow-1 flex-column">
             <div class="card-body">
                 <div class="card-title"><h5>Meta Fields</h5></div>
-                <div class="mb-2">
-                    <EditForm Model="Item" OnValidSubmit="OnValidSetValue">
-                        <div class="form-inline">
-                            <div class="form-group mx-sm-3 mb-2">
-                                <label for="id_name" class="sr-only">Field Name</label>
-                                <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
-                                    @if (Fields == null)
-                                    {
-                                        <option></option>
-                                    }
-                                    else
-                                    {
-                                        foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                <AuthorizeView Roles="Admin">
+                    <div class="mb-2">
+                        <EditForm Context="test" Model="Item" OnValidSubmit="OnValidSetValue">
+                            <div class="form-inline">
+                                <div class="form-group mx-sm-3 mb-2">
+                                    <label for="id_name" class="sr-only">Field Name</label>
+                                    <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
+                                        @if (Fields == null)
                                         {
-                                            <optgroup label="@group">
-                                                @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
-                                                {
-                                                    <option value="@field.Name">@field.Title</option>
-                                                }
-
-                                            </optgroup>
+                                            <option></option>
                                         }
-                                    }
+                                        else
+                                        {
+                                            foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                                            {
+                                                <optgroup label="@group">
+                                                    @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
+                                                    {
+                                                        <option value="@field.Name">@field.Title</option>
+                                                    }
 
-                                </InputSelect>
+                                                </optgroup>
+                                            }
+                                        }
+
+                                    </InputSelect>
+                                </div>
+                                <div class="form-group mb-2">
+                                    <label for="id_value" class="sr-only">Field Value</label>
+                                    <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
+                                </div>
+                                <button type="submit" class="btn btn-success mx-2 mb-2">Set Value</button>
                             </div>
-                            <div class="form-group mb-2">
-                                <label for="id_value" class="sr-only">Field Value</label>
-                                <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
-                            </div>
-                            <button type="submit" class="btn btn-success mx-2 mb-2">Set Value</button>
-                        </div>
-                    </EditForm>
-                </div>
+                        </EditForm>
+                    </div>
+                </AuthorizeView>
+
                 @if (ActiveFields != null)
                 {
                     <table class="table table-bordered table-sm col-6">

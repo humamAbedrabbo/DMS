@@ -1,5 +1,5 @@
 ﻿@page "/repos"
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Admin, Archive")]
 
 @using DAS.ViewModels
 @using DAS.Services
@@ -11,41 +11,44 @@
 @inject IToastService toastService
 
 <h3>Repositories</h3>
-<div class="row mb-3">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body">
-                <EditForm Context="RepoAddModelForm" Model="RepoAddModel" OnValidSubmit="OnValidSubmitRepository">
-                    <DataAnnotationsValidator />
-                    <div class="form-inline">
-                        <div class="form-group mb-2">
-                            <label for="id_name" class="sr-only">Repository Name</label>
-                            @*<input @bind="RepositoryModel.Name" class="form-control" id="inputName" placeholder="Repository Name">*@
-                            <InputText @bind-Value="RepoAddModel.Name" class="form-control" id="id_name" placeholder="Name"></InputText>
-                            <ValidationMessage For="@(() => RepoAddModel.Name)"></ValidationMessage>
-                        </div>
-                        <div class="form-group mx-sm-3 mb-2">
-                            <label for="id_desc" class="sr-only">Description</label>
-                            <InputText @bind-Value="RepoAddModel.Description" class="form-control" id="id_desc" placeholder="Description"></InputText>
-                            <ValidationMessage For="@(() => RepoAddModel.Description)"></ValidationMessage>
-                        </div>
+<AuthorizeView Roles="Admin">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <EditForm Context="RepoAddModelForm" Model="RepoAddModel" OnValidSubmit="OnValidSubmitRepository">
+                        <DataAnnotationsValidator />
+                        <div class="form-inline">
+                            <div class="form-group mb-2">
+                                <label for="id_name" class="sr-only">Repository Name</label>
+                                @*<input @bind="RepositoryModel.Name" class="form-control" id="inputName" placeholder="Repository Name">*@
+                                <InputText @bind-Value="RepoAddModel.Name" class="form-control" id="id_name" placeholder="Name"></InputText>
+                                <ValidationMessage For="@(() => RepoAddModel.Name)"></ValidationMessage>
+                            </div>
+                            <div class="form-group mx-sm-3 mb-2">
+                                <label for="id_desc" class="sr-only">Description</label>
+                                <InputText @bind-Value="RepoAddModel.Description" class="form-control" id="id_desc" placeholder="Description"></InputText>
+                                <ValidationMessage For="@(() => RepoAddModel.Description)"></ValidationMessage>
+                            </div>
 
-                        <div class="form-group mx-sm-3 mb-2">
-                            <label for="id_storage" class="sr-only">Storage</label>
-                            <InputSelect @bind-Value="RepoAddModel.Storage" class="form-control" id="id_storage">
-                                <option value="@StorageType.Database">Database</option>
-                                <option value="@StorageType.Directory">Directory</option>
-                            </InputSelect>
+                            <div class="form-group mx-sm-3 mb-2">
+                                <label for="id_storage" class="sr-only">Storage</label>
+                                <InputSelect @bind-Value="RepoAddModel.Storage" class="form-control" id="id_storage">
+                                    <option value="@StorageType.Database">Database</option>
+                                    <option value="@StorageType.Directory">Directory</option>
+                                </InputSelect>
+                            </div>
+
+                            <button type="submit" class="btn btn-success mb-2">Add Repository</button>
                         </div>
+                    </EditForm>
 
-                        <button type="submit" class="btn btn-success mb-2">Add Repository</button>
-                    </div>
-                </EditForm>
-
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+</AuthorizeView>
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -73,7 +76,9 @@
                                     <td>@repo.Title</td>
                                     <td>@repo.Storage.ToString()</td>
                                     <td>
-                                        <a class="btn-sm btn-secondary mr-1" href="#"><i class="oi oi-pencil"></i></a>
+                                        <AuthorizeView Roles="Admin">
+                                            <a class="btn-sm btn-secondary mr-1" href="#"><i class="oi oi-pencil"></i></a>
+                                        </AuthorizeView>
                                         <a class="btn-sm btn-secondary mr-1" href="repo/@repo.Id"><i class="oi oi-list-rich"></i></a>
                                         <a class="btn-sm btn-secondary mr-1" href="docs/upload/@repo.Id"><i class="oi oi-cloud-upload"></i></a>
                                     </td>

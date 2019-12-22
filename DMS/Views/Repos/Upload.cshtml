@@ -75,7 +75,8 @@
                 </div>
             }
 
-            <a asp-controller="Repos" asp-action="Explore" asp-route-repoId="@Model.RepositoryId" asp-route-folderId="@Model.ParentId" class="btn btn-secondary mr-1">Cancel</a>
+            @*<a asp-controller="Repos" asp-action="Explore" asp-route-repoId="@Model.RepositoryId" asp-route-folderId="@Model.ParentId" class="btn btn-secondary mr-1">Cancel</a>*@
+            <a href="/docs/upload/@Model.RepositoryId" class="btn btn-secondary mr-1">Cancel</a>
             <a href="#" id="btnUpload" class="btn btn-primary mr-1">Upload file</a>
 
         </form>

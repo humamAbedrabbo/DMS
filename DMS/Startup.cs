@@ -48,8 +48,9 @@ namespace DAS
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<DasContext>();
 
-            services.AddMvc(options => options.EnableEndpointRouting = false)
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            //services.AddMvc(options => options.EnableEndpointRouting = false)
+            //    .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
@@ -85,14 +86,17 @@ namespace DAS
 
             app.UseRouting();
 
-            app.UseMvcWithDefaultRoute();
+            // app.UseMvcWithDefaultRoute();
 
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                // endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                   name: "default",
+                   pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");

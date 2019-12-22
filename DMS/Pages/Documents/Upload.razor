@@ -25,14 +25,14 @@
                     <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
                         <TitleTemplate>
                             <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
-                            @context.Name
+                            <a href="repos/upload?repoId=@context.RepositoryId&folderId=@context.Id">@context.Name</a>
                         </TitleTemplate>
                     </Tree>
                 }
             </div>
         </div>
     </div>
-    <div class="col-8 d-flex flex-column flex-grow-1">
+    <div class="col-8 d-flex flex-column flex-grow-1" hidden>
         <div class="card">
             <div class="card-header">
                 Upload Document
@@ -98,7 +98,7 @@
 
     private async Task OnUpload()
     {
-        await JSRuntime.InvokeVoidAsync("btnUpload");
+        //await JSRuntime.InvokeVoidAsync("btnUpload");
         
     }
 
@@ -112,7 +112,7 @@
     protected override async Task OnInitializedAsync()
     {
         currentUser = await currentUserService.GetCurrentUserAsync();
-        await JSRuntime.InvokeVoidAsync("onUploadFormReady");
+        //await JSRuntime.InvokeVoidAsync("onUploadFormReady");
     }
 
     protected override void OnInitialized()

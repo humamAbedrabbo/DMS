@@ -1,0 +1,164 @@
+﻿@page "/repo/edit/{id:int}"
+@attribute [Authorize(Roles = "Admin")]
+
+@using DAS.ViewModels
+@using DAS.Services
+@using DAS.Models
+
+@inject IAdminService adminService
+@inject IListsService listsService
+@inject IArchiveService arcService
+@inject ICurrentUserService currentUserService
+@inject IToastService toastService
+@inject IJSRuntime JSRuntime;
+@inject NavigationManager navMgr
+
+<h3>Edit Repository: @Repo?.Name</h3>
+<small class="text-secondary font-italic">created on @Repo.CreatedOn.ToString("dd-MM-yyyy") by @Repo.CreatedBy, last update on @Repo.UpdatedOn.ToString("dd-MM-yyyy hh:mm") by @Repo.UpdatedBy</small>
+
+
+<EditForm Model="RepoUpdateModel" OnValidSubmit="OnValidSubmitRepository" class="my-3">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <label for="id_title">Title</label>
+        <InputText @bind-Value="RepoUpdateModel.Title" class="form-control" id="id_title"></InputText>
+        <ValidationMessage For="@(() => RepoUpdateModel.Title)" />
+    </div>
+    <div class="form-group">
+        <label for="id_desc">Description</label>
+        <InputText @bind-Value="RepoUpdateModel.Description" class="form-control" id="id_desc"></InputText>
+        <ValidationMessage For="@(() => RepoUpdateModel.Description)" />
+    </div>
+    <a class="btn btn-secondary mr-1" href="repos">Cancel</a>
+    <button class="btn btn-primary" type="submit">Save</button>
+</EditForm>
+
+
+<div class="row">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="card-title"><h5>Meta Fields</h5></div>
+                <div class="mb-2">
+                    <EditForm Context="test" Model="Item" OnValidSubmit="OnValidSetValue">
+                        <div class="form-inline">
+                            <div class="form-group mx-sm-3 mb-2">
+                                <label for="id_name" class="sr-only">Field Name</label>
+                                <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
+                                    @if (Fields == null)
+                                    {
+                                        <option></option>
+                                    }
+                                    else
+                                    {
+                                        foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                                        {
+                                            <optgroup label="@group">
+                                                @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
+                                                {
+                                                    <option value="@field.Name">@field.Title</option>
+                                                }
+
+                                            </optgroup>
+                                        }
+                                    }
+
+                                </InputSelect>
+                            </div>
+                            <div class="form-group mb-2">
+                                <label for="id_value" class="sr-only">Field Value</label>
+                                <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
+                            </div>
+                            <button type="submit" class="btn btn-success mx-2 mb-2">Set Value</button>
+                        </div>
+                    </EditForm>
+                </div>
+
+
+                @if (ActiveFields != null)
+                {
+                    <table class="table table-bordered table-sm col-6">
+                        <tbody>
+                            @foreach (var group in ActiveFields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                            {
+                                <tr class="bg-dark text-white d-flex">
+                                    <td class="col-12">@group</td>
+                                </tr>
+                                @foreach (var meta in ActiveFields.Where(x => x.Group == group).OrderBy(x => x.Name))
+                                {
+                                    <tr class="d-flex">
+                                        <td class="bg-light col-6">@meta.Title</td>
+                                        <td class="col-6">@Repo.Meta[meta.Name]</td>
+                                    </tr>
+                                }
+
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private RepoDetailModel Repo { get; set; } = new RepoDetailModel();
+    public RepoUpdateModel RepoUpdateModel { get; set; } = new RepoUpdateModel();
+    private MetaItemEditModel Item { get; set; } = new MetaItemEditModel();
+    private AppUser currentUser;
+    private IEnumerable<MetaField> Fields;
+
+    private IEnumerable<MetaField> ActiveFields => Fields?.Where(x => Repo != null && Repo.Meta != null && Repo.Meta.ContainsKey(x.Name));
+
+    public async Task OnValidSetValue()
+    {
+        if (Repo != null && Item != null && !string.IsNullOrEmpty(Item.Name))
+        {
+            await adminService.SetRepoMetaValue(Repo.Id, Item.Name, Item.Value);
+            Repo = await listsService.GetRepositoryById(Id.ToString());
+        }
+    }
+
+    public async Task OnValidSubmitRepository()
+    {
+        RepoUpdateModel.UserName = currentUser.UserName;
+
+        try
+        {
+            await adminService.UpdateRepository(Repo.Id.ToString(), RepoUpdateModel);
+            toastService.ShowSuccess($"Repository '{Repo.Name}' updated successfully");
+            navMgr.NavigateTo("repos");
+        }
+        catch (Exception ex)
+        {
+            toastService.ShowError($"Failed to update repository '{Repo.Name}'");
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Repo = await listsService.GetRepositoryById(Id.ToString());
+        RepoUpdateModel.Title = Repo.Title;
+        RepoUpdateModel.Description = Repo.Description;
+        if (Repo.Meta != null)
+        {
+            RepoUpdateModel.Meta = new Dictionary<string, string>();
+            foreach (var meta in Repo.Meta)
+            {
+                RepoUpdateModel.Meta[meta.Key] = meta.Value;
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Fields = await listsService.GetMetaFieldsList();
+        currentUser = await currentUserService.GetCurrentUserAsync();
+        RepoUpdateModel.UserName = currentUser.UserName;
+    }
+}

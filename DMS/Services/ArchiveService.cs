@@ -1017,7 +1017,8 @@ namespace DAS.Services
                     DocumentId = document.Id,
                     Operation = document.LastOperation,
                     OperationBy = document.OperationBy,
-                    OperationOn = document.OperationDate
+                    OperationOn = document.OperationDate,
+                    Version = document.Version
                 });
 
                 await context.SaveChangesAsync().ConfigureAwait(false);

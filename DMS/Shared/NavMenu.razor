@@ -9,25 +9,25 @@
     <ul class="nav flex-column">
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
+                <span class="oi oi-home mx-1" aria-hidden="true"></span> Home
             </NavLink>
         </li>
         <AuthorizeView Roles="Admin, Archive">
             <li class="nav-item px-3">
                 <NavLink class="nav-link" href="repos">
-                    <span class="oi oi-box" aria-hidden="true"></span> Repositories
+                    <span class="oi oi-box mx-1" aria-hidden="true"></span> Repositories
                 </NavLink>
             </li>
         </AuthorizeView>
         <AuthorizeView Roles="Admin">
             <li class="nav-item px-3">
                 <NavLink class="nav-link" href="meta">
-                    <span class="oi oi-spreadsheet" aria-hidden="true"></span> Meta Fields
+                    <span class="oi oi-spreadsheet mx-1" aria-hidden="true"></span> Meta Fields
                 </NavLink>
             </li>
             <li class="nav-item px-3">
                 <NavLink class="nav-link" href="users">
-                    <span class="oi oi-people" aria-hidden="true"></span> Users
+                    <span class="oi oi-people mx-1" aria-hidden="true"></span> Users
                 </NavLink>
             </li>
         </AuthorizeView>

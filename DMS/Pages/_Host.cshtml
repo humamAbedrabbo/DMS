@@ -12,13 +12,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document Management System</title>
     <base href="~/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+
+    @*<link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />*@
+
+    <link href="/lib/rtl/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/lib/rtl/dist/css/bootstrap-rtl.min.css" rel="stylesheet" />
+
     <link href="_content/Blazored.Toast/blazored-toast.css" rel="stylesheet" />
     @*<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">*@
 
     <link href="css/font-awesome/css/all.css" rel="stylesheet" />
     <link rel="stylesheet" href="_content/MW.Blazor.Tree/styles.css" />
     <link href="css/site.css" rel="stylesheet" />
+
+    <link href="~/css/site-rtl.css" rel="stylesheet" />
 </head>
 <body>
     <app>
@@ -37,8 +44,13 @@
     </div>
 
     <script src="_framework/blazor.server.js"></script>
+
     <script src="/lib/jquery/dist/jquery.min.js"></script>
-    <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/lib/popper.js/umd/popper.min.js"></script>
+    @*<script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>*@
+
+    <script src="/lib/rtl/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="/js/upload-utils.js"></script>
     <script src="/js/site.js"></script>
 </body>

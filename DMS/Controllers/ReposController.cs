@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DAS.Services;
 using DAS.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DAS.Controllers
@@ -74,7 +75,12 @@ namespace DAS.Controllers
         public async Task<IActionResult> Upload(string repoId, int? folderId)
         {
             var model = new UploadViewModel();
-            model.UserName = (await currentUserService.GetCurrentUserAsync().ConfigureAwait(false)).UserName;
+            var user = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
+            if(user == null || !(user.IsAdmin || user.Repositories.Contains(Convert.ToInt32(repoId))) )
+            {
+                return Unauthorized();
+            }
+            model.UserName = (user).UserName;
             FolderDetailModel folder = null;
             FolderBreadcrumbModel breadcrumb = null;
             RepoDetailModel repo = null;
@@ -110,8 +116,14 @@ namespace DAS.Controllers
         public async Task<IActionResult> CheckIn(int id)
         {
             var model = new CheckInViewModel();
-            model.UserName = (await currentUserService.GetCurrentUserAsync().ConfigureAwait(false)).UserName;
+            var user = await currentUserService.GetCurrentUserAsync().ConfigureAwait(false);
             var doc = await listsService.GetDocumentById(id);
+            if (user == null || doc == null || !(user.IsAdmin || user.Repositories.Contains(Convert.ToInt32(doc.RepositoryId))))
+            {
+                return Unauthorized();
+            }
+            model.UserName = (await currentUserService.GetCurrentUserAsync().ConfigureAwait(false)).UserName;
+            
             model.DocumentId = doc.Id;
             model.CheckInKey = doc.CheckInKey;
             model.Description = doc.Description;

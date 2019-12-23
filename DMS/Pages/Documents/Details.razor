@@ -13,167 +13,172 @@
 @inject IToastService toastService
 @inject IJSRuntime JSRuntime;
 
-<h3>Document: @Doc.Name</h3>
-<small class="text-secondary font-italic">created on @Doc.CreatedOn.ToString("dd-MM-yyyy") by @Doc.CreatedBy, last update on @Doc.UpdatedOn.ToString("dd-MM-yyyy hh:mm") by @Doc.UpdatedBy</small>
+@if (currentUser != null && Doc != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Doc.RepositoryId)))
+{
+    <h3>Document: @Doc.Name</h3>
+    <small class="text-secondary font-italic">created on @Doc.CreatedOn.ToString("dd-MM-yyyy") by @Doc.CreatedBy, last update on @Doc.UpdatedOn.ToString("dd-MM-yyyy hh:mm") by @Doc.UpdatedBy</small>
 
-<div class="row">
-    <div class="col-6">
-        <div class="card">
-            <div class="card-body">
-                <div class="card-title"><h5>@Doc.Title</h5></div>
-                <div class="card-text">@Doc.Description</div>
-            </div>
-            <div class="card-body">
-                <a class="btn btn-primary mr-1" href="Archive/DownloadDocument?id=@Id">Download</a>
-                <AuthorizeView Roles="Admin, Archive">
-                    @if (Doc.LastOperation == DocumentOperation.CheckedIn)
-                    {
-                        <button type="button" class="btn btn-secondary mr-1" @onclick="Checkout">Check Out</button>
-                    }
-                    else if (Doc.LastOperation == DocumentOperation.CheckedOut)
-                    {
-                        <a class="btn btn-secondary mr-1" href="repos/Checkin?id=@Doc.Id">Check In</a>
-
-                    }
-                </AuthorizeView>
-            </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">Repository:<span class="font-weight-bold"><a href="/repo/@Doc.RepositoryId">@Doc.Repository</a></span></li>
-                <li class="list-group-item">Folder:<span class="font-weight-bold">
-                        @if (Doc.ParentId.HasValue)
+    <div class="row">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title"><h5>@Doc.Title</h5></div>
+                    <div class="card-text">@Doc.Description</div>
+                </div>
+                <div class="card-body">
+                    <a class="btn btn-primary mr-1" href="Archive/DownloadDocument?id=@Id">Download</a>
+                    <AuthorizeView Roles="Admin, Archive">
+                        @if (Doc.LastOperation == DocumentOperation.CheckedIn)
                         {
-                            <a href="/folders/@Doc.ParentId">@Doc.Parent</a>
+                            <button type="button" class="btn btn-secondary mr-1" @onclick="Checkout">Check Out</button>
                         }
-                        else
+                        else if (Doc.LastOperation == DocumentOperation.CheckedOut)
                         {
-                            @Doc.Parent
+                            <a class="btn btn-secondary mr-1" href="repos/Checkin?id=@Doc.Id">Check In</a>
+
                         }
-
-                    </span>
-                </li>
-                <li class="list-group-item">Version:<span class="font-weight-bold text-primary">@Doc.Version</span></li>
-                <li class="list-group-item">Content Type:<span class="font-weight-bold">@Doc.ContentType</span></li>
-                <li class="list-group-item">Size:<span class="font-weight-bold">@Doc.Length bytes</span></li>
-                <li class="list-group-item">Last Operation:<span class="font-weight-bold">@Doc.LastOperation.ToString()</span></li>
-                <li class="list-group-item">Operation By:<span class="font-weight-bold">@Doc.OperationBy</span></li>
-                <li class="list-group-item">Operation On:<span class="font-weight-bold">@Doc.OperationDate</span></li>
-            </ul>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-6 ">
-        <div class="card mt-3 d-flex flex-grow-1 flex-column">
-            <div class="card-body">
-                <div class="card-title"><h5>Meta Fields</h5></div>
-                <AuthorizeView Roles="Admin">
-                    <div class="mb-2">
-                        <EditForm Context="test" Model="Item" OnValidSubmit="OnValidSetValue">
-                            <div class="form-inline">
-                                <div class="form-group mx-sm-3 mb-2">
-                                    <label for="id_name" class="sr-only">Field Name</label>
-                                    <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
-                                        @if (Fields == null)
-                                        {
-                                            <option></option>
-                                        }
-                                        else
-                                        {
-                                            foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
-                                            {
-                                                <optgroup label="@group">
-                                                    @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
-                                                    {
-                                                        <option value="@field.Name">@field.Title</option>
-                                                    }
-
-                                                </optgroup>
-                                            }
-                                        }
-
-                                    </InputSelect>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label for="id_value" class="sr-only">Field Value</label>
-                                    <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
-                                </div>
-                                <button type="submit" class="btn btn-success mx-2 mb-2">Set Value</button>
-                            </div>
-                        </EditForm>
-                    </div>
-                </AuthorizeView>
-
-                @if (ActiveFields != null)
-                {
-                    <table class="table table-bordered table-sm col-6">
-                        <tbody>
-                            @foreach (var group in ActiveFields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                    </AuthorizeView>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Repository:<span class="font-weight-bold"><a href="/repo/@Doc.RepositoryId">@Doc.Repository</a></span></li>
+                    <li class="list-group-item">
+                        Folder:<span class="font-weight-bold">
+                            @if (Doc.ParentId.HasValue)
                             {
-                                <tr class="bg-dark text-white d-flex">
-                                    <td class="col-12">@group</td>
-                                </tr>
-                                @foreach (var meta in ActiveFields.Where(x => x.Group == group).OrderBy(x => x.Name))
-                                {
-                                    <tr class="d-flex">
-                                        <td class="bg-light col-6">@meta.Title</td>
-                                        <td class="col-6">@Doc.Meta[meta.Name]</td>
-                                    </tr>
-                                }
-
+                                <a href="/folders/@Doc.ParentId">@Doc.Parent</a>
                             }
-                        </tbody>
-                    </table>
-                }
-            </div>
+                            else
+                            {
+                                @Doc.Parent
+                            }
 
+                        </span>
+                    </li>
+                    <li class="list-group-item">Version:<span class="font-weight-bold text-primary">@Doc.Version</span></li>
+                    <li class="list-group-item">Content Type:<span class="font-weight-bold">@Doc.ContentType</span></li>
+                    <li class="list-group-item">Size:<span class="font-weight-bold">@Doc.Length bytes</span></li>
+                    <li class="list-group-item">Last Operation:<span class="font-weight-bold">@Doc.LastOperation.ToString()</span></li>
+                    <li class="list-group-item">Operation By:<span class="font-weight-bold">@Doc.OperationBy</span></li>
+                    <li class="list-group-item">Operation On:<span class="font-weight-bold">@Doc.OperationDate</span></li>
+                </ul>
+            </div>
         </div>
     </div>
-
-    <div class="col-6 mt-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="card-title">History</div>
-                <div class="row">
-                    <div class="col-12">
-                        <table class="table">
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th></th>
-                                    <th>Version</th>
-                                    <th>Operation</th>
-                                    <th>User</th>
-                                    <th>Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Doc.History != null)
-                                {
-                                    foreach (var h in Doc.History.OrderByDescending(e => e.OperationOn))
-                                    {
-                                        <tr>
-                                            <td>
-                                                @if(h.Operation == DocumentOperation.CheckedIn)
+    <div class="row">
+        <div class="col-6 ">
+            <div class="card mt-3 d-flex flex-grow-1 flex-column">
+                <div class="card-body">
+                    <div class="card-title"><h5>Meta Fields</h5></div>
+                    <AuthorizeView Roles="Admin">
+                        <div class="mb-2">
+                            <EditForm Context="test" Model="Item" OnValidSubmit="OnValidSetValue">
+                                <div class="form-inline">
+                                    <div class="form-group mx-sm-3 mb-2">
+                                        <label for="id_name" class="sr-only">Field Name</label>
+                                        <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
+                                            @if (Fields == null)
                                                 {
-                                                    <a href="Archive/DownloadDocument?id=@h.DocumentId&version=@h.Version"><i class="oi oi-cloud-download"></i></a>
+                                                <option></option>
                                                 }
-                                            </td>
-                                            <td>@h.Version</td>
-                                            <td>@h.Operation.ToString()</td>
-                                            <td>@h.OperationBy</td>
-                                            <td>@h.OperationOn.ToString("dd/MM/yyyy HH:mm")</td>
+                                                else
+                                                {
+                                                    foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                                                    {
+                                                    <optgroup label="@group">
+                                                        @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
+                                                            {
+                                                            <option value="@field.Name">@field.Title</option>
+                                                            }
+
+                                                    </optgroup>
+                                                    }
+                                                }
+
+                                        </InputSelect>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label for="id_value" class="sr-only">Field Value</label>
+                                        <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
+                                    </div>
+                                    <button type="submit" class="btn btn-success mx-2 mb-2">Set Value</button>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </AuthorizeView>
+
+                    @if (ActiveFields != null)
+                    {
+                        <table class="table table-bordered table-sm col-6">
+                            <tbody>
+                                @foreach (var group in ActiveFields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                                {
+                                    <tr class="bg-dark text-white d-flex">
+                                        <td class="col-12">@group</td>
+                                    </tr>
+                                    @foreach (var meta in ActiveFields.Where(x => x.Group == group).OrderBy(x => x.Name))
+                                    {
+                                        <tr class="d-flex">
+                                            <td class="bg-light col-6">@meta.Title</td>
+                                            <td class="col-6">@Doc.Meta[meta.Name]</td>
                                         </tr>
                                     }
+
                                 }
                             </tbody>
                         </table>
+                    }
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-6 mt-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title">History</div>
+                    <div class="row">
+                        <div class="col-12">
+                            <table class="table">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th></th>
+                                        <th>Version</th>
+                                        <th>Operation</th>
+                                        <th>User</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (Doc.History != null)
+                                    {
+                                        foreach (var h in Doc.History.OrderByDescending(e => e.OperationOn))
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @if (h.Operation == DocumentOperation.CheckedIn)
+                                                    {
+                                                        <a href="Archive/DownloadDocument?id=@h.DocumentId&version=@h.Version"><i class="oi oi-cloud-download"></i></a>
+                                                    }
+                                                </td>
+                                                <td>@h.Version</td>
+                                                <td>@h.Operation.ToString()</td>
+                                                <td>@h.OperationBy</td>
+                                                <td>@h.OperationOn.ToString("dd/MM/yyyy HH:mm")</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+
             </div>
-
         </div>
-    </div>
 
-</div>
+    </div>
+}
+
 
 
 @code {
@@ -197,10 +202,10 @@
         model.DocumentId = Doc.Id;
         model.UserName = currentUser.UserName;
         var result = await arcService.Checkout(model);
-        if(result.IsOk)
+        if (result.IsOk)
         {
             toastService.ShowSuccess($"Document '{Doc.Name}' checked out successfully");
-            Doc = await listsService.GetDocumentById(Id,true);
+            Doc = await listsService.GetDocumentById(Id, true);
         }
         else
         {
@@ -213,13 +218,13 @@
         if (Doc != null && Item != null && !string.IsNullOrEmpty(Item.Name))
         {
             await adminService.SetDocumentMetaValue(Doc.Id, Item.Name, Item.Value);
-            Doc = await listsService.GetDocumentById(Id,true);
+            Doc = await listsService.GetDocumentById(Id, true);
         }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        Doc = await listsService.GetDocumentById(Id,true);
+        Doc = await listsService.GetDocumentById(Id, true);
     }
 
     protected override async Task OnInitializedAsync()

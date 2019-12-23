@@ -101,7 +101,8 @@
     public async Task LoadRepositories()
     {
         currentUser = await currentUserService.GetCurrentUserAsync();
-        Repositories = await listsService.GetRepositoryList();
+        Repositories = (await listsService.GetRepositoryList())
+            .Where(x => currentUser.IsAdmin || currentUser.Repositories.Contains(x.Id));
     }
 
     public async Task OnValidSubmitRepository()

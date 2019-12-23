@@ -13,74 +13,78 @@
 @inject IToastService toastService
 @inject IJSRuntime JSRuntime;
 
-<h3>Repository: @Repo.Name - Upload</h3>
+@if (currentUser != null && Repo != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Id)))
+{
+    <h3>Repository: @Repo.Name - Upload</h3>
 
-<div class="row d-flex flex-grow-1">
-    <div class="col-4 d-flex flex-column flex-grow-1">
-        <div class="card d-flex flex-grow-1 flex-column">
-            <div class="card-body">
-                <div class="card-title"><h5>Folders</h5></div>
-                @if (TreeItems != null)
-                {
-                    <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
-                        <TitleTemplate>
-                            <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
-                            <a href="repos/upload?repoId=@context.RepositoryId&folderId=@context.Id">@context.Name</a>
-                        </TitleTemplate>
-                    </Tree>
-                }
+    <div class="row d-flex flex-grow-1">
+        <div class="col-4 d-flex flex-column flex-grow-1">
+            <div class="card d-flex flex-grow-1 flex-column">
+                <div class="card-body">
+                    <div class="card-title"><h5>Folders</h5></div>
+                    @if (TreeItems != null)
+                    {
+                        <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
+                            <TitleTemplate>
+                                <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
+                                <a href="repos/upload?repoId=@context.RepositoryId&folderId=@context.Id">@context.Name</a>
+                            </TitleTemplate>
+                        </Tree>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-8 d-flex flex-column flex-grow-1 invisible">
+            <div class="card">
+                <div class="card-header">
+                    Upload Document
+                </div>
+                <div class="card-body">
+                    <EditForm Context="myForm" Model="UploadModel" OnValidSubmit="OnUpload">
+
+                        <div id="imgContainer" class="form-group">
+                        </div>
+
+                        @*<div class="form-group">
+                                <img id="docThumbnail" src="" alt="Thumbnail" />
+                            </div>*@
+
+                        <input readonly type="hidden" name="documentId" id="documentId" class="form-control" />
+                        <input name="repositoryId" type="hidden" id="repositoryId" class="form-control" value="@Repo.Id" />
+                        <input name="path" id="path" type="hidden" class="form-control" />
+                        <input readonly class="form-control" type="hidden" id="checkInKey" name="checkInKey" />
+                        <input class="form-control" type="hidden" id="userName" name="userName" value="@currentUser?.UserName" />
+
+                        <div class="form-group">
+                            <label for="parentName">Parent Folder</label>
+                            <input name="parentId" id="parentId" class="form-control" type="hidden" value="@selectedNode?.Id" />
+                            <input readonly id="parentName" class="form-control" value="@selectedNode?.Name" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="uploadFile">Select File</label>
+                            <input type="file" class="form-control" id="uploadFile" name="file" />
+                        </div>
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <input name="title" id="title" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea rows="3" class="form-control" id="description" name="description"></textarea>
+                        </div>
+
+                        <button type="submit" id="btnUpload" class="btn btn-primary mr-1">Upload file</button>
+
+                    </EditForm>
+
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-8 d-flex flex-column flex-grow-1 invisible">
-        <div class="card">
-            <div class="card-header">
-                Upload Document
-            </div>
-            <div class="card-body">
-                <EditForm Context="myForm" Model="UploadModel" OnValidSubmit="OnUpload">
+}
 
-                    <div id="imgContainer" class="form-group">
-                    </div>
-
-                    @*<div class="form-group">
-                        <img id="docThumbnail" src="" alt="Thumbnail" />
-                    </div>*@
-
-                    <input readonly type="hidden" name="documentId" id="documentId" class="form-control" />
-                    <input name="repositoryId" type="hidden" id="repositoryId" class="form-control" value="@Repo.Id" />
-                    <input name="path" id="path" type="hidden" class="form-control" />
-                    <input readonly class="form-control" type="hidden" id="checkInKey" name="checkInKey"  />
-                    <input class="form-control" type="hidden" id="userName" name="userName" value="@currentUser?.UserName" />
-
-                    <div class="form-group">
-                        <label for="parentName">Parent Folder</label>
-                        <input name="parentId" id="parentId" class="form-control" type="hidden" value="@selectedNode?.Id" />
-                        <input readonly id="parentName" class="form-control" value="@selectedNode?.Name" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="uploadFile">Select File</label>
-                        <input type="file" class="form-control" id="uploadFile" name="file" />
-                    </div>
-                    <div class="form-group">
-                        <label for="title">Title</label>
-                        <input name="title" id="title" class="form-control" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea rows="3" class="form-control" id="description" name="description"></textarea>
-                    </div>
-
-                    <button type="submit" id="btnUpload" class="btn btn-primary mr-1">Upload file</button>
-
-                </EditForm>
-
-            </div>
-        </div>
-    </div>
-</div>
 
 @code {
 
@@ -99,7 +103,7 @@
     private async Task OnUpload()
     {
         //await JSRuntime.InvokeVoidAsync("btnUpload");
-        
+
     }
 
     protected override async Task OnParametersSetAsync()

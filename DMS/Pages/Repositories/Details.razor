@@ -13,150 +13,156 @@
 @inject IToastService toastService
 @inject IJSRuntime JSRuntime;
 
-<h3>Repository: @Repo.Name</h3>
-<small class="text-secondary font-italic">created on @Repo.CreatedOn.ToString("dd-MM-yyyy") by @Repo.CreatedBy, last update on @Repo.UpdatedOn.ToString("dd-MM-yyyy hh:mm") by @Repo.UpdatedBy</small>
+@if (currentUser != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Id)))
+{
+    <h3>Repository: @Repo.Name</h3>
+    <small class="text-secondary font-italic">created on @Repo.CreatedOn.ToString("dd-MM-yyyy") by @Repo.CreatedBy, last update on @Repo.UpdatedOn.ToString("dd-MM-yyyy hh:mm") by @Repo.UpdatedBy</small>
 
-<div class="row">
-    <div class="col-6">
-        <div class="card">
-            <div class="card-body">
-                <div class="card-title"><h5>@Repo.Title</h5></div>
-                <div class="card-text">@Repo.Description</div>
-            </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">Storage: <span class="font-weight-bold">@Repo.Storage.ToString()</span></li>
-            </ul>
-            <AuthorizeView Roles="Admin">
+    <div class="row">
+        <div class="col-6">
+            <div class="card">
                 <div class="card-body">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#id_AddFolder">Add Folder</button>
+                    <div class="card-title"><h5>@Repo.Title</h5></div>
+                    <div class="card-text">@Repo.Description</div>
                 </div>
-            </AuthorizeView>
-
-        </div>
-    </div>
-</div>
-
-<div class="row mt-3 d-flex flex-grow-1">
-    <div class="col-6 d-flex flex-column flex-grow-1">
-        <div class="card d-flex flex-grow-1 flex-column">
-            <div class="card-body">
-                <div class="card-title"><h5>Meta Fields</h5></div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Storage: <span class="font-weight-bold">@Repo.Storage.ToString()</span></li>
+                </ul>
                 <AuthorizeView Roles="Admin">
-                    <div class="mb-2">
-                        <EditForm Context="test" Model="Item" OnValidSubmit="OnValidSetValue">
-                            <div class="form-inline">
-                                <div class="form-group mx-sm-3 mb-2">
-                                    <label for="id_name" class="sr-only">Field Name</label>
-                                    <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
-                                        @if (Fields == null)
-                                        {
-                                            <option></option>
-                                        }
-                                        else
-                                        {
-                                            foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
-                                            {
-                                                <optgroup label="@group">
-                                                    @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
-                                                    {
-                                                        <option value="@field.Name">@field.Title</option>
-                                                    }
-
-                                                </optgroup>
-                                            }
-                                        }
-
-                                    </InputSelect>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label for="id_value" class="sr-only">Field Value</label>
-                                    <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
-                                </div>
-                                <button type="submit" class="btn btn-success mx-2 mb-2">Set Value</button>
-                            </div>
-                        </EditForm>
+                    <div class="card-body">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#id_AddFolder">Add Folder</button>
                     </div>
                 </AuthorizeView>
 
-                @if (ActiveFields != null)
-                {
-                    <table class="table table-bordered table-sm col-6">
-                        <tbody>
-                            @foreach (var group in ActiveFields.Select(x => x.Group).Distinct().OrderBy(x => x))
-                            {
-                                <tr class="bg-dark text-white d-flex">
-                                    <td class="col-12">@group</td>
-                                </tr>
-                                @foreach (var meta in ActiveFields.Where(x => x.Group == group).OrderBy(x => x.Name))
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3 d-flex flex-grow-1">
+        <div class="col-6 d-flex flex-column flex-grow-1">
+            <div class="card d-flex flex-grow-1 flex-column">
+                <div class="card-body">
+                    <div class="card-title"><h5>Meta Fields</h5></div>
+                    <AuthorizeView Roles="Admin">
+                        <div class="mb-2">
+                            <EditForm Context="test" Model="Item" OnValidSubmit="OnValidSetValue">
+                                <div class="form-inline">
+                                    <div class="form-group mx-sm-3 mb-2">
+                                        <label for="id_name" class="sr-only">Field Name</label>
+                                        <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
+                                            @if (Fields == null)
+                                                {
+                                                <option></option>
+                                                }
+                                                else
+                                                {
+                                                    foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                                                    {
+                                                    <optgroup label="@group">
+                                                        @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
+                                                            {
+                                                            <option value="@field.Name">@field.Title</option>
+                                                            }
+
+
+                                                    </optgroup>
+                                                    }
+                                                }
+
+                                        </InputSelect>
+                                    </div>
+                                    <div class="form-group mb-2">
+                                        <label for="id_value" class="sr-only">Field Value</label>
+                                        <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
+                                    </div>
+                                    <button type="submit" class="btn btn-success mx-2 mb-2">Set Value</button>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </AuthorizeView>
+
+                    @if (ActiveFields != null)
+                    {
+                        <table class="table table-bordered table-sm col-6">
+                            <tbody>
+                                @foreach (var group in ActiveFields.Select(x => x.Group).Distinct().OrderBy(x => x))
                                 {
-                                    <tr class="d-flex">
-                                        <td class="bg-light col-6">@meta.Title</td>
-                                        <td class="col-6">@Repo.Meta[meta.Name]</td>
+                                    <tr class="bg-dark text-white d-flex">
+                                        <td class="col-12">@group</td>
                                     </tr>
+                                    @foreach (var meta in ActiveFields.Where(x => x.Group == group).OrderBy(x => x.Name))
+                                    {
+                                        <tr class="d-flex">
+                                            <td class="bg-light col-6">@meta.Title</td>
+                                            <td class="col-6">@Repo.Meta[meta.Name]</td>
+                                        </tr>
+                                    }
+
                                 }
+                            </tbody>
+                        </table>
+                    }
+                </div>
 
-                            }
-                        </tbody>
-                    </table>
-                }
             </div>
 
         </div>
-
-    </div>
-    <div class="col-6 d-flex flex-column flex-grow-1">
-        <div class="card d-flex flex-grow-1 flex-column">
-            <div class="card-body">
-                <div class="card-title"><h5>Folders</h5></div>
-                @if (TreeItems != null)
-                {
-                    <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
-                        <TitleTemplate>
-                            <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
-                            <a href="@context.Url">@context.Name</a>
-                        </TitleTemplate>
-                    </Tree>
-                }
+        <div class="col-6 d-flex flex-column flex-grow-1">
+            <div class="card d-flex flex-grow-1 flex-column">
+                <div class="card-body">
+                    <div class="card-title"><h5>Folders</h5></div>
+                    @if (TreeItems != null)
+                    {
+                        <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
+                            <TitleTemplate>
+                                <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
+                                <a href="@context.Url">@context.Name</a>
+                            </TitleTemplate>
+                        </Tree>
+                    }
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal -->
-<div class="modal fade" id="id_AddFolder" tabindex="-1" role="dialog" aria-labelledby="label_AddFolder" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <!-- Modal -->
+    <div class="modal fade" id="id_AddFolder" tabindex="-1" role="dialog" aria-labelledby="label_AddFolder" aria-hidden="true">
+        <div class="modal-dialog" role="document">
 
-        <div class="modal-content">
-            <EditForm Model="FolderAddModel" OnValidSubmit="OnValidSubmitFolder">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="label_AddFolder">Add Folder</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="id_fld_name">Name</label>
-                        <InputText @bind-Value="FolderAddModel.Name" id="id_fld_name" class="form-control"></InputText>
+            <div class="modal-content">
+                <EditForm Model="FolderAddModel" OnValidSubmit="OnValidSubmitFolder">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="label_AddFolder">Add Folder</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <label for="id_fld_title">Title</label>
-                        <InputText @bind-Value="FolderAddModel.Title" id="id_fld_title" class="form-control"></InputText>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="id_fld_name">Name</label>
+                            <InputText @bind-Value="FolderAddModel.Name" id="id_fld_name" class="form-control"></InputText>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_fld_title">Title</label>
+                            <InputText @bind-Value="FolderAddModel.Title" id="id_fld_title" class="form-control"></InputText>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_fld_desc">Description</label>
+                            <InputTextArea @bind-Value="FolderAddModel.Description" id="id_fld_desc" class="form-control"></InputTextArea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="id_fld_desc">Description</label>
-                        <InputTextArea @bind-Value="FolderAddModel.Description" id="id_fld_desc" class="form-control"></InputTextArea>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </EditForm>
+                </EditForm>
 
+            </div>
         </div>
     </div>
-</div>
+}
+
+
 
 
 
@@ -214,7 +220,9 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        currentUser = await currentUserService.GetCurrentUserAsync();
         Repo = await listsService.GetRepositoryById(Id.ToString());
+
         // TreeItems = await listsService.GetRepositoryFoldersTree(Repo.Id);
         await LoadTree();
     }
@@ -222,7 +230,7 @@
     protected override async Task OnInitializedAsync()
     {
         Fields = await listsService.GetMetaFieldsList();
-        currentUser = await currentUserService.GetCurrentUserAsync();
+
     }
 
     protected override void OnInitialized()

@@ -27,6 +27,7 @@ namespace DAS.ViewModels
         public DateTime UpdatedOn { get; set; }
         public Dictionary<string, string> Meta { get; set; }
         public string Thumbnail { get; set; }
+        public IEnumerable<DocumentHistoryDetailModel> History { get; set; }
     }
 
 }

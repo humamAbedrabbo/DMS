@@ -411,7 +411,7 @@ namespace DAS.Services
             }
         }
 
-        public async Task<DocumentDetailModel> GetDocumentById(int? id)
+        public async Task<DocumentDetailModel> GetDocumentById(int? id, bool withHistory = false)
         {
             try
             {
@@ -424,6 +424,7 @@ namespace DAS.Services
                         .Include(x => x.MetaData).ThenInclude(m => m.Field)
                         .Include(x => x.Repository)
                         .Include(x => x.Parent)
+                        .Include(x => x.History)
                         .Where(x => x.Id == id)
                         .AsNoTracking()
                         .FirstOrDefaultAsync().ConfigureAwait(false);
@@ -462,7 +463,21 @@ namespace DAS.Services
                     CheckInKey = document.CheckInKey,
                     Meta = document.MetaData?.ToDictionary(k => k.Field.Name, v => v.Value),
                     Thumbnail = thumbnail?.Base64Image
+
                 };
+
+                if(withHistory)
+                {
+                    dModel.History = document.History.Select(x => new DocumentHistoryDetailModel
+                    {
+                        Id = x.Id,
+                        Operation = x.Operation,
+                        OperationBy = x.OperationBy,
+                        OperationOn = x.OperationOn,
+                        DocumentId = x.DocumentId,
+                        Version = x.Version
+                    });
+                }
 
                 return dModel;
             }

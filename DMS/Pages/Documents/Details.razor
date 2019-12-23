@@ -16,7 +16,7 @@
 <h3>Document: @Doc.Name</h3>
 <small class="text-secondary font-italic">created on @Doc.CreatedOn.ToString("dd-MM-yyyy") by @Doc.CreatedBy, last update on @Doc.UpdatedOn.ToString("dd-MM-yyyy hh:mm") by @Doc.UpdatedBy</small>
 
-<div class="row overflow-hidden">
+<div class="row">
     <div class="col-6">
         <div class="card">
             <div class="card-body">
@@ -49,19 +49,10 @@
             </ul>
         </div>
     </div>
-    <div class="col-6">
-        <div class="card d-flex flex-grow-1 flex-column">
-            <div class="card-body">
-                <div class="card-title">Versions</div>
-            </div>
-
-        </div>
-    </div>
 </div>
-
-<div class="row mt-3 d-flex flex-grow-1">
-    <div class="col-6 d-flex flex-column flex-grow-1">
-        <div class="card d-flex flex-grow-1 flex-column">
+<div class="row">
+    <div class="col-6 ">
+        <div class="card mt-3 d-flex flex-grow-1 flex-column">
             <div class="card-body">
                 <div class="card-title"><h5>Meta Fields</h5></div>
                 <AuthorizeView Roles="Admin">
@@ -125,9 +116,47 @@
             </div>
 
         </div>
-
     </div>
+
+    <div class="col-6 mt-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="card-title">History</div>
+                <div class="row">
+                    <div class="col-12">
+                        <table class="table">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Version</th>
+                                    <th>Operation</th>
+                                    <th>User</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Doc.History != null)
+                                {
+                                    foreach (var h in Doc.History.OrderByDescending(e => e.OperationOn))
+                                    {
+                                        <tr>
+                                            <td>@h.Version</td>
+                                            <td>@h.Operation.ToString()</td>
+                                            <td>@h.OperationBy</td>
+                                            <td>@h.OperationOn.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 </div>
+
 
 @code {
 
@@ -153,11 +182,11 @@
         if(result.IsOk)
         {
             toastService.ShowSuccess($"Document '{Doc.Name}' checked out successfully");
-            Doc = await listsService.GetDocumentById(Id);
+            Doc = await listsService.GetDocumentById(Id,true);
         }
         else
         {
-            toastService.ShowError($"{result.ErrorMessage}");
+            toastService.ShowError($"Failed to check out document {Doc.Name}");
         }
     }
 
@@ -166,13 +195,13 @@
         if (Doc != null && Item != null && !string.IsNullOrEmpty(Item.Name))
         {
             await adminService.SetDocumentMetaValue(Doc.Id, Item.Name, Item.Value);
-            Doc = await listsService.GetDocumentById(Id);
+            Doc = await listsService.GetDocumentById(Id,true);
         }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        Doc = await listsService.GetDocumentById(Id);
+        Doc = await listsService.GetDocumentById(Id,true);
     }
 
     protected override async Task OnInitializedAsync()

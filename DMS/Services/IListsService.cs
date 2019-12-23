@@ -7,7 +7,7 @@ namespace DAS.Services
 {
     public interface IListsService
     {
-        Task<DocumentDetailModel> GetDocumentById(int? id);
+        Task<DocumentDetailModel> GetDocumentById(int? id, bool withHistory = false);
         Task<IEnumerable<DocumentDetailModel>> GetDocumentsList(string repoId, int? parentId);
         Task<FolderDetailModel> GetFolderById(int? id);
         Task<IEnumerable<FolderDetailModel>> GetFoldersList(string repoId, int? parentId);

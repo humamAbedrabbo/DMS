@@ -30,6 +30,12 @@ namespace DAS.Services
             {
                 var user = new AppUser { Id = u.Id, UserName = u.UserName };
                 user.Roles = (await um.GetRolesAsync(u).ConfigureAwait(false)).ToList();
+                
+                user.Repositories = (await um.GetClaimsAsync(u))
+                    .Where(x => x.Type == "RepositoryId")
+                    .Select(x => Convert.ToInt32(x.Value))
+                    .ToList();
+
                 users.Add(user);
             }
 
@@ -113,6 +119,10 @@ namespace DAS.Services
                     UserName = user.UserName
                 };
                 appUser.Roles = await GetUserRolesAsync(user).ConfigureAwait(false);
+                appUser.Repositories = (await um.GetClaimsAsync(user))
+                    .Where(x => x.Type == "RepositoryId")
+                    .Select(x => Convert.ToInt32(x.Value))
+                    .ToList();
                 return appUser;
             }
 

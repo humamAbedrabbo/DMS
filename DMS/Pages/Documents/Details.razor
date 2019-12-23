@@ -127,6 +127,7 @@
                         <table class="table">
                             <thead class="thead-dark">
                                 <tr>
+                                    <th></th>
                                     <th>Version</th>
                                     <th>Operation</th>
                                     <th>User</th>
@@ -139,6 +140,12 @@
                                     foreach (var h in Doc.History.OrderByDescending(e => e.OperationOn))
                                     {
                                         <tr>
+                                            <td>
+                                                @if(h.Operation == DocumentOperation.CheckedIn)
+                                                {
+                                                    <a href="Archive/DownloadDocument?id=@h.DocumentId&version=@h.Version"><i class="oi oi-cloud-download"></i></a>
+                                                }
+                                            </td>
                                             <td>@h.Version</td>
                                             <td>@h.Operation.ToString()</td>
                                             <td>@h.OperationBy</td>

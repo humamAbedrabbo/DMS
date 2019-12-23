@@ -38,8 +38,19 @@
                 </AuthorizeView>
             </div>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item">Repository:<span class="font-weight-bold">@Doc.Repository</span></li>
-                <li class="list-group-item">Folder:<span class="font-weight-bold">@Doc.Parent</span></li>
+                <li class="list-group-item">Repository:<span class="font-weight-bold"><a href="/repo/@Doc.RepositoryId">@Doc.Repository</a></span></li>
+                <li class="list-group-item">Folder:<span class="font-weight-bold">
+                        @if (Doc.ParentId.HasValue)
+                        {
+                            <a href="/folders/@Doc.ParentId">@Doc.Parent</a>
+                        }
+                        else
+                        {
+                            @Doc.Parent
+                        }
+
+                    </span>
+                </li>
                 <li class="list-group-item">Version:<span class="font-weight-bold text-primary">@Doc.Version</span></li>
                 <li class="list-group-item">Content Type:<span class="font-weight-bold">@Doc.ContentType</span></li>
                 <li class="list-group-item">Size:<span class="font-weight-bold">@Doc.Length bytes</span></li>

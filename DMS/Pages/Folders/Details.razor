@@ -25,11 +25,15 @@
                 <div class="card-title"><h5>@CurrentFolder.Title</h5></div>
                 <div class="card-text">@CurrentFolder.Description</div>
             </div>
-            <AuthorizeView Roles="Admin">
-                <div class="card-body">
+            <div class="card-body">
+                <AuthorizeView Roles="Admin, Archive">
+                    <a href="/repos/upload?repoId=@CurrentFolder.RepositoryId&folderId=@CurrentFolder.Id" class="btn btn-secondary">Upload</a>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin">
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#id_AddFolder">Add Folder</button>
-                </div>
-            </AuthorizeView>
+                </AuthorizeView>
+            </div>
+
         </div>
     </div>
 </div>

@@ -7,22 +7,7 @@
 <h5>Upload Document</h5>
 
 <div class="row">
-    <div class="col-12">
-        <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="mr-auto">Done</strong>
-                <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="toast-body">
-                File uploaded successfully.
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-10">
+    <div class="col-8">
         <form class="form">
 
             <div id="imgContainer" class="form-group">
@@ -30,8 +15,8 @@
             </div>
 
             @*<div class="form-group">
-            <img id="docThumbnail" src="" alt="Thumbnail" />
-        </div>*@
+                    <img id="docThumbnail" src="" alt="Thumbnail" />
+                </div>*@
 
             <input readonly type="hidden" name="documentId" id="documentId" class="form-control" />
             <input name="repositoryId" type="hidden" id="repositoryId" class="form-control" value="@Model.RepositoryId" />
@@ -81,8 +66,24 @@
 
         </form>
     </div>
+    <div class="col-4">
+        <!-- Flexbox container for aligning the toasts -->
+        <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+            <!-- Then put toasts within -->
+            <div class="toast" id="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="mr-auto">Done</strong>
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    File uploaded successfully.
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
 
 
 @section Scripts{
@@ -156,19 +157,19 @@
                 FD.append('contentType', $file.type);
                 FD.append('length', $file.size);
                 FD.append('userName', $userName);
-                
+
                 var meta = [];
                 var metaFields = $(".meta");
                 $.each(metaFields, function (index, value) {
-                    
+
                     var key$ = metaFields.children(".metaKey")[0];
                     var key = $(key$).val();
                     var value$ = metaFields.children(".metaValue")[0];
                     var value = $(value$).val();
-                    
+
                     FD.append("meta['" + key + "']", value);
                 });
-                
+
                 $.ajax({
                     type: "POST",
                     url: postUrl,

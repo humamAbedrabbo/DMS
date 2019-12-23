@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace DAS.ViewModels
 {
-    public class UploadViewModel
+    public class CheckInViewModel
     {
+        public int DocumentId { get; set; }
+        public string CheckInKey { get; set; }
         public int RepositoryId { get; set; }
         public string RepositoryName { get; set; }
         public int? ParentId { get; set; }

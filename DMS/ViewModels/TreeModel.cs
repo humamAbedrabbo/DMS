@@ -16,7 +16,8 @@ namespace DAS.ViewModels
         public string Title { get; set; }
         public int? ParentId { get; set; }
         public TreeModel Parent { get; set; }
-        public string Url => Type == TreeNodeType.Folder ? $"folders/{Id}" : $"Archive/DownloadDocument?id={Id}";
+        public string Url => Type == TreeNodeType.Folder ? $"folders/{Id}" : $"doc/details/{Id}";
+        public string DownloadUrl => Type == TreeNodeType.Folder ? $"#" : $"Archive/DownloadDocument?id={Id}";
         public Dictionary<string, string> Meta { get; set; }
         public List<TreeModel> Childs { get; set; }
     }

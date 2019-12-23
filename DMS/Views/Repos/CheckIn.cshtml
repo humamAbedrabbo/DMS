@@ -1,10 +1,12 @@
-﻿@model DAS.ViewModels.UploadViewModel
+﻿@model DAS.ViewModels.CheckInViewModel
+
+
 
 @{
     int metaIndex = 0;
 }
 
-<h5>Upload Document</h5>
+<h5>Check In Document</h5>
 
 <div class="row">
     <div class="col-12">
@@ -33,10 +35,10 @@
             <img id="docThumbnail" src="" alt="Thumbnail" />
         </div>*@
 
-            <input readonly type="hidden" name="documentId" id="documentId" class="form-control" />
+            <input readonly type="hidden" name="documentId" id="documentId" class="form-control" value="@Model.DocumentId" />
             <input name="repositoryId" type="hidden" id="repositoryId" class="form-control" value="@Model.RepositoryId" />
             <input name="path" id="path" type="hidden" class="form-control" />
-            <input readonly class="form-control" type="hidden" id="checkInKey" name="checkInKey" />
+            <input readonly class="form-control" type="hidden" id="checkInKey" name="checkInKey" value="@Model.CheckInKey" />
             <input class="form-control" type="hidden" id="userName" name="userName" value="@Model.UserName" />
 
             <div class="form-group">
@@ -55,12 +57,12 @@
             </div>
             <div class="form-group">
                 <label for="title">Title</label>
-                <input name="title" id="title" class="form-control" />
+                <input name="title" id="title" class="form-control" value="@Model.Title" />
             </div>
 
             <div class="form-group">
                 <label for="description">Description</label>
-                <textarea rows="3" class="form-control" id="description" name="description"></textarea>
+                <textarea rows="3" class="form-control" id="description" name="description">@Model.Description</textarea>
             </div>
 
             @foreach (var meta in Model.Meta)
@@ -76,8 +78,8 @@
             }
 
             @*<a asp-controller="Repos" asp-action="Explore" asp-route-repoId="@Model.RepositoryId" asp-route-folderId="@Model.ParentId" class="btn btn-secondary mr-1">Cancel</a>*@
-            <a href="/docs/upload/@Model.RepositoryId" class="btn btn-secondary mr-1">Cancel</a>
-            <a href="#" id="btnUpload" class="btn btn-primary mr-1">Upload file</a>
+            <a href="/doc/details/@Model.DocumentId" class="btn btn-secondary mr-1">Cancel</a>
+            <a href="#" id="btnCheckin" class="btn btn-primary mr-1">Checkin</a>
 
         </form>
     </div>
@@ -134,44 +136,21 @@
 
             }
 
-            $('#btnUpload').click(function () {
-                var $file = $("#uploadFile")[0].files[0];
-                var $repositoryId = $("#repositoryId").val();
-                var $title = $("#title").val();
-                var $path = $("#path").val();
+            $("#btnCheckin").click(function () {
+                var $documentId = $("#documentId").val();
                 var $userName = $("#userName").val();
-                var $description = $("#description").val();
-                var $parentId = $("#parentId").val();
+                var $checkInKey = $("#checkInKey").val();
+                var $length = $('#uploadFile')[0].files[0].size;
 
-
-                // let postUrl = postDocumentBaseUrl + $repositoryId + '/' + $parentId;
-                let postUrl = "/Archive/PostDocument";
                 var FD = new FormData();
-                FD.append('repositoryId', $repositoryId);
-                FD.append('name', $file.name);
-                FD.append('title', $title);
-                FD.append('parentId', $parentId);
-                FD.append('path', $path);
-                FD.append('description', $description);
-                FD.append('contentType', $file.type);
-                FD.append('length', $file.size);
+                FD.append('documentId', $documentId);
                 FD.append('userName', $userName);
-                
-                var meta = [];
-                var metaFields = $(".meta");
-                $.each(metaFields, function (index, value) {
-                    
-                    var key$ = metaFields.children(".metaKey")[0];
-                    var key = $(key$).val();
-                    var value$ = metaFields.children(".metaValue")[0];
-                    var value = $(value$).val();
-                    
-                    FD.append("meta['" + key + "']", value);
-                });
-                
+                FD.append('checkInKey', $checkInKey);
+                FD.append('length', $length);
+
                 $.ajax({
                     type: "POST",
-                    url: postUrl,
+                    url: "/Archive/Checkin",
                     contentType: false,
                     processData: false,
                     dataType: 'json',
@@ -185,13 +164,10 @@
                         UploadFile($('#uploadFile')[0].files);
                     },
                     failure: function (errmsg) {
-                        alert(errmsg);
+                       alert(errmsg);
                     }
                 });
-
-            }
-            )
-
+            });
 
         });
 
@@ -270,14 +246,15 @@
 
         function UploadComplete() {
             $('#toast').toast('show')
-
-            $("#documentId").val('');
-            $("#checkInKey").val('');
-            $("#title").val('');
-            $("#description").val('');
-            $("#uploadFile").val('');
-            $(".metaValue").val('');
-            //$("#imgContainer").empty();
+            var documentId = $("#documentId").val();
+            window.location.href = "/doc/details/" + documentId;
+            //$("#documentId").val('');
+            //$("#checkInKey").val('');
+            //$("#title").val('');
+            //$("#description").val('');
+            //$("#uploadFile").val('');
+            //$(".metaValue").val('');
+            ////$("#imgContainer").empty();
         }
 
         function UploadFile(TargetFile) {

@@ -13,12 +13,14 @@ namespace DAS.Controllers
         private readonly IAdminService adminService;
         private readonly IListsService listsService;
         private readonly IArchiveService arcService;
+        private readonly ICurrentUserService currentUserService;
 
-        public ReposController(IAdminService adminService, IListsService listsService, IArchiveService arcService)
+        public ReposController(IAdminService adminService, IListsService listsService, IArchiveService arcService, ICurrentUserService currentUserService)
         {
             this.adminService = adminService;
             this.listsService = listsService;
             this.arcService = arcService;
+            this.currentUserService = currentUserService;
         }
 
         // GET: /<controller>/
@@ -72,6 +74,7 @@ namespace DAS.Controllers
         public async Task<IActionResult> Upload(string repoId, int? folderId)
         {
             var model = new UploadViewModel();
+            model.UserName = (await currentUserService.GetCurrentUserAsync().ConfigureAwait(false)).UserName;
             FolderDetailModel folder = null;
             FolderBreadcrumbModel breadcrumb = null;
             RepoDetailModel repo = null;
@@ -99,6 +102,31 @@ namespace DAS.Controllers
                 model.ParentName = folder.Name;
                 model.Path = breadcrumb?.Path;
                 model.Meta = folder.Meta;
+            }
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> CheckIn(int id)
+        {
+            var model = new CheckInViewModel();
+            model.UserName = (await currentUserService.GetCurrentUserAsync().ConfigureAwait(false)).UserName;
+            var doc = await listsService.GetDocumentById(id);
+            model.DocumentId = doc.Id;
+            model.CheckInKey = doc.CheckInKey;
+            model.Description = doc.Description;
+            model.ParentId = doc.ParentId;
+            model.ParentName = doc.Parent;
+            model.RepositoryId = doc.RepositoryId;
+            model.RepositoryName = doc.Repository;
+            model.Title = doc.Title;
+            if(doc.Meta != null)
+            {
+                model.Meta = new Dictionary<string, string>();
+                foreach (var meta in doc.Meta)
+                {
+                    model.Meta[meta.Key] = meta.Value;
+                }
             }
 
             return View(model);

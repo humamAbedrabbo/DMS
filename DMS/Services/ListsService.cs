@@ -459,6 +459,7 @@ namespace DAS.Services
                     CreatedOn = document.CreatedOn,
                     UpdatedBy = document.UpdatedBy,
                     UpdatedOn = document.UpdatedOn,
+                    CheckInKey = document.CheckInKey,
                     Meta = document.MetaData?.ToDictionary(k => k.Field.Name, v => v.Value),
                     Thumbnail = thumbnail?.Base64Image
                 };

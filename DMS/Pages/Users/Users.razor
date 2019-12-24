@@ -54,6 +54,7 @@
                                         <th>@LocalService.Get("Archive", currentUser.Lang)</th>
                                         <th>@LocalService.Get("Public", currentUser.Lang)</th>
                                         <th>@LocalService.Get("Repositories", currentUser.Lang)</th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -87,6 +88,10 @@
                                             }
                                             <td>
                                                 <a class="btn-link" style="cursor:pointer;" @onclick="(() => SelectUser(user))"><i class="oi oi-box"></i></a>
+                                            </td>
+                                            <td>
+                                                <a class="btn-sm @(user.Lang == "ar" ? "btn-primary text-light" : "") mx-2" style="cursor:pointer;" @onclick="@(() => SelectLanguage("ar"))">Ar</a>
+                                                <a class="btn-sm @(user.Lang == "en" ? "btn-primary text-light" : "") mx-2" style="cursor:pointer;" @onclick="@(() => SelectLanguage("en"))">En</a>
                                             </td>
                                         </tr>
                                     }
@@ -163,6 +168,31 @@
         if(CurrentUser != null)
         {
             CurrentUser.RepoToAdd = null;
+        }
+    }
+
+    public async Task SelectLanguage(string lang)
+    {
+        if(CurrentUser != null && !string.IsNullOrEmpty(lang))
+        {
+            var user = await userManager.FindByIdAsync(CurrentUser.Id);
+            if(user != null)
+            {
+                var claims = await userManager.GetClaimsAsync(user);
+                if(!claims.Any(x => x.Type == "Lang" && x.Value == lang))
+                {
+
+                    await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("Lang", lang));
+                    await LoadUsers(CurrentUser.Id);
+                }
+                else
+                {
+                    var claim = claims.FirstOrDefault(x => x.Type == "Lang");
+
+                    await userManager.ReplaceClaimAsync(user, claim, new System.Security.Claims.Claim("Lang", lang));
+                    await LoadUsers(CurrentUser.Id);
+                }
+            }
         }
     }
 

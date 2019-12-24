@@ -36,6 +36,11 @@ namespace DAS.Services
                     .Select(x => Convert.ToInt32(x.Value))
                     .ToList();
 
+                user.Lang = (await um.GetClaimsAsync(u))
+                    .Where(x => x.Type == "Lang")
+                    .Select(x => x.Value)
+                    .FirstOrDefault();
+
                 users.Add(user);
             }
 
@@ -123,6 +128,11 @@ namespace DAS.Services
                     .Where(x => x.Type == "RepositoryId")
                     .Select(x => Convert.ToInt32(x.Value))
                     .ToList();
+                appUser.Lang = (await um.GetClaimsAsync(user))
+                    .Where(x => x.Type == "Lang")
+                    .Select(x => x.Value)
+                    .FirstOrDefault();
+
                 return appUser;
             }
 

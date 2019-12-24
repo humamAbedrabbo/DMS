@@ -12,20 +12,21 @@
 @inject IToastService toastService
 @inject IJSRuntime JSRuntime;
 
-<AuthorizeView Roles="Admin">
-    <h3>Meta Fields</h3>
+@if (currentUser != null)
+{
+    <h3> @LocalService.Get("Meta Fields", currentUser.Lang)</h3>
     <div class="row mb-3">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <EditForm Context="formMetaContext" Model="MetaFieldModel" OnValidSubmit="OnValidCreateSubmit">
+                    <EditForm Model="MetaFieldModel" OnValidSubmit="OnValidCreateSubmit">
                         <div class="form-inline">
                             <div class="form-group mb-2">
-                                <label for="inputName" class="sr-only">Field Name</label>
-                                <input @bind="MetaFieldModel.Name" class="form-control" id="inputName" placeholder="Field Name">
+                                <label for="inputName" class="sr-only"> @LocalService.Get("Field Name", currentUser.Lang)</label>
+                                <input @bind="MetaFieldModel.Name" class="form-control" id="inputName" placeholder=" @LocalService.Get("Field Name", currentUser.Lang)">
                             </div>
                             <div class="form-group mx-sm-3 mb-2">
-                                <label for="inputFieldType" class="sr-only">Storage Type</label>
+                                <label for="inputFieldType" class="sr-only"> @LocalService.Get("Field Type", currentUser.Lang)</label>
                                 <select @bind="MetaFieldModel.FieldType" class="form-control" id="inputFieldType">
                                     <option value="@FieldType.Text">@FieldType.Text.ToString()</option>
                                     <option value="@FieldType.LargeText">@FieldType.LargeText.ToString()</option>
@@ -37,14 +38,14 @@
                                 </select>
                             </div>
                             <div class="form-group mb-2">
-                                <label for="inputTitle" class="sr-only">Title</label>
+                                <label for="inputTitle" class="sr-only"> @LocalService.Get("Title", currentUser.Lang)</label>
                                 <input @bind="MetaFieldModel.Title" class="form-control" id="inputTitle" placeholder="Field Title">
                             </div>
                             <div class="form-group mx-sm-3 mb-2">
-                                <label for="inputDefault" class="sr-only">Default Value</label>
-                                <input @bind="MetaFieldModel.DefaultValue" class="form-control" id="inputDefault" placeholder="Default Value">
+                                <label for="inputDefault" class="sr-only"> @LocalService.Get("Default Value", currentUser.Lang)</label>
+                                <input @bind="MetaFieldModel.DefaultValue" class="form-control" id="inputDefault" placeholder=" @LocalService.Get("Default Value", currentUser.Lang)">
                             </div>
-                            <button type="submit" class="btn btn-success mb-2">Add Meta Field</button>
+                            <button type="submit" class="btn btn-success mb-2"> @LocalService.Get("Add Meta Field", currentUser.Lang)</button>
                         </div>
                     </EditForm>
 
@@ -58,17 +59,17 @@
                 <div class="card-body">
                     @if (MetaFields == null)
                     {
-                        <p>Loading...</p>
+                        <p> @LocalService.Get("Loading", currentUser.Lang)...</p>
                     }
                     else
                     {
                         <table class="table">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Field Title</th>
-                                    <th>Group</th>
-                                    <th>Name</th>
-                                    <th>Type</th>
+                                    <th> @LocalService.Get("Field Title", currentUser.Lang)</th>
+                                    <th> @LocalService.Get("Group", currentUser.Lang)</th>
+                                    <th> @LocalService.Get("Field Name", currentUser.Lang)</th>
+                                    <th> @LocalService.Get("Field Type", currentUser.Lang)</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -92,63 +93,68 @@
             </div>
         </div>
     </div>
-</AuthorizeView>
 
-<!-- Modal -->
-<div class="modal fade" id="id_EditMeta" tabindex="-1" role="dialog" aria-labelledby="label_EditMeta" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <!-- Modal -->
+    <div class="modal fade" id="id_EditMeta" tabindex="-1" role="dialog" aria-labelledby="label_EditMeta" aria-hidden="true">
+        <div class="modal-dialog" role="document">
 
-        <div class="modal-content">
-            <EditForm Model="EditMetaModel" OnValidSubmit="OnValidSubmitEditMeta">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="label_EditMeta">Edit Meta Field</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="id_fld_group">Group</label>
-                        <input readonly id="id_fld_group" class="form-control" value="@EditMetaModel.Group" />
+            <div class="modal-content">
+                <EditForm Model="EditMetaModel" OnValidSubmit="OnValidSubmitEditMeta">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="label_EditMeta"> @LocalService.Get("Edit Meta Field", currentUser.Lang)</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <label for="id_fld_name">Name</label>
-                        <InputText @bind-Value="EditMetaModel.Name" id="id_fld_name" class="form-control"></InputText>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="id_fld_group"> @LocalService.Get("Group", currentUser.Lang)</label>
+                            <input readonly id="id_fld_group" class="form-control" value="@EditMetaModel.Group" />
+                        </div>
+                        <div class="form-group">
+                            <label for="id_fld_name"> @LocalService.Get("Field Name", currentUser.Lang)</label>
+                            <InputText @bind-Value="EditMetaModel.Name" id="id_fld_name" class="form-control"></InputText>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_fld_title"> @LocalService.Get("Field Title", currentUser.Lang)</label>
+                            <InputText @bind-Value="EditMetaModel.Title" id="id_fld_title" class="form-control"></InputText>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_fld_type"> @LocalService.Get("Field Type", currentUser.Lang)</label>
+                            <InputSelect @bind-Value="EditMetaModel.FieldType" id="id_fld_type" class="form-control">
+                                <option value="@FieldType.Text">@FieldType.Text.ToString()</option>
+                                <option value="@FieldType.LargeText">@FieldType.LargeText.ToString()</option>
+                                <option value="@FieldType.Boolean">@FieldType.Boolean.ToString()</option>
+                                <option value="@FieldType.Date">@FieldType.Date.ToString()</option>
+                                <option value="@FieldType.DateTime">@FieldType.DateTime.ToString()</option>
+                                <option value="@FieldType.Number">@FieldType.Number.ToString()</option>
+                                <option value="@FieldType.List">@FieldType.List.ToString()</option>
+                            </InputSelect>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_fld_list"> @LocalService.Get("List", currentUser.Lang)</label>
+                            <InputText @bind-Value="EditMetaModel.ListSource" id="id_fld_list" class="form-control"></InputText>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_fld_default"> @LocalService.Get("Default Value", currentUser.Lang)</label>
+                            <InputText @bind-Value="EditMetaModel.DefaultValue" id="id_fld_default" class="form-control"></InputText>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="id_fld_title">Title</label>
-                        <InputText @bind-Value="EditMetaModel.Title" id="id_fld_title" class="form-control"></InputText>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"> @LocalService.Get("Close", currentUser.Lang)</button>
+                        <button type="submit" class="btn btn-primary"> @LocalService.Get("Save", currentUser.Lang)</button>
                     </div>
-                    <div class="form-group">
-                        <label for="id_fld_type">Type</label>
-                        <InputSelect @bind-Value="EditMetaModel.FieldType" id="id_fld_type" class="form-control">
-                            <option value="@FieldType.Text">@FieldType.Text.ToString()</option>
-                            <option value="@FieldType.LargeText">@FieldType.LargeText.ToString()</option>
-                            <option value="@FieldType.Boolean">@FieldType.Boolean.ToString()</option>
-                            <option value="@FieldType.Date">@FieldType.Date.ToString()</option>
-                            <option value="@FieldType.DateTime">@FieldType.DateTime.ToString()</option>
-                            <option value="@FieldType.Number">@FieldType.Number.ToString()</option>
-                            <option value="@FieldType.List">@FieldType.List.ToString()</option>
-                        </InputSelect>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_fld_list">List</label>
-                        <InputText @bind-Value="EditMetaModel.ListSource" id="id_fld_list" class="form-control"></InputText>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_fld_default">Default Value</label>
-                        <InputText @bind-Value="EditMetaModel.DefaultValue" id="id_fld_default" class="form-control"></InputText>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </EditForm>
+                </EditForm>
 
+            </div>
         </div>
     </div>
-</div>
+}
+
+
+
+
+
 
 @code {
     public List<MetaField> MetaFields { get; set; }
@@ -156,6 +162,8 @@
     private MetaField MetaFieldModel { get; set; } = new MetaField();
 
     private MetaField EditMetaModel { get; set; } = new MetaField();
+
+    private AppUser currentUser;
 
     public async Task LoadMetaFields()
     {
@@ -210,6 +218,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        currentUser = await currentUserService.GetCurrentUserAsync();
         await LoadMetaFields();
     }
 }

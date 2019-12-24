@@ -1,57 +1,74 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">Archive</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
+﻿@using DAS.ViewModels
+@using DAS.Services
 
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home mx-1" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <AuthorizeView Roles="Admin, Archive">
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="repos">
-                    <span class="oi oi-box mx-1" aria-hidden="true"></span> Repositories
-                </NavLink>
-            </li>
-        </AuthorizeView>
-        <AuthorizeView Roles="Admin">
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="meta">
-                    <span class="oi oi-spreadsheet mx-1" aria-hidden="true"></span> Meta Fields
-                </NavLink>
-            </li>
-            <li class="nav-item px-3">
-                <NavLink class="nav-link" href="users">
-                    <span class="oi oi-people mx-1" aria-hidden="true"></span> Users
-                </NavLink>
-            </li>
-        </AuthorizeView>
+@inject ICurrentUserService currentUserService
 
-        @*<li class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </li>*@
-    </ul>
-</div>
+@if (currentUser != null)
+{
+    <div class="top-row pl-4 navbar navbar-dark">
+        <a class="navbar-brand" href="">@LocalService.Get("DMS", currentUser.Lang)</a>
+        <button class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+
+    <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+        <ul class="nav flex-column">
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="oi oi-home mx-1" aria-hidden="true"></span> @LocalService.Get("Home", currentUser.Lang)
+                </NavLink>
+            </li>
+            <AuthorizeView Roles="Admin, Archive">
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="repos">
+                        <span class="oi oi-box mx-1" aria-hidden="true"></span> @LocalService.Get("Repositories", currentUser.Lang)
+                    </NavLink>
+                </li>
+            </AuthorizeView>
+            <AuthorizeView Roles="Admin">
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="meta">
+                        <span class="oi oi-spreadsheet mx-1" aria-hidden="true"></span> @LocalService.Get("Meta Fields", currentUser.Lang)
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="users">
+                        <span class="oi oi-people mx-1" aria-hidden="true"></span> @LocalService.Get("Users", currentUser.Lang)
+                    </NavLink>
+                </li>
+            </AuthorizeView>
+
+            @*<li class="nav-item px-3">
+                    <NavLink class="nav-link" href="counter">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Counter
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="fetchdata">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+                    </NavLink>
+                </li>*@
+        </ul>
+    </div>
+}
+
+
 
 @code {
     private bool collapseNavMenu = true;
 
     private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
+    private AppUser currentUser;
+
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await currentUserService.GetCurrentUserAsync();
     }
 }

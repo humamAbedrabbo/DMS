@@ -1,9 +1,15 @@
 ﻿@page "/"
 @namespace DAS.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@inject DAS.Services.ICurrentUserService cu
 @{
     Layout = null;
+    string rtl = (await cu.GetCurrentUserAsync()).Rtl;
 }
+
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -24,10 +30,13 @@
     <link href="css/font-awesome/css/all.css" rel="stylesheet" />
     <link rel="stylesheet" href="_content/MW.Blazor.Tree/styles.css" />
     <link href="css/site.css" rel="stylesheet" />
+    @if (!string.IsNullOrEmpty(rtl))
+    {
+        <link href="~/css/site-rtl.css" rel="stylesheet" />
+    }
 
-    <link href="~/css/site-rtl.css" rel="stylesheet" />
 </head>
-<body>
+<body class="@rtl">
     <app>
         <component type="typeof(App)" render-mode="ServerPrerendered" />
     </app>
@@ -55,3 +64,4 @@
     <script src="/js/site.js"></script>
 </body>
 </html>
+

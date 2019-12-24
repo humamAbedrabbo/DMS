@@ -1,4 +1,6 @@
-﻿<AuthorizeView>
+﻿
+
+<AuthorizeView>
     <Authorized>
         <a href="Identity/Account/Manage" class="text-light">@context.User.Identity.Name</a>
         <form method="post" action="Identity/Account/LogOut">
@@ -9,3 +11,4 @@
         <a href="Identity/Account/Login" class="text-light">Log in</a>
     </NotAuthorized>
 </AuthorizeView>
+

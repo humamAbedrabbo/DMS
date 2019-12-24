@@ -1,10 +1,13 @@
 ﻿@model DAS.ViewModels.UploadViewModel
-
+@using DAS.Services
+@using DAS.ViewModels
+@inject ICurrentUserService currentUserService
 @{
     int metaIndex = 0;
+    var currentUser = await currentUserService.GetCurrentUserAsync();
 }
 
-<h5>Upload Document</h5>
+    <h5>@LocalService.Get("Upload", currentUser.Lang)</h5>
 
 <div class="row">
     <div class="col-8">
@@ -25,26 +28,26 @@
             <input class="form-control" type="hidden" id="userName" name="userName" value="@Model.UserName" />
 
             <div class="form-group">
-                <label>Repository Name</label>
+                <label>@LocalService.Get("Repository Name", currentUser.Lang)</label>
                 <input readonly class="form-control" value="@Model.RepositoryName" />
             </div>
             <div class="form-group">
-                <label for="parentName">Parent Folder</label>
+                <label for="parentName">@LocalService.Get("Parent Folder", currentUser.Lang)</label>
                 <input name="parentId" id="parentId" class="form-control" type="hidden" value="@Model.ParentId" />
                 <input readonly id="parentName" class="form-control" value="@Model.Path@Model.ParentName" />
             </div>
 
             <div class="form-group">
-                <label for="uploadFile">Select File</label>
+                <label for="uploadFile">@LocalService.Get("Select File", currentUser.Lang)</label>
                 <input type="file" class="form-control" id="uploadFile" name="file" />
             </div>
             <div class="form-group">
-                <label for="title">Title</label>
+                <label for="title">@LocalService.Get("Title", currentUser.Lang)</label>
                 <input name="title" id="title" class="form-control" />
             </div>
 
             <div class="form-group">
-                <label for="description">Description</label>
+                <label for="description">@LocalService.Get("Description", currentUser.Lang)</label>
                 <textarea rows="3" class="form-control" id="description" name="description"></textarea>
             </div>
 
@@ -61,8 +64,8 @@
             }
 
             @*<a asp-controller="Repos" asp-action="Explore" asp-route-repoId="@Model.RepositoryId" asp-route-folderId="@Model.ParentId" class="btn btn-secondary mr-1">Cancel</a>*@
-            <a href="/docs/upload/@Model.RepositoryId" class="btn btn-secondary mr-1">Cancel</a>
-            <a href="#" id="btnUpload" class="btn btn-primary mr-1">Upload file</a>
+        <a href="/docs/upload/@Model.RepositoryId" class="btn btn-secondary mr-1">@LocalService.Get("Close", currentUser.Lang)</a>
+            <a href="#" id="btnUpload" class="btn btn-primary mr-1">@LocalService.Get("Upload", currentUser.Lang)</a>
 
         </form>
     </div>

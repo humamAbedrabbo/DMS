@@ -15,8 +15,8 @@
 
 @if (currentUser != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Id)))
 {
-    <h3>Repository: @Repo.Name</h3>
-    <small class="text-secondary font-italic">created on @Repo.CreatedOn.ToString("dd-MM-yyyy") by @Repo.CreatedBy, last update on @Repo.UpdatedOn.ToString("dd-MM-yyyy hh:mm") by @Repo.UpdatedBy</small>
+    <h3> @LocalService.Get("Repository", currentUser.Lang): @Repo.Name</h3>
+    <small class="text-secondary font-italic"> @LocalService.Get("created on", currentUser.Lang) @Repo.CreatedOn.ToString("dd-MM-yyyy")  @LocalService.Get("by", currentUser.Lang) @Repo.CreatedBy,  @LocalService.Get("last update on", currentUser.Lang) @Repo.UpdatedOn.ToString("dd-MM-yyyy hh:mm")  @LocalService.Get("by", currentUser.Lang) @Repo.UpdatedBy</small>
 
     <div class="row">
         <div class="col-6">
@@ -26,11 +26,11 @@
                     <div class="card-text">@Repo.Description</div>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Storage: <span class="font-weight-bold">@Repo.Storage.ToString()</span></li>
+                    <li class="list-group-item"> @LocalService.Get("Storage", currentUser.Lang): <span class="font-weight-bold">@Repo.Storage.ToString()</span></li>
                 </ul>
                 <AuthorizeView Roles="Admin">
                     <div class="card-body">
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#id_AddFolder">Add Folder</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#id_AddFolder"> @LocalService.Get("Add Folder", currentUser.Lang)</button>
                     </div>
                 </AuthorizeView>
 
@@ -42,13 +42,13 @@
         <div class="col-6 d-flex flex-column flex-grow-1">
             <div class="card d-flex flex-grow-1 flex-column">
                 <div class="card-body">
-                    <div class="card-title"><h5>Meta Fields</h5></div>
+                    <div class="card-title"><h5> @LocalService.Get("Meta Fields", currentUser.Lang)</h5></div>
                     <AuthorizeView Roles="Admin">
                         <div class="mb-2">
                             <EditForm Context="test" Model="Item" OnValidSubmit="OnValidSetValue">
                                 <div class="form-inline">
                                     <div class="form-group mx-sm-3 mb-2">
-                                        <label for="id_name" class="sr-only">Field Name</label>
+                                        <label for="id_name" class="sr-only"> @LocalService.Get("Field Name", currentUser.Lang)</label>
                                         <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
                                             @if (Fields == null)
                                                 {
@@ -72,10 +72,10 @@
                                         </InputSelect>
                                     </div>
                                     <div class="form-group mb-2">
-                                        <label for="id_value" class="sr-only">Field Value</label>
-                                        <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
+                                        <label for="id_value" class="sr-only"> @LocalService.Get("Field Value", currentUser.Lang)</label>
+                                        <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder=" @LocalService.Get("Field Value", currentUser.Lang)"></InputText>
                                     </div>
-                                    <button type="submit" class="btn btn-success mx-2 mb-2">Set Value</button>
+                                    <button type="submit" class="btn btn-success mx-2 mb-2"> @LocalService.Get("Set Value", currentUser.Lang)</button>
                                 </div>
                             </EditForm>
                         </div>
@@ -110,7 +110,7 @@
         <div class="col-6 d-flex flex-column flex-grow-1">
             <div class="card d-flex flex-grow-1 flex-column">
                 <div class="card-body">
-                    <div class="card-title"><h5>Folders</h5></div>
+                    <div class="card-title"><h5> @LocalService.Get("Folders", currentUser.Lang)</h5></div>
                     @if (TreeItems != null)
                     {
                         <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
@@ -132,28 +132,28 @@
             <div class="modal-content">
                 <EditForm Model="FolderAddModel" OnValidSubmit="OnValidSubmitFolder">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="label_AddFolder">Add Folder</h5>
+                        <h5 class="modal-title" id="label_AddFolder"> @LocalService.Get("Add Folder", currentUser.Lang)</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="id_fld_name">Name</label>
+                            <label for="id_fld_name"> @LocalService.Get("Folder Name", currentUser.Lang)</label>
                             <InputText @bind-Value="FolderAddModel.Name" id="id_fld_name" class="form-control"></InputText>
                         </div>
                         <div class="form-group">
-                            <label for="id_fld_title">Title</label>
+                            <label for="id_fld_title"> @LocalService.Get("Title", currentUser.Lang)</label>
                             <InputText @bind-Value="FolderAddModel.Title" id="id_fld_title" class="form-control"></InputText>
                         </div>
                         <div class="form-group">
-                            <label for="id_fld_desc">Description</label>
+                            <label for="id_fld_desc"> @LocalService.Get("Description", currentUser.Lang)</label>
                             <InputTextArea @bind-Value="FolderAddModel.Description" id="id_fld_desc" class="form-control"></InputTextArea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"> @LocalService.Get("Close", currentUser.Lang)</button>
+                        <button type="submit" class="btn btn-primary"> @LocalService.Get("Save", currentUser.Lang)</button>
                     </div>
                 </EditForm>
 

@@ -1,21 +1,38 @@
 ﻿@inherits LayoutComponentBase
 @using Blazored.Toast.Configuration
 
+@using DAS.ViewModels
+@using DAS.Services
+@inject ICurrentUserService currentUserService
+
 <BlazoredToasts Position="ToastPosition.TopCenter"
                 Timeout="2"
                 SuccessIconClass="oi oi-check"
                 ErrorIconClass="oi oi-x" />
 
-<div class="sidebar">
-    <NavMenu />
-</div>
-
-<div class="main d-flex flex-column">
-    <div class="top-row px-4 auth bg-primary">
-        <LoginDisplay />
+@if (currentUser != null)
+{
+    <div class="sidebar">
+        <NavMenu />
     </div>
 
-    <div class="content px-4  d-flex flex-column flex-grow-1">
-        @Body
+    <div class="main d-flex flex-column">
+        <div class="top-row px-4 auth bg-primary">
+            <LoginDisplay />
+        </div>
+
+        <div class="content px-4  d-flex flex-column flex-grow-1">
+            @Body
+        </div>
     </div>
-</div>
+}
+
+@code
+{
+    private AppUser currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await currentUserService.GetCurrentUserAsync();
+    }
+}

@@ -15,13 +15,13 @@
 
 @if (currentUser != null && Repo != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Id)))
 {
-    <h3>Repository: @Repo.Name - Upload</h3>
+    <h3> @LocalService.Get("Repository", currentUser.Lang): @Repo.Name -  @LocalService.Get("Upload", currentUser.Lang)</h3>
 
     <div class="row d-flex flex-grow-1">
         <div class="col-4 d-flex flex-column flex-grow-1">
             <div class="card d-flex flex-grow-1 flex-column">
                 <div class="card-body">
-                    <div class="card-title"><h5>Folders</h5></div>
+                    <div class="card-title"><h5> @LocalService.Get("Folders", currentUser.Lang)</h5></div>
                     @if (TreeItems != null)
                     {
                         <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
@@ -37,7 +37,7 @@
         <div class="col-8 d-flex flex-column flex-grow-1 invisible">
             <div class="card">
                 <div class="card-header">
-                    Upload Document
+                    @LocalService.Get("Upload Document", currentUser.Lang)
                 </div>
                 <div class="card-body">
                     <EditForm Context="myForm" Model="UploadModel" OnValidSubmit="OnUpload">

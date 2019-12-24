@@ -1,5 +1,9 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+.uic-tree__icon {
+    float: right;
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }

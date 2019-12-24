@@ -15,8 +15,8 @@
 
 @if (currentUser != null && Doc != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Doc.RepositoryId)))
 {
-    <h3>Document: @Doc.Name</h3>
-    <small class="text-secondary font-italic">created on @Doc.CreatedOn.ToString("dd-MM-yyyy") by @Doc.CreatedBy, last update on @Doc.UpdatedOn.ToString("dd-MM-yyyy hh:mm") by @Doc.UpdatedBy</small>
+    <h3>@LocalService.Get("Document", currentUser.Lang): @Doc.Name</h3>
+    <small class="text-secondary font-italic">@LocalService.Get("created on", currentUser.Lang) @Doc.CreatedOn.ToString("dd-MM-yyyy")  @LocalService.Get("by", currentUser.Lang) @Doc.CreatedBy, @LocalService.Get("last update on", currentUser.Lang) @Doc.UpdatedOn.ToString("dd-MM-yyyy hh:mm") @LocalService.Get("by", currentUser.Lang) @Doc.UpdatedBy</small>
 
     <div class="row">
         <div class="col-6">
@@ -26,21 +26,21 @@
                     <div class="card-text">@Doc.Description</div>
                 </div>
                 <div class="card-body">
-                    <a class="btn btn-primary mr-1" href="Archive/DownloadDocument?id=@Id">Download</a>
+                    <a class="btn btn-primary mr-1" href="Archive/DownloadDocument?id=@Id"> @LocalService.Get("Download", currentUser.Lang)</a>
                     <AuthorizeView Roles="Admin, Archive">
                         @if (Doc.LastOperation == DocumentOperation.CheckedIn)
                         {
-                            <button type="button" class="btn btn-secondary mr-1" @onclick="Checkout">Check Out</button>
+                        <button type="button" class="btn btn-secondary mr-1" @onclick="Checkout"> @LocalService.Get("Check Out", currentUser.Lang)</button>
                         }
                         else if (Doc.LastOperation == DocumentOperation.CheckedOut)
                         {
-                            <a class="btn btn-secondary mr-1" href="repos/Checkin?id=@Doc.Id">Check In</a>
+                    <a class="btn btn-secondary mr-1" href="repos/Checkin?id=@Doc.Id"> @LocalService.Get("Check In", currentUser.Lang)</a>
 
                         }
                     </AuthorizeView>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">Repository:<span class="font-weight-bold"><a href="/repo/@Doc.RepositoryId">@Doc.Repository</a></span></li>
+                    <li class="list-group-item"> @LocalService.Get("Repository", currentUser.Lang):<span class="font-weight-bold"><a href="/repo/@Doc.RepositoryId">@Doc.Repository</a></span></li>
                     <li class="list-group-item">
                         Folder:<span class="font-weight-bold">
                             @if (Doc.ParentId.HasValue)
@@ -54,12 +54,12 @@
 
                         </span>
                     </li>
-                    <li class="list-group-item">Version:<span class="font-weight-bold text-primary">@Doc.Version</span></li>
-                    <li class="list-group-item">Content Type:<span class="font-weight-bold">@Doc.ContentType</span></li>
-                    <li class="list-group-item">Size:<span class="font-weight-bold">@Doc.Length bytes</span></li>
-                    <li class="list-group-item">Last Operation:<span class="font-weight-bold">@Doc.LastOperation.ToString()</span></li>
-                    <li class="list-group-item">Operation By:<span class="font-weight-bold">@Doc.OperationBy</span></li>
-                    <li class="list-group-item">Operation On:<span class="font-weight-bold">@Doc.OperationDate</span></li>
+                    <li class="list-group-item"> @LocalService.Get("Version", currentUser.Lang):<span class="font-weight-bold text-primary">@Doc.Version</span></li>
+                    <li class="list-group-item"> @LocalService.Get("Content Type", currentUser.Lang):<span class="font-weight-bold">@Doc.ContentType</span></li>
+                    <li class="list-group-item"> @LocalService.Get("Size", currentUser.Lang):<span class="font-weight-bold">@Doc.Length  @LocalService.Get("bytes", currentUser.Lang)</span></li>
+                    <li class="list-group-item"> @LocalService.Get("Last Operation", currentUser.Lang):<span class="font-weight-bold">@Doc.LastOperation.ToString()</span></li>
+                    <li class="list-group-item"> @LocalService.Get("Operation By", currentUser.Lang):<span class="font-weight-bold">@Doc.OperationBy</span></li>
+                    <li class="list-group-item"> @LocalService.Get("Operation On", currentUser.Lang):<span class="font-weight-bold">@Doc.OperationDate</span></li>
                 </ul>
             </div>
         </div>
@@ -68,13 +68,13 @@
         <div class="col-6 ">
             <div class="card mt-3 d-flex flex-grow-1 flex-column">
                 <div class="card-body">
-                    <div class="card-title"><h5>Meta Fields</h5></div>
+                    <div class="card-title"><h5> @LocalService.Get("Meta Fields", currentUser.Lang)</h5></div>
                     <AuthorizeView Roles="Admin">
                         <div class="mb-2">
                             <EditForm Context="test" Model="Item" OnValidSubmit="OnValidSetValue">
                                 <div class="form-inline">
                                     <div class="form-group mx-sm-3 mb-2">
-                                        <label for="id_name" class="sr-only">Field Name</label>
+                                        <label for="id_name" class="sr-only"> @LocalService.Get("Field Name", currentUser.Lang)</label>
                                         <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
                                             @if (Fields == null)
                                                 {
@@ -97,10 +97,10 @@
                                         </InputSelect>
                                     </div>
                                     <div class="form-group mb-2">
-                                        <label for="id_value" class="sr-only">Field Value</label>
-                                        <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
+                                        <label for="id_value" class="sr-only"> @LocalService.Get("Field Value", currentUser.Lang)</label>
+                                        <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder=" @LocalService.Get("Field Value", currentUser.Lang)"></InputText>
                                     </div>
-                                    <button type="submit" class="btn btn-success mx-2 mb-2">Set Value</button>
+                                    <button type="submit" class="btn btn-success mx-2 mb-2"> @LocalService.Get("Set Value", currentUser.Lang)</button>
                                 </div>
                             </EditForm>
                         </div>
@@ -135,17 +135,17 @@
         <div class="col-6 mt-3">
             <div class="card">
                 <div class="card-body">
-                    <div class="card-title">History</div>
+                    <div class="card-title"> @LocalService.Get("History", currentUser.Lang)</div>
                     <div class="row">
                         <div class="col-12">
                             <table class="table">
                                 <thead class="thead-dark">
                                     <tr>
                                         <th></th>
-                                        <th>Version</th>
-                                        <th>Operation</th>
-                                        <th>User</th>
-                                        <th>Date</th>
+                                        <th> @LocalService.Get("Version", currentUser.Lang)</th>
+                                        <th> @LocalService.Get("Operation", currentUser.Lang)</th>
+                                        <th> @LocalService.Get("User", currentUser.Lang)</th>
+                                        <th> @LocalService.Get("Date", currentUser.Lang)</th>
                                     </tr>
                                 </thead>
                                 <tbody>

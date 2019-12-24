@@ -7,138 +7,142 @@
 @inject IIdentityService identService
 @inject IListsService listsService
 @inject Microsoft.AspNetCore.Identity.UserManager<IdentityUser> userManager
+@inject ICurrentUserService currentUserService
 @inject IToastService toastService
 
-
-<AuthorizeView Roles="Admin">
-    <h3>Users</h3>
-    <div class="row mb-3">
-        <div class="col-6">
-            <div class="card">
-                <div class="card-body">
-                    <EditForm Context="formContext" Model="UserModel" OnValidSubmit="OnValidSubmit">
-                        <div class="form-inline">
-                            <div class="form-group mb-2">
-                                <label for="inputUserName" class="sr-only">User Name</label>
-                                <input @bind="UserModel.UserName" class="form-control" id="inputUserName" placeholder="User Name">
+@if(currentUser != null)
+{
+    <AuthorizeView Roles="Admin">
+        <h3> @LocalService.Get("Users", currentUser.Lang)</h3>
+        <div class="row mb-3">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-body">
+                        <EditForm Context="formContext" Model="UserModel" OnValidSubmit="OnValidSubmit">
+                            <div class="form-inline">
+                                <div class="form-group mb-2">
+                                    <label for="inputUserName" class="sr-only"> @LocalService.Get("User Name", currentUser.Lang)</label>
+                                    <input @bind="UserModel.UserName" class="form-control" id="inputUserName" placeholder="@LocalService.Get("User Name", currentUser.Lang)">
+                                </div>
+                                <div class="form-group mx-sm-3 mb-2">
+                                    <label for="inputEmail" class="sr-only"> @LocalService.Get("Email", currentUser.Lang)</label>
+                                    <input @bind="UserModel.Email" type="email" class="form-control" id="inputEmail" placeholder="@LocalService.Get("Email", currentUser.Lang)">
+                                </div>
+                                <button type="submit" class="btn btn-success mb-2"> @LocalService.Get("Add User", currentUser.Lang)</button>
                             </div>
-                            <div class="form-group mx-sm-3 mb-2">
-                                <label for="inputEmail" class="sr-only">Email</label>
-                                <input @bind="UserModel.Email" type="email" class="form-control" id="inputEmail" placeholder="Email">
-                            </div>
-                            <button type="submit" class="btn btn-success mb-2">Add User</button>
-                        </div>
-                    </EditForm>
+                        </EditForm>
 
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-6">
-            <div class="card">
-                <div class="card-body">
-                    @if (AppUsers == null)
-                    {
-                        <p>Loading...</p>
-                    }
-                    else
-                    {
-                        <table class="table">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>User Name</th>
-                                    <th>Admin</th>
-                                    <th>Archive</th>
-                                    <th>Public</th>
-                                    <th>Repositories</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var user in AppUsers)
-                                {
-                                    <tr class="@(user == CurrentUser ? "bg-info text-light" : "")">
-                                        <td>@user.UserName</td>
-                                        @if (user.IsAdmin)
-                                        {
-                                            <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_ADMIN))"><i class="oi oi-check"></i></a></td>
-                                        }
-                                        else
-                                        {
-                                            <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_ADMIN))"><i class="oi oi-x"></i></a></td>
-                                        }
-                                        @if (user.IsArchive)
-                                        {
-                                            <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_ARCHIVE))"><i class="oi oi-check"></i></a></td>
-                                        }
-                                        else
-                                        {
-                                            <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_ARCHIVE))"><i class="oi oi-x"></i></a></td>
-                                        }
-                                        @if (user.IsPublic)
-                                        {
-                                            <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_PUBLIC))"><i class="oi oi-check"></i></a></td>
-                                        }
-                                        else
-                                        {
-                                            <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_PUBLIC))"><i class="oi oi-x"></i></a></td>
-                                        }
-                                        <td>
-                                            <a class="btn-link" style="cursor:pointer;" @onclick="(() => SelectUser(user))"><i class="oi oi-box"></i></a>
-                                        </td>
+        <div class="row">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-body">
+                        @if (AppUsers == null)
+                        {
+                        <p> @LocalService.Get("Loading", currentUser.Lang)...</p>
+                        }
+                        else
+                        {
+                            <table class="table">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>@LocalService.Get("User Name", currentUser.Lang)</th>
+                                        <th>@LocalService.Get("Admin", currentUser.Lang)</th>
+                                        <th>@LocalService.Get("Archive", currentUser.Lang)</th>
+                                        <th>@LocalService.Get("Public", currentUser.Lang)</th>
+                                        <th>@LocalService.Get("Repositories", currentUser.Lang)</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in AppUsers)
+                                    {
+                                        <tr class="@(user == CurrentUser ? "bg-info text-light" : "")">
+                                            <td>@user.UserName</td>
+                                            @if (user.IsAdmin)
+                                            {
+                                                <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_ADMIN))"><i class="oi oi-check"></i></a></td>
+                                            }
+                                            else
+                                            {
+                                                <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_ADMIN))"><i class="oi oi-x"></i></a></td>
+                                            }
+                                            @if (user.IsArchive)
+                                            {
+                                                <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_ARCHIVE))"><i class="oi oi-check"></i></a></td>
+                                            }
+                                            else
+                                            {
+                                                <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_ARCHIVE))"><i class="oi oi-x"></i></a></td>
+                                            }
+                                            @if (user.IsPublic)
+                                            {
+                                                <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_PUBLIC))"><i class="oi oi-check"></i></a></td>
+                                            }
+                                            else
+                                            {
+                                                <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_PUBLIC))"><i class="oi oi-x"></i></a></td>
+                                            }
+                                            <td>
+                                                <a class="btn-link" style="cursor:pointer;" @onclick="(() => SelectUser(user))"><i class="oi oi-box"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-6">
-            @if (Repositories != null && Repositories.Count > 0 && CurrentUser != null)
-            {
-            <div class="card">
-                <div class="card-body">
-                    <div class="card-title">@CurrentUser.UserName Repositories</div>
-                    <EditForm Context="from" Model="CurrentUser" OnValidSubmit="OnAddRepo">
-                        <div class="form-inline">
-                            <div class="form-group mb-2">
-                                <label for="inputRepoToAdd" class="sr-only">Repository</label>
-                                <InputSelect @bind-Value="CurrentUser.RepoToAdd" class="form-control" id="inputRepoToAdd">
-                                    <option value=""> -- Select Repository -- </option>
-                                    @foreach (var item in Repositories.Where(x => !CurrentUser.Repositories.Contains(x.Key)))
-                                        {
-                                        <option value="@item.Key.ToString()">@item.Value</option>
-                                        }
-                                </InputSelect>
-                            </div>
-                            <button type="submit" class="btn btn-success mx-2 mb-2">Add</button>
+            <div class="col-6">
+                @if (Repositories != null && Repositories.Count > 0 && CurrentUser != null)
+                {
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-title">@CurrentUser.UserName @LocalService.Get("Repositories", currentUser.Lang)</div>
+                            <EditForm Context="from" Model="CurrentUser" OnValidSubmit="OnAddRepo">
+                                <div class="form-inline">
+                                    <div class="form-group mb-2">
+                                        <label for="inputRepoToAdd" class="sr-only">@LocalService.Get("Repository", currentUser.Lang)</label>
+                                        <InputSelect @bind-Value="CurrentUser.RepoToAdd" class="form-control" id="inputRepoToAdd">
+                                            <option value=""> -- @LocalService.Get("Select Repository", currentUser.Lang) -- </option>
+                                            @foreach (var item in Repositories.Where(x => !CurrentUser.Repositories.Contains(x.Key)))
+                                                    {
+                                                <option value="@item.Key.ToString()">@item.Value</option>
+                                                    }
+                                        </InputSelect>
+                                    </div>
+                                    <button type="submit" class="btn btn-success mx-2 mb-2">@LocalService.Get("Add", currentUser.Lang)</button>
+                                </div>
+                            </EditForm>
+                            <table class="table mt-2">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>@LocalService.Get("Repository", currentUser.Lang)</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var repoId in CurrentUser.Repositories)
+                                    {
+                                        <tr>
+                                            <td>@Repositories[repoId]</td>
+                                            <td><a @onclick="@(() => OnRemoveRepo(repoId))" class="btn-link text-danger" style="cursor: pointer;"><i class="oi oi-trash"></i></a></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
                         </div>
-                    </EditForm>
-                    <table class="table mt-2">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>Repository</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var repoId in CurrentUser.Repositories)
-                            {
-                                <tr>
-                                    <td>@Repositories[repoId]</td>
-                                    <td><a @onclick="@(() => OnRemoveRepo(repoId))" class="btn-link text-danger" style="cursor: pointer;"><i class="oi oi-trash"></i></a></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                    </div>
+                }
             </div>
-            }
         </div>
-    </div>
-</AuthorizeView>
+    </AuthorizeView>
+}
+
 
 
 @code {
@@ -150,6 +154,8 @@
     private Dictionary<int, string> Repositories { get; set; } = new Dictionary<int, string>();
 
     private AppUser CurrentUser { get; set; } = new AppUser();
+
+    private AppUser currentUser;
 
     public void SelectUser(AppUser user)
     {
@@ -263,6 +269,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        currentUser = await currentUserService.GetCurrentUserAsync();
         await LoadUsers().ConfigureAwait(false);
     }
 }

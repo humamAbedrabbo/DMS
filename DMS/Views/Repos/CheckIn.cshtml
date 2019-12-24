@@ -142,6 +142,12 @@
             }
 
             $("#btnCheckin").click(function () {
+                 $(this).attr("disabled", true);
+                window.onbeforeunload = function () {
+                    return UnloadMessage;
+                   //if we return nothing here (just calling return;) then there will be no pop-up question at all
+                   //return;
+                };
                 var $documentId = $("#documentId").val();
                 var $userName = $("#userName").val();
                 var $checkInKey = $("#checkInKey").val();
@@ -169,7 +175,8 @@
                         UploadFile($('#uploadFile')[0].files);
                     },
                     failure: function (errmsg) {
-                       alert(errmsg);
+                        alert(errmsg);
+                        $("#btnCheckin").removeAttr("disabled");
                     }
                 });
             });
@@ -206,6 +213,8 @@
                 },
                 failure: function (errmsg) {
                     alert(errmsg);
+                    $("#btnCheckin").removeAttr("disabled");
+
                 }
             });
         }
@@ -251,6 +260,10 @@
 
         function UploadComplete() {
             $('#toast').toast('show')
+            window.onbeforeunload = null;
+
+            $("#btnCheckin").removeAttr("disabled");
+
             var documentId = $("#documentId").val();
             window.location.href = "/doc/details/" + documentId;
             //$("#documentId").val('');

@@ -9,6 +9,7 @@
 @inject Microsoft.AspNetCore.Identity.UserManager<IdentityUser> userManager
 @inject ICurrentUserService currentUserService
 @inject IToastService toastService
+@inject Microsoft.Extensions.Caching.Memory.IMemoryCache mem
 
 @if(currentUser != null)
 {
@@ -183,6 +184,7 @@
                 {
 
                     await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("Lang", lang));
+                    mem.Remove($"AppUser_{CurrentUser.UserName}");
                     await LoadUsers(CurrentUser.Id);
                 }
                 else
@@ -190,6 +192,7 @@
                     var claim = claims.FirstOrDefault(x => x.Type == "Lang");
 
                     await userManager.ReplaceClaimAsync(user, claim, new System.Security.Claims.Claim("Lang", lang));
+                    mem.Remove($"AppUser_{CurrentUser.UserName}");
                     await LoadUsers(CurrentUser.Id);
                 }
             }
@@ -208,6 +211,7 @@
                 {
 
                     await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("RepositoryId", CurrentUser.RepoToAdd));
+                    mem.Remove($"AppUser_{CurrentUser.UserName}");
                     await LoadUsers(CurrentUser.Id);
                 }
             }
@@ -226,6 +230,7 @@
                 {
 
                     await userManager.RemoveClaimAsync(user, new System.Security.Claims.Claim("RepositoryId", repoId.ToString()));
+                    mem.Remove($"AppUser_{CurrentUser.UserName}");
                     await LoadUsers(CurrentUser.Id);
                 }
             }

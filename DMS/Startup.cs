@@ -34,6 +34,9 @@ namespace DAS
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddMemoryCache();
+
             services.AddDbContext<DasContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
@@ -80,6 +83,8 @@ namespace DAS
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            
 
             //app.UseHttpsRedirection();
             app.UseStaticFiles();

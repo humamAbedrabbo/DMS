@@ -20,5 +20,6 @@ namespace DAS.ViewModels
         public int? ParentId { get; set; }
         public StorageType Storage { get; set; }
         public string UserName { get; set; }
+        public Dictionary<string, string> Meta { get; set; } = new Dictionary<string, string>();
     }
 }

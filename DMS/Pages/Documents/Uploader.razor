@@ -1,4 +1,5 @@
 ﻿@page "/docs/upload/{Id:int}/{FolderId}"
+@page "/docs/upload/{Id:int}"
 @attribute [Authorize(Roles = "Admin, Archive")]
 
 @using MW.Blazor
@@ -63,6 +64,22 @@
                         <label for="description"> @LocalService.Get("Description", currentUser.Lang)</label>
                         <textarea rows="3" class="form-control" @bind="documentModel.Description"></textarea>
                     </div>
+
+                    @if (documentModel != null && documentModel.Meta != null && MetaFields != null)
+                    {
+                        foreach (var meta in documentModel.Meta.OrderBy(x => x.Key))
+                        {
+                            var field = MetaFields.FirstOrDefault(x => x.Name == meta.Key);
+                            if (field != null)
+                            {
+                                <div class="form-group">
+                                    <label for="meta_@field.Id">@field.Title</label>
+                                    <input @bind="documentModel.Meta[meta.Key]" class="form-control" />
+                                </div>
+                            }
+                        }
+                    }
+
                     <div class="form-group">
                         <div class="progress">
                             <div class="progress-bar" role="progressbar" style="width: @(progress)%;" aria-valuenow="@(value)" aria-valuemin="0" aria-valuemax="100"> @($"{progress:00}")%</div>
@@ -92,6 +109,7 @@
     private RepoDetailModel Repo { get; set; } = new RepoDetailModel();
     private AppUser currentUser;
     private IEnumerable<TreeModel> TreeItems;
+    private IEnumerable<MetaField> MetaFields;
 
     IList<TreeModel> ExpandedNodes = new List<TreeModel>();
 
@@ -129,7 +147,6 @@
         Output = string.Empty;
         progress = 0;
         chunkNo = 1;
-        long bytesDone = 0;
         long remainingBytes = 0;
 
         this.StateHasChanged();
@@ -246,6 +263,7 @@
     protected override async Task OnParametersSetAsync()
     {
         currentUser = await currentUserService.GetCurrentUserAsync();
+        MetaFields = await listsService.GetMetaFieldsList();
         Repo = await listsService.GetRepositoryById(Id.ToString());
         // TreeItems = await listsService.GetRepositoryFoldersTree(Repo.Id);
         CreateUploadModel();
@@ -264,6 +282,28 @@
         documentModel.ParentId = selectedNode?.Id;
         documentModel.Storage = Repo.Storage;
         documentModel.UserName = currentUser.UserName;
+        SetMeta();
+    }
+
+    protected void SetMeta()
+    {
+        documentModel.Meta.Clear();
+        if(Repo != null && Repo.Meta != null)
+        {
+            foreach (var item in Repo.Meta)
+            {
+                documentModel.Meta[item.Key] = item.Value;
+            }
+            if(selectedNode != null && selectedNode.Meta != null)
+            {
+                foreach (var item in selectedNode.Meta)
+                {
+                    documentModel.Meta[item.Key] = item.Value;
+                }
+            }
+        }
+
+
     }
 
     protected override void OnInitialized()
@@ -288,6 +328,7 @@
                         if (result != null)
                         {
                             selectedNode = result;
+                            SetMeta();
                             break;
                         }
                     }

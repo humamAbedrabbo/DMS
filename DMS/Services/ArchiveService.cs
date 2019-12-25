@@ -1154,7 +1154,7 @@ namespace DAS.Services
                 OperationBy = uploadDocument.UserName,
                 OperationDate = dt,
                 Name = uploadDocument.Name,
-                Title = uploadDocument.Title,
+                Title = uploadDocument.Title ?? uploadDocument.Name,
                 ContentType = uploadDocument.ContentType,
                 Length = uploadDocument.Size,
                 Version = 1,
@@ -1178,6 +1178,23 @@ namespace DAS.Services
             try
             {
                 context.Documents.Add(doc);
+                
+
+                if(uploadDocument.Meta != null)
+                {
+                    var fields = await listsService.GetMetaFieldsList();
+                    doc.MetaData = new List<DocumentMeta>();
+                    foreach (var meta in uploadDocument.Meta)
+                    {
+                        doc.MetaData.Add(new DocumentMeta
+                        {
+                            Document = doc,
+                            FieldId = fields.First(x => x.Name == meta.Key).Id,
+                            Value = meta.Value
+                        });
+                    }
+                }
+
                 await context.SaveChangesAsync();
 
                 result.IsOk = true;

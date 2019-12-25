@@ -112,11 +112,17 @@ namespace DAS.Services
 
         public async Task<IEnumerable<TreeModel>> GetRepositoryFoldersTree(int repoId)
         {
-            var nodes = await context.Folders
-                .Include(x => x.MetaData)
+            var list = await context.Folders
+                .Include(x => x.MetaData).ThenInclude(y => y.Field)
                 .Where(x => x.RepositoryId == repoId)
                 .OrderBy(x => x.ParentId)
-                .Select(x => new TreeModel
+                .AsNoTracking()
+                .ToListAsync();
+
+            var nodes = new List<TreeModel>();
+            foreach (var x in list)
+            {
+                var model = new TreeModel
                 {
                     Id = x.Id,
                     RepositoryId = x.RepositoryId,
@@ -124,9 +130,14 @@ namespace DAS.Services
                     Title = x.Title,
                     Type = TreeNodeType.Folder,
                     ParentId = x.ParentId
-                })
-                .AsNoTracking()
-                .ToListAsync();
+
+                };
+                if(x.MetaData != null)
+                {
+                    model.Meta = x.MetaData.ToDictionary(a => a.Field.Name, b => b.Value);
+                }
+                nodes.Add(model);
+            }
 
             foreach (var node in nodes)
             {
@@ -328,10 +339,11 @@ namespace DAS.Services
                     CreatedBy = folder.CreatedBy,
                     CreatedOn = folder.CreatedOn,
                     UpdatedBy = folder.UpdatedBy,
-                    UpdatedOn = folder.UpdatedOn,
-                    Meta = folder.MetaData?.ToDictionary(k => k.Field.Name, v => v.Value)
+                    UpdatedOn = folder.UpdatedOn
+                    
                 };
 
+                dModel.Meta = folder.MetaData?.ToDictionary(k => k.Field.Name, v => v.Value);
                 return dModel;
             }
             catch (Exception ex)

@@ -231,7 +231,7 @@ namespace DAS.Services
 
                 return dModel;
             }
-            catch (Exception ex)
+            catch 
             {
 
                 throw;

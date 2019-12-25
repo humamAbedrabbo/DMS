@@ -1005,7 +1005,7 @@ namespace DAS.Controllers
                     var dbChunkIds = await context.Chunks
                         .Where(x => x.DocumentId == document.Id && x.Version == (version.HasValue ? version : document.Version))
                         .OrderBy(x => x.SortId)
-                        .Select(x => new { Id = x.Id, SortId = x.SortId })
+                        .Select(x => new { x.Id, x.SortId })
                         .ToListAsync()
                         .ConfigureAwait(false);
 

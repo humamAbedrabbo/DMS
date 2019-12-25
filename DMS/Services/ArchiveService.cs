@@ -356,7 +356,7 @@ namespace DAS.Services
 
 
             }
-            catch (Exception ex)
+            catch 
             {
                 throw;
             }
@@ -1221,12 +1221,14 @@ namespace DAS.Services
         {
             string fullFileName = string.Empty;
             DirectoryInfo uploadDirectory = null;
-            UploadDocumentChunkResultViewModel result = new UploadDocumentChunkResultViewModel();
-            result.DocumentId = uploadChunk.DocumentId;
-            result.Version = uploadChunk.Version;
-            
+            UploadDocumentChunkResultViewModel result = new UploadDocumentChunkResultViewModel
+            {
+                DocumentId = uploadChunk.DocumentId,
+                Version = uploadChunk.Version
+            };
+
             // Unspecified Document
-            if(uploadChunk.DocumentId == 0)
+            if (uploadChunk.DocumentId == 0)
             {
                 result.IsOk = false;
                 result.ErrorMessage = "Undefined document";
@@ -1245,12 +1247,14 @@ namespace DAS.Services
             {
                 if(uploadChunk.Storage == StorageType.Database)
                 {
-                    var chunk = new Chunk();
-                    chunk.DocumentId = uploadChunk.DocumentId;
-                    chunk.Version = uploadChunk.Version;
-                    chunk.Contents = uploadChunk.Bytes;
-                    chunk.Length = uploadChunk.Bytes.Length;
-                    chunk.SortId = uploadChunk.ChunkNo;
+                    var chunk = new Chunk
+                    {
+                        DocumentId = uploadChunk.DocumentId,
+                        Version = uploadChunk.Version,
+                        Contents = uploadChunk.Bytes,
+                        Length = uploadChunk.Bytes.Length,
+                        SortId = uploadChunk.ChunkNo
+                    };
 
                     context.Chunks.Add(chunk);
                     await context.SaveChangesAsync();

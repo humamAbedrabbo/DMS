@@ -74,7 +74,7 @@ namespace DAS.Utils
                                     fileChunk.CopyTo(FS);
                                 }
                             }
-                            catch (IOException ex)
+                            catch 
                             {
                                 // handle                                
                             }

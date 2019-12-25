@@ -98,7 +98,7 @@ namespace DAS.Services
                 await context.SaveChangesAsync().ConfigureAwait(false);
 
             }
-            catch (Exception ex)
+            catch 
             {
                 throw;
             }

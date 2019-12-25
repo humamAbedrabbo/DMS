@@ -138,7 +138,7 @@
             toastService.ShowSuccess($"Repository '{Repo.Name}' updated successfully");
             navMgr.NavigateTo("repos");
         }
-        catch (Exception ex)
+        catch 
         {
             toastService.ShowError($"Failed to update repository '{Repo.Name}'");
         }

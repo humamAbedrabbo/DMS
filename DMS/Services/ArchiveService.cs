@@ -1184,7 +1184,10 @@ namespace DAS.Services
                 result.ErrorMessage = string.Empty;
                 result.DocumentId = doc.Id;
                 result.Version = doc.Version;
-                result.Path = Path.Combine(repo.Path, repo.Id.ToString(),doc.Id.ToString(), doc.Version.ToString());
+                if(uploadDocument.Storage == StorageType.Directory)
+                {
+                    result.Path = Path.Combine(repo.Path, repo.Id.ToString(), doc.Id.ToString(), doc.Version.ToString());
+                }
             }
             catch(Exception ex)
             {

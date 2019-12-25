@@ -100,10 +100,10 @@
 
     private TreeModel selectedNode;
 
-    private async Task OnUpload()
+    private Task OnUpload()
     {
         //await JSRuntime.InvokeVoidAsync("btnUpload");
-
+        return Task.CompletedTask;
     }
 
     protected override async Task OnParametersSetAsync()

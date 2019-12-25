@@ -27,7 +27,8 @@
                 </div>
                 <div class="card-body">
                     <AuthorizeView Roles="Admin, Archive">
-                        <a href="/repos/upload?repoId=@CurrentFolder.RepositoryId&folderId=@CurrentFolder.Id" class="btn btn-secondary"> @LocalService.Get("Upload", currentUser.Lang)</a>
+                        @*<a href="/repos/upload?repoId=@CurrentFolder.RepositoryId&folderId=@CurrentFolder.Id" class="btn btn-secondary"> @LocalService.Get("Upload", currentUser.Lang)</a>*@
+                        <a href="/docs/upload/@CurrentFolder.RepositoryId/@CurrentFolder.Id" class="btn btn-secondary"> @LocalService.Get("Upload", currentUser.Lang)</a>
                     </AuthorizeView>
                     <AuthorizeView Roles="Admin">
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#id_AddFolder"> @LocalService.Get("Add Folder", currentUser.Lang)</button>

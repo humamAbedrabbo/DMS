@@ -1,4 +1,4 @@
-﻿@page "/docs/upload/{Id:int}"
+﻿@page "/docs/upload/{Id:int}/{FolderId}"
 @attribute [Authorize(Roles = "Admin, Archive")]
 
 @using MW.Blazor
@@ -65,7 +65,7 @@
                     </div>
                     <div class="form-group">
                         <div class="progress">
-                            <div class="progress-bar" role="progressbar" style="width: @(progress)%;" aria-valuenow="@(value)" aria-valuemin="0" aria-valuemax="100"> @(progress)%</div>
+                            <div class="progress-bar" role="progressbar" style="width: @(progress)%;" aria-valuenow="@(value)" aria-valuemin="0" aria-valuemax="100"> @($"{progress:00}")%</div>
                         </div>
                         @*<progress max="@max" value="@value" />*@
                         <br />
@@ -85,6 +85,9 @@
 
     [Parameter]
     public int Id { get; set; }
+
+    [Parameter]
+    public string FolderId { get; set; }
 
     private RepoDetailModel Repo { get; set; } = new RepoDetailModel();
     private AppUser currentUser;
@@ -126,11 +129,20 @@
         Output = string.Empty;
         progress = 0;
         chunkNo = 1;
+        long bytesDone = 0;
+        long remainingBytes = 0;
 
         this.StateHasChanged();
         var nl = Environment.NewLine;
         var files = (await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync()).ToList();
+        if(files == null || files.Count == 0)
+        {
+            toastService.ShowError("Please select a file to upload");
+            return;
+        }
+
         var file = files.FirstOrDefault();
+
 
         var fileInfo = await file.ReadFileInfoAsync();
         max += fileInfo.Size;
@@ -145,8 +157,8 @@
 
         if(!uploadDocResult.IsOk)
         {
-            toastService.ShowError(uploadDocResult.ErrorMessage);
             this.StateHasChanged();
+            toastService.ShowError(uploadDocResult.ErrorMessage);
             return;
         }
 
@@ -163,6 +175,9 @@
         Output += $"{nameof(IFileInfo)}.{nameof(fileInfo.LastModifiedDate)}: {fileInfo.LastModifiedDate?.ToString() ?? "(N/A)"}{nl}";
         Output += $"Reading file...";
 
+        if (fileInfo.Size < BufferSize)
+            BufferSize = (int)fileInfo.Size;
+
 
         this.StateHasChanged();
         Console.WriteLine(Output);
@@ -170,6 +185,7 @@
         using (var fs = await file.OpenReadAsync())
         {
             var buffer = new byte[BufferSize];
+            remainingBytes = fileInfo.Size;
             int count;
             var lastAnnounce = 0m;
             while ((count = await fs.ReadAsync(buffer, 0, buffer.Length)) != 0)
@@ -179,7 +195,7 @@
                 chunk.DocumentId = documentModel.DocumentId;
                 chunk.Version = documentModel.Version;
                 chunk.ChunkNo = chunkNo;
-                chunk.ChunkSize = buffer.Length;
+                chunk.ChunkSize = count;
                 chunk.RepositoryId = documentModel.RepositoryId;
                 chunk.Storage = documentModel.Storage;
                 chunk.Path = uploadDocResult.Path;
@@ -202,6 +218,13 @@
 
                 chunkNo++;
                 value += count;
+
+                if(fileInfo.Size - value < BufferSize)
+                {
+                    BufferSize = (int) (fileInfo.Size - value);
+                    buffer = new byte[BufferSize];
+                }
+
                 progress = ((decimal)fs.Position * 100) / fs.Length;
                 if (progress > (lastAnnounce + 10))
                 {
@@ -215,7 +238,7 @@
             stopwatch.Stop();
             Output += $"Done reading file {fileInfo.Name} - {fs.Length} bytes in {stopwatch.ElapsedMilliseconds}ms.{nl}.";
             toastService.ShowSuccess($"Uploaded document {fileInfo.Name} successfully!");
-            await ClearFile();
+            await OnParametersSetAsync();
         }
         this.StateHasChanged();
     }
@@ -229,6 +252,8 @@
 
         await LoadTree();
     }
+
+
 
     protected void CreateUploadModel()
     {
@@ -250,6 +275,48 @@
     private async Task LoadTree()
     {
         TreeItems = await listsService.GetRepositoryFoldersTree(Id);
+        if(TreeItems != null)
+        {
+            if(!string.IsNullOrEmpty(FolderId))
+            {
+                if (int.TryParse(FolderId, out int selectedFolderId))
+                {
+                    TreeModel result = null;
+                    foreach (var item in TreeItems)
+                    {
+                        result = SearchFolder(item, selectedFolderId);
+                        if (result != null)
+                        {
+                            selectedNode = result;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    private TreeModel SearchFolder(TreeModel parent, int fid)
+    {
+        TreeModel result = null;
+        if(parent.Id == fid)
+        {
+            return parent;
+        }
+        if (parent.Childs != null)
+        {
+            foreach (var item in parent.Childs)
+            {
+                result = SearchFolder(item, fid);
+                if(result != null)
+                {
+                    return result;
+                }
+            }
+
+        }
+        return result;
     }
 }
 

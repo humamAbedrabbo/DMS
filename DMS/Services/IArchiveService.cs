@@ -13,6 +13,8 @@ namespace DAS.Services
         Task UpdateDocument(int? id, DocumentUpdateModel model);
         Task UpdateFolder(int? id, FolderUpdateModel model);
         Task<bool> UploadChunk(ChunkAddModel model);
+        Task<UploadDocumentResultViewModel> UploadDocument(UploadDocumentViewModel uploadDocument);
+        Task<UploadDocumentChunkResultViewModel> UploadDocumentChunk(UploadDocumentChunkViewModel uploadChunk);
         Task UploadThumbnail(DocumentThumbnail model);
     }
 }

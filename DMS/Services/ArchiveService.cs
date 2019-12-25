@@ -16,10 +16,12 @@ namespace DAS.Services
     public class ArchiveService : IArchiveService
     {
         private readonly DasContext context;
+        private readonly IListsService listsService;
 
-        public ArchiveService(DasContext context)
+        public ArchiveService(DasContext context, IListsService listsService)
         {
             this.context = context;
+            this.listsService = listsService;
         }
 
         public async Task<FolderDetailModel> AddFolder(FolderAddModel model)
@@ -1095,6 +1097,232 @@ namespace DAS.Services
             {
                 throw;
             }
+        }
+
+        public async Task<UploadDocumentResultViewModel> UploadDocument(UploadDocumentViewModel uploadDocument)
+        {
+            UploadDocumentResultViewModel result = new UploadDocumentResultViewModel();
+
+            Document doc = null;
+            DateTime dt = DateTime.Now;
+
+            FolderDetailModel folder = null;
+            RepoDetailModel repo = await listsService.GetRepositoryById(uploadDocument.RepositoryId.ToString());
+            
+            // Repository Not Found
+            if(repo == null)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "Repository not found";
+                result.DocumentId = uploadDocument.DocumentId;
+                result.Version = uploadDocument.Version;
+
+                return result;
+            }
+
+            if(uploadDocument.ParentId.HasValue)
+            {
+                folder = await listsService.GetFolderById(uploadDocument.ParentId);
+
+                // Folder Not Found
+                if(folder == null)
+                {
+                    result.IsOk = false;
+                    result.ErrorMessage = "Parent folder not found";
+                    result.DocumentId = uploadDocument.DocumentId;
+                    result.Version = uploadDocument.Version;
+
+                    return result;
+                }
+
+                if(folder.RepositoryId != repo.Id)
+                {
+                    result.IsOk = false;
+                    result.ErrorMessage = "Parent folder not found in repository";
+                    result.DocumentId = uploadDocument.DocumentId;
+                    result.Version = uploadDocument.Version;
+
+                    return result;
+                }
+            }
+
+            doc = new Document
+            {
+                RepositoryId = repo.Id,
+                ParentId = folder?.Id,
+                LastOperation = DocumentOperation.CheckedIn,
+                OperationBy = uploadDocument.UserName,
+                OperationDate = dt,
+                Name = uploadDocument.Name,
+                Title = uploadDocument.Title,
+                ContentType = uploadDocument.ContentType,
+                Length = uploadDocument.Size,
+                Version = 1,
+                Description = uploadDocument.Description,
+                CreatedBy = uploadDocument.UserName,
+                CreatedOn = dt,
+                UpdatedBy = uploadDocument.UserName,
+                UpdatedOn = dt
+            };
+
+            doc.History = new List<DocumentHistory>();
+            doc.History.Add(new DocumentHistory
+            {
+                Document = doc,
+                Version = doc.Version,
+                Operation = DocumentOperation.CheckedIn,
+                OperationBy = uploadDocument.UserName,
+                OperationOn = dt
+            });
+
+            try
+            {
+                context.Documents.Add(doc);
+                await context.SaveChangesAsync();
+
+                result.IsOk = true;
+                result.ErrorMessage = string.Empty;
+                result.DocumentId = doc.Id;
+                result.Version = doc.Version;
+                result.Path = Path.Combine(repo.Path, repo.Id.ToString(),doc.Id.ToString(), doc.Version.ToString());
+            }
+            catch(Exception ex)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "Failed to upload document";
+
+                return result;
+            }
+
+            return result;
+        }
+
+        public async Task<UploadDocumentChunkResultViewModel> UploadDocumentChunk(UploadDocumentChunkViewModel uploadChunk)
+        {
+            string fullFileName = string.Empty;
+            DirectoryInfo uploadDirectory = null;
+            UploadDocumentChunkResultViewModel result = new UploadDocumentChunkResultViewModel();
+            result.DocumentId = uploadChunk.DocumentId;
+            result.Version = uploadChunk.Version;
+            
+            // Unspecified Document
+            if(uploadChunk.DocumentId == 0)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "Undefined document";
+                return result;
+            }
+
+            // No contents, bytes array is null
+            if(uploadChunk.Bytes == null)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "No contents found to upload";
+                return result;
+            }
+
+            try
+            {
+                if(uploadChunk.Storage == StorageType.Database)
+                {
+                    var chunk = new Chunk();
+                    chunk.DocumentId = uploadChunk.DocumentId;
+                    chunk.Version = uploadChunk.Version;
+                    chunk.Contents = uploadChunk.Bytes;
+                    chunk.Length = uploadChunk.Bytes.Length;
+                    chunk.SortId = uploadChunk.ChunkNo;
+
+                    context.Chunks.Add(chunk);
+                    await context.SaveChangesAsync();
+                    result.Id = chunk.Id;    
+                }
+                else
+                {
+                    // Upload chunk to physical directory and append bytes to file
+                    uploadDirectory = Directory.CreateDirectory(uploadChunk.Path);
+                    fullFileName = Path.Combine(uploadDirectory.FullName, uploadChunk.FileName);
+                    using(var fs = new FileStream(fullFileName, FileMode.Append))
+                    {
+                        await fs.WriteAsync(uploadChunk.Bytes, 0, uploadChunk.Bytes.Length);
+                    }
+                }
+
+                result.IsOk = true;
+                result.ErrorMessage = string.Empty;
+
+                return result;
+            }
+            catch(Exception ex)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = $"Failed to load chunk {uploadChunk.ChunkNo}";
+            }
+
+            if(!result.IsOk)
+            {
+                // Delete and rollback
+                try
+                {
+                    var doc = await context.Documents
+                        .Where(x => x.Id == uploadChunk.DocumentId)
+                        .FirstOrDefaultAsync();
+
+                    if(doc.Version == 1)
+                    {
+                        doc.IsDeleted = true;
+                        doc.UpdatedOn = DateTime.Now;
+                        doc.UpdatedBy = uploadChunk.UserName;
+                        await context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        doc.Version = doc.Version - 1;
+                        doc.UpdatedOn = DateTime.Now;
+                        doc.UpdatedBy = uploadChunk.UserName;
+                        await context.SaveChangesAsync();
+
+                        await context.Database.ExecuteSqlRawAsync($"DELETE FROM Chunks WHERE DocumentId = {uploadChunk.DocumentId} AND Version = {uploadChunk.Version};");
+                        var resetHistory = new DocumentHistory
+                        {
+                            DocumentId = uploadChunk.DocumentId,
+                            Version = uploadChunk.Version,
+                            Operation = DocumentOperation.Reset,
+                            OperationBy = uploadChunk.UserName,
+                            OperationOn = DateTime.Now
+                        };
+
+                        var checkInHistory = new DocumentHistory
+                        {
+                            DocumentId = uploadChunk.DocumentId,
+                            Version = uploadChunk.Version - 1,
+                            Operation = DocumentOperation.CheckedIn,
+                            OperationBy = uploadChunk.UserName,
+                            OperationOn = DateTime.Now
+                        };
+
+                        context.Histories.Add(resetHistory);
+                        context.Histories.Add(checkInHistory);
+                        await context.SaveChangesAsync();
+
+                        
+                        if(!string.IsNullOrEmpty(fullFileName) && File.Exists(fullFileName))
+                        {
+                            FileInfo fi = new FileInfo(fullFileName);
+                            string destFile = Path.Combine(uploadDirectory.FullName, $"DELETED_DOC_{uploadChunk.DocumentId}_V_{uploadChunk.Version}_{Guid.NewGuid().ToString("D")}.{fi.Extension}");
+                            File.Move(fullFileName, destFile);
+                        }
+                    }
+
+                }
+                catch(Exception ex)
+                {
+                    result.IsOk = false;
+                    result.ErrorMessage = $"Rollback error! {result.ErrorMessage}";
+                    return result;
+                }
+            }
+
+            return result;
         }
     }
 }

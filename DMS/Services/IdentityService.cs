@@ -40,6 +40,8 @@ namespace DAS.Services
                     .Where(x => x.Type == "Lang")
                     .Select(x => x.Value)
                     .FirstOrDefault();
+                if (user.Lang == null)
+                    user.Lang = "en";
 
                 users.Add(user);
             }
@@ -58,6 +60,7 @@ namespace DAS.Services
             var result = await um.CreateAsync(user, password).ConfigureAwait(false);
             if (result.Succeeded)
             {
+                await um.AddClaimAsync(user, new System.Security.Claims.Claim("Lang", "en"));
                 return user;
             }
             else
@@ -132,6 +135,9 @@ namespace DAS.Services
                     .Where(x => x.Type == "Lang")
                     .Select(x => x.Value)
                     .FirstOrDefault();
+
+                if (appUser.Lang == null)
+                    appUser.Lang = "en";
 
                 return appUser;
             }

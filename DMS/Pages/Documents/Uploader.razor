@@ -1,0 +1,255 @@
+﻿@page "/docs/upload/{Id:int}"
+@attribute [Authorize(Roles = "Admin, Archive")]
+
+@using MW.Blazor
+@using DAS.Models
+@using DAS.ViewModels
+@using DAS.Services
+@using Blazor.FileReader
+@using System.IO;
+@using System.Diagnostics
+
+@inject IFileReaderService fileReaderService
+
+@inject IAdminService adminService
+@inject IListsService listsService
+@inject IArchiveService arcService
+@inject ICurrentUserService currentUserService
+@inject IToastService toastService
+@inject IJSRuntime JSRuntime;
+
+@if (currentUser != null && Repo != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Id)))
+{
+    <h3> @LocalService.Get("Repository", currentUser.Lang): @Repo.Name -  @LocalService.Get("Upload", currentUser.Lang)</h3>
+
+    <div class="row d-flex flex-grow-1">
+        <div class="col-4 d-flex flex-column flex-grow-1">
+            <div class="card d-flex flex-grow-1 flex-column">
+                <div class="card-body">
+                    <div class="card-title"><h5> @LocalService.Get("Folders", currentUser.Lang)</h5></div>
+                    @if (TreeItems != null)
+                    {
+                        <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
+                            <TitleTemplate>
+                                <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
+                                @context.Name
+                            </TitleTemplate>
+                        </Tree>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-8 d-flex flex-column flex-grow-1">
+            <div class="card">
+                <div class="card-header">
+                    @LocalService.Get("Upload Document", currentUser.Lang)
+                </div>
+                <div class="card-body">
+
+                    <div class="form-group">
+                        <label for="parentName"> @LocalService.Get("Parent Folder", currentUser.Lang)</label>
+                        <input readonly id="parentName" class="form-control" value="@selectedNode?.Name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="uploadFile"> @LocalService.Get("Select File", currentUser.Lang)</label>
+                        <input type="file" @ref=inputElement class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="title"> @LocalService.Get("Title", currentUser.Lang)</label>
+                        <input @bind="documentModel.Title" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description"> @LocalService.Get("Description", currentUser.Lang)</label>
+                        <textarea rows="3" class="form-control" @bind="documentModel.Description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: @(progress)%;" aria-valuenow="@(value)" aria-valuemin="0" aria-valuemax="100"> @(progress)%</div>
+                        </div>
+                        @*<progress max="@max" value="@value" />*@
+                        <br />
+                        <textarea style="max-width: 100%;" cols="50" rows="20">@Output</textarea>
+                    </div>
+                    <button @onclick=ReadFile class="btn btn-primary"> @LocalService.Get("Upload Document", currentUser.Lang)</button>
+                    <button @onclick=ClearFile class="btn btn-primary"> @LocalService.Get("Reset", currentUser.Lang)</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private RepoDetailModel Repo { get; set; } = new RepoDetailModel();
+    private AppUser currentUser;
+    private IEnumerable<TreeModel> TreeItems;
+
+    IList<TreeModel> ExpandedNodes = new List<TreeModel>();
+
+    private TreeModel selectedNode;
+
+    private UploadDocumentViewModel documentModel = new UploadDocumentViewModel();
+
+    [Parameter]
+    public int BufferSize { get; set; } = 20480;
+
+    public long max;
+    public long value;
+    public decimal progress;
+    public int chunkNo = 1;
+    ElementReference inputElement;
+
+    string Output { get; set; }
+
+    public async Task ClearFile()
+    {
+        await fileReaderService.CreateReference(inputElement).ClearValue();
+        max = 0;
+        value = 0;
+        Output = string.Empty;
+        progress = 0;
+        chunkNo = 1;
+        CreateUploadModel();
+
+    }
+
+    public async Task ReadFile()
+    {
+        max = 0;
+        value = 0;
+        Output = string.Empty;
+        progress = 0;
+        chunkNo = 1;
+
+        this.StateHasChanged();
+        var nl = Environment.NewLine;
+        var files = (await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync()).ToList();
+        var file = files.FirstOrDefault();
+
+        var fileInfo = await file.ReadFileInfoAsync();
+        max += fileInfo.Size;
+
+        // Upload the document first
+        documentModel.ParentId = selectedNode?.Id;
+        documentModel.Name = fileInfo.Name;
+        documentModel.ContentType = fileInfo.Type;
+        documentModel.Size = fileInfo.Size;
+
+        var uploadDocResult = await arcService.UploadDocument(documentModel);
+
+        if(!uploadDocResult.IsOk)
+        {
+            toastService.ShowError(uploadDocResult.ErrorMessage);
+            this.StateHasChanged();
+            return;
+        }
+
+        documentModel.DocumentId = uploadDocResult.DocumentId;
+        documentModel.Version = uploadDocResult.Version;
+
+        // Start uploading file
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        Output += $"{nameof(IFileInfo)}.{nameof(fileInfo.Name)}: {fileInfo.Name}{nl}";
+        Output += $"{nameof(IFileInfo)}.{nameof(fileInfo.Size)}: {fileInfo.Size}{nl}";
+        Output += $"{nameof(IFileInfo)}.{nameof(fileInfo.Type)}: {fileInfo.Type}{nl}";
+        Output += $"{nameof(IFileInfo)}.{nameof(fileInfo.LastModifiedDate)}: {fileInfo.LastModifiedDate?.ToString() ?? "(N/A)"}{nl}";
+        Output += $"Reading file...";
+
+
+        this.StateHasChanged();
+        Console.WriteLine(Output);
+
+        using (var fs = await file.OpenReadAsync())
+        {
+            var buffer = new byte[BufferSize];
+            int count;
+            var lastAnnounce = 0m;
+            while ((count = await fs.ReadAsync(buffer, 0, buffer.Length)) != 0)
+            {
+                var chunk = new UploadDocumentChunkViewModel();
+
+                chunk.DocumentId = documentModel.DocumentId;
+                chunk.Version = documentModel.Version;
+                chunk.ChunkNo = chunkNo;
+                chunk.ChunkSize = buffer.Length;
+                chunk.RepositoryId = documentModel.RepositoryId;
+                chunk.Storage = documentModel.Storage;
+                chunk.Path = uploadDocResult.Path;
+                chunk.ParentId = documentModel.ParentId;
+                chunk.FileName = fileInfo.Name;
+                chunk.ContentType = fileInfo.Type;
+                chunk.Size = fileInfo.Size;
+                chunk.UserName = documentModel.UserName;
+
+                chunk.Bytes = buffer;
+
+                var r = await arcService.UploadDocumentChunk(chunk);
+                if(!r.IsOk)
+                {
+                    this.StateHasChanged();
+                    toastService.ShowError(r.ErrorMessage);
+
+                    return;
+                }
+
+                chunkNo++;
+                value += count;
+                progress = ((decimal)fs.Position * 100) / fs.Length;
+                if (progress > (lastAnnounce + 10))
+                {
+                    stopwatch.Stop();
+                    Output += $"Read {count} bytes ({progress:00}%). {fs.Position} / {fs.Length}{nl}";
+                    this.StateHasChanged();
+                    lastAnnounce = progress;
+                    stopwatch.Start();
+                }
+            }
+            stopwatch.Stop();
+            Output += $"Done reading file {fileInfo.Name} - {fs.Length} bytes in {stopwatch.ElapsedMilliseconds}ms.{nl}.";
+            toastService.ShowSuccess($"Uploaded document {fileInfo.Name} successfully!");
+            await ClearFile();
+        }
+        this.StateHasChanged();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        currentUser = await currentUserService.GetCurrentUserAsync();
+        Repo = await listsService.GetRepositoryById(Id.ToString());
+        // TreeItems = await listsService.GetRepositoryFoldersTree(Repo.Id);
+        CreateUploadModel();
+
+        await LoadTree();
+    }
+
+    protected void CreateUploadModel()
+    {
+        documentModel = new UploadDocumentViewModel();
+        documentModel.DocumentId = 0;
+        documentModel.Version = 1;
+        documentModel.RepositoryId = Repo.Id;
+        documentModel.ParentId = selectedNode?.Id;
+        documentModel.Storage = Repo.Storage;
+        documentModel.UserName = currentUser.UserName;
+    }
+
+    protected override void OnInitialized()
+    {
+        ExpandedNodes.Add(TreeItems?.Skip(1).First());
+        ExpandedNodes.Add(TreeItems?.Skip(1).Take(1).First().Childs.Skip(1).First());
+    }
+
+    private async Task LoadTree()
+    {
+        TreeItems = await listsService.GetRepositoryFoldersTree(Id);
+    }
+}
+

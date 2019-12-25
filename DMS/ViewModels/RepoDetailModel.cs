@@ -11,6 +11,7 @@ namespace DAS.ViewModels
         public string Title { get; set; }
         public string Description { get; set; }
         public StorageType Storage { get; set; }
+        public string Path { get; set; }
         public string CreatedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public string UpdatedBy { get; set; }

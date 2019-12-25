@@ -18,6 +18,7 @@ using DAS.Data;
 using DAS.Services;
 using Blazored.Toast;
 using Microsoft.AspNetCore.Mvc;
+using Blazor.FileReader;
 
 namespace DAS
 {
@@ -58,6 +59,12 @@ namespace DAS
             services.AddServerSideBlazor();
 
             services.AddBlazoredToast();
+
+            services.AddFileReaderService(options => options.InitializeOnFirstCall = true);
+            services.AddServerSideBlazor().AddHubOptions(o =>
+            {
+                o.MaximumReceiveMessageSize = 10 * 1024 * 1024; // 10MB
+            });
 
             services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             services.AddScoped<IIdentityService, IdentityService>();

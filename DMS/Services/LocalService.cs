@@ -10,6 +10,8 @@ namespace DAS.Services
         private static Dictionary<string, string> dic = new Dictionary<string, string> 
         { 
             ["Select File"] = "اختر ملف",
+            ["Reset"] = "عملية جديدة",
+            ["Path"] = "الفهرس",
             ["Parent Folder"] = "الفهرس الأب",
             ["Done"] = "تمت العملية",
             ["Home"] = "الصفحة الرئيسية",

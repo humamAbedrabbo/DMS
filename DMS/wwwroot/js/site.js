@@ -7,6 +7,10 @@ function closeDialog(id_dialog) {
     $(id_dialog).modal('hide');
 }
 
+function showTab(id_tab) {
+    $(id_tab).tab('show');
+}
+
 function onUploadFormReady() {
     document.getElementById('uploadFile').addEventListener('change', handleFileSelect, false);
 

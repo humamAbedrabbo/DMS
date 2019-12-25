@@ -1,3 +1,28 @@
 ﻿@page "/"
 
+@using DAS.ViewModels
+@using DAS.Services
 
+@inject ICurrentUserService currentUserService
+
+@if (currentUser != null)
+{
+<div class="card text-center">
+    <div class="jumbotron jumbotron-fluid mb-0">
+        <div class="container-fluid">
+            <h1 class="display-4">@DAS.Services.LocalService.Get("Document Management System", currentUser.Lang)</h1>
+            <p class="lead"><a href="http://itech.sy" target="_blank">ITech Solutions</a></p>
+        </div>
+    </div>
+</div>
+}
+
+@code { 
+
+    private AppUser currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await currentUserService.GetCurrentUserAsync();
+    }
+}

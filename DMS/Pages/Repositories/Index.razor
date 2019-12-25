@@ -9,92 +9,101 @@
 @inject IListsService listsService
 @inject ICurrentUserService currentUserService
 @inject IToastService toastService
+@inject IJSRuntime JSRuntime
 
 
 @if (currentUser != null)
 {
-    <h3 class="h3"> @LocalService.Get("Repositories", currentUser.Lang)</h3>
-    <AuthorizeView Roles="Admin">
-        <div class="row mb-3">
-            <div class="col-12">
+    <div class="card text-left">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container-fluid">
+                <h1 class="display-4">@LocalService.Get("Repositories", currentUser.Lang)</h1>
+                <p class="lead">@LocalService.Get("Repositories are archive containers that can store documents on either a database or directory", currentUser.Lang).</p>
+                <AuthorizeView Roles="Admin">
+                    <hr class="my-4">
+                    <a class="btn btn-primary btn-lg" href="#" role="button" data-toggle="modal" data-target="#dlg_AddRepository">@LocalService.Get("Add Repository", currentUser.Lang)</a>
+                </AuthorizeView>
+            </div>
+        </div>
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-index-tab" data-toggle="tab" href="#nav-index" role="tab" aria-controls="nav-index" aria-selected="true">@LocalService.Get("Repositories", currentUser.Lang)</a>
+
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-index" role="tabpanel" aria-labelledby="nav-index-tab">
+
                 <div class="card">
                     <div class="card-body">
-                        <EditForm Context="RepoAddModelForm" Model="RepoAddModel" OnValidSubmit="OnValidSubmitRepository">
-                            <DataAnnotationsValidator />
-                            <div class="form-inline">
-                                <div class="form-group mb-2">
-                                    <label for="id_name" class="sr-only"> @LocalService.Get("Repository Name", currentUser.Lang)</label>
-                                    @*<input @bind="RepositoryModel.Name" class="form-control" id="inputName" placeholder="Repository Name">*@
-                                    <InputText @bind-Value="RepoAddModel.Name" class="form-control" id="id_name" placeholder=" @LocalService.Get("Repository Name", currentUser.Lang)"></InputText>
-                                    <ValidationMessage For="@(() => RepoAddModel.Name)"></ValidationMessage>
-                                </div>
-                                <div class="form-group mx-sm-3 mb-2">
-                                    <label for="id_desc" class="sr-only"> @LocalService.Get("Description", currentUser.Lang)</label>
-                                    <InputText @bind-Value="RepoAddModel.Description" class="form-control" id="id_desc" placeholder=" @LocalService.Get("Description", currentUser.Lang)"></InputText>
-                                    <ValidationMessage For="@(() => RepoAddModel.Description)"></ValidationMessage>
-                                </div>
-
-                                <div class="form-group mx-sm-3 mb-2">
-                                    <label for="id_storage" class="sr-only"> @LocalService.Get("Storage", currentUser.Lang)</label>
-                                    <InputSelect @bind-Value="RepoAddModel.Storage" class="form-control" id="id_storage">
-                                        <option value="@StorageType.Database">Database</option>
-                                        <option value="@StorageType.Directory">Directory</option>
-                                    </InputSelect>
-                                </div>
-
-                                <button type="submit" class="btn btn-success mb-2"> @LocalService.Get("Add Repository", currentUser.Lang)</button>
-                            </div>
-                        </EditForm>
-
+                        @if (Repositories == null)
+                        {
+                            <p> @LocalService.Get("Loading", currentUser.Lang)...</p>
+                        }
+                        else
+                        {
+                            <RepositoryIndex Repositories="@Repositories" currentUser="@currentUser" />
+                        }
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-    </AuthorizeView>
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    @if (Repositories == null)
-                    {
-                        <p> @LocalService.Get("Loading", currentUser.Lang)...</p>
-                    }
-                    else
-                    {
-                        <table class="table">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th> @LocalService.Get("Repository Name", currentUser.Lang)</th>
-                                    <th> @LocalService.Get("Title", currentUser.Lang)</th>
-                                    <th> @LocalService.Get("Storage", currentUser.Lang)</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var repo in Repositories)
-                                {
-                                    <tr>
-                                        <td>@repo.Name</td>
-                                        <td>@repo.Title</td>
-                                        <td>@repo.Storage.ToString()</td>
-                                        <td>
-                                            <AuthorizeView Roles="Admin">
-                                                <a class="btn-sm btn-secondary mr-1" href="repo/edit/@repo.Id"><i class="oi oi-pencil"></i></a>
-                                            </AuthorizeView>
-                                            <a class="btn-sm btn-secondary mr-1" href="repo/@repo.Id"><i class="oi oi-list-rich"></i></a>
-                                            <a class="btn-sm btn-secondary mr-1" href="docs/upload/@repo.Id/"><i class="oi oi-cloud-upload"></i></a>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    }
-                </div>
+    <!-- Modal -->
+    <div class="modal fade" id="dlg_AddRepository" tabindex="-1" role="dialog" aria-labelledby="dlg_AddRepositoryLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <EditForm Context="RepoAddModelForm" Model="RepoAddModel" OnValidSubmit="OnValidSubmitRepository">
+                    <DataAnnotationsValidator />
+
+                    <div class="modal-header bg-primary text-light">
+                        <h5 class="modal-title" id="dlg_AddRepositoryLabel">@LocalService.Get("Add Repository", currentUser.Lang)</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="id_name"> @LocalService.Get("Repository Name", currentUser.Lang)</label>
+                            <InputText @bind-Value="RepoAddModel.Name" class="form-control" id="id_name" placeholder=" @LocalService.Get("Repository Name", currentUser.Lang)"></InputText>
+                            <ValidationMessage For="@(() => RepoAddModel.Name)"></ValidationMessage>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_title"> @LocalService.Get("Title", currentUser.Lang)</label>
+                            <InputText @bind-Value="RepoAddModel.Title" class="form-control" id="id_title" placeholder=" @LocalService.Get("Title", currentUser.Lang)"></InputText>
+                            <ValidationMessage For="@(() => RepoAddModel.Title)"></ValidationMessage>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_storage"> @LocalService.Get("Storage", currentUser.Lang)</label>
+                            <InputSelect @bind-Value="RepoAddModel.Storage" class="form-control" id="id_storage">
+                                <option value="@StorageType.Database">Database</option>
+                                <option value="@StorageType.Directory">Directory</option>
+                            </InputSelect>
+                        </div>
+                        <div class="form-group">
+                            <label for="id_desc"> @LocalService.Get("Description", currentUser.Lang)</label>
+                            <InputTextArea @bind-Value="RepoAddModel.Description" class="form-control" id="id_desc" placeholder=" @LocalService.Get("Description", currentUser.Lang)"></InputTextArea>
+                            <ValidationMessage For="@(() => RepoAddModel.Description)"></ValidationMessage>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">@LocalService.Get("Close", currentUser.Lang)</button>
+                        <button type="submit" class="btn btn-success mb-2"> @LocalService.Get("Add Repository", currentUser.Lang)</button>
+                    </div>
+
+
+                </EditForm>
+
             </div>
         </div>
     </div>
 }
+
+
+
 
 
 @code {
@@ -130,7 +139,8 @@
         {
             toastService.ShowError($"Failed to create repository '{RepoAddModel.Name}'. {ex.Message}");
         }
-
+        await JSRuntime.InvokeVoidAsync("closeDialog", "#id_AddRepository");
+        RepoAddModel = new RepoAddModel();
         await LoadRepositories();
 
     }

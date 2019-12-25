@@ -12,6 +12,7 @@ namespace DAS.ViewModels
         {
             Roles = new List<string>();
             Repositories = new List<int>();
+            IsAnonymous = false;
         }
 
         public string Id { get; set; }
@@ -21,6 +22,7 @@ namespace DAS.ViewModels
         public string RepoToAdd { get; set; }
         public string Lang { get; set; } = "en";
         public string Rtl => Lang == "ar" ? "rtl" : "";
+        public bool IsAnonymous { get; set; }
         public bool IsAdmin => Roles?.Contains(Constants.ROLE_ADMIN) ?? false;
         public bool IsArchive => Roles?.Contains(Constants.ROLE_ARCHIVE) ?? false;
         public bool IsPublic => Roles?.Contains(Constants.ROLE_PUBLIC) ?? false;

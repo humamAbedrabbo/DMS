@@ -17,80 +17,92 @@
 @inject IArchiveService arcService
 @inject ICurrentUserService currentUserService
 @inject IToastService toastService
-@inject IJSRuntime JSRuntime;
+@inject IJSRuntime JSRuntime
 
 @if (currentUser != null && Repo != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Id)))
 {
-    <h3> @LocalService.Get("Repository", currentUser.Lang): @Repo.Name -  @LocalService.Get("Upload", currentUser.Lang)</h3>
-
-    <div class="row d-flex flex-grow-1">
-        <div class="col-4 d-flex flex-column flex-grow-1">
-            <div class="card d-flex flex-grow-1 flex-column">
-                <div class="card-body">
-                    <div class="card-title"><h5> @LocalService.Get("Folders", currentUser.Lang)</h5></div>
-                    @if (TreeItems != null)
-                    {
-                        <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
-                            <TitleTemplate>
-                                <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
-                                @context.Name
-                            </TitleTemplate>
-                        </Tree>
-                    }
-                </div>
+    <div class="card text-left">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container-fluid">
+                <h1 class="display-4">@LocalService.Get("Upload Document", currentUser.Lang)</h1>
+                <p>@LocalService.Get("Repository", currentUser.Lang): @Repo.Name</p>
             </div>
         </div>
-        <div class="col-8 d-flex flex-column flex-grow-1">
-            <div class="card">
-                <div class="card-header">
-                    @LocalService.Get("Upload Document", currentUser.Lang)
-                </div>
-                <div class="card-body">
-
-                    <div class="form-group">
-                        <label for="parentName"> @LocalService.Get("Parent Folder", currentUser.Lang)</label>
-                        <input readonly id="parentName" class="form-control" value="@selectedNode?.Name" />
-                    </div>
-                    <div class="form-group">
-                        <label for="uploadFile"> @LocalService.Get("Select File", currentUser.Lang)</label>
-                        <input type="file" @ref=inputElement class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label for="title"> @LocalService.Get("Title", currentUser.Lang)</label>
-                        <input @bind="documentModel.Title" class="form-control" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description"> @LocalService.Get("Description", currentUser.Lang)</label>
-                        <textarea rows="3" class="form-control" @bind="documentModel.Description"></textarea>
-                    </div>
-
-                    @if (documentModel != null && documentModel.Meta != null && MetaFields != null)
-                    {
-                        foreach (var meta in documentModel.Meta.OrderBy(x => x.Key))
-                        {
-                            var field = MetaFields.FirstOrDefault(x => x.Name == meta.Key);
-                            if (field != null)
-                            {
-                                <div class="form-group">
-                                    <label for="meta_@field.Id">@field.Title</label>
-                                    <input @bind="documentModel.Meta[meta.Key]" class="form-control" />
-                                </div>
-                            }
-                        }
-                    }
-
-                    <div class="form-group">
-                        <div class="progress">
-                            <div class="progress-bar" role="progressbar" style="width: @(progress)%;" aria-valuenow="@(value)" aria-valuemin="0" aria-valuemax="100"> @($"{progress:00}")%</div>
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-upload-tab" data-toggle="tab" href="#nav-upload" role="tab" aria-controls="nav-upload" aria-selected="true">@LocalService.Get("Upload", currentUser.Lang)</a>
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
+                <div class="row d-flex flex-grow-1">
+                    <div class="col-4 d-flex flex-column flex-grow-1">
+                        <div class="card d-flex flex-grow-1 flex-column">
+                            <div class="card-body">
+                                <div class="card-title"><h5>@LocalService.Get("Folders", currentUser.Lang)</h5></div>
+                                @if (TreeItems != null)
+                                {
+                                    <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
+                                        <TitleTemplate>
+                                            <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
+                                            @context.Name
+                                        </TitleTemplate>
+                                    </Tree>
+                                }
+                            </div>
                         </div>
-                        @*<progress max="@max" value="@value" />*@
-                        <br />
-                        <textarea style="max-width: 100%;" cols="50" rows="20">@Output</textarea>
                     </div>
-                    <button @onclick=ReadFile class="btn btn-primary"> @LocalService.Get("Upload Document", currentUser.Lang)</button>
-                    <button @onclick=ClearFile class="btn btn-primary"> @LocalService.Get("Reset", currentUser.Lang)</button>
+                    <div class="col-8 d-flex flex-column flex-grow-1">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label for="parentName">@LocalService.Get("Parent Folder", currentUser.Lang)</label>
+                                    <input readonly id="parentName" class="form-control" value="@selectedNode?.Name" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="uploadFile">@LocalService.Get("Select File", currentUser.Lang)</label>
+                                    <input type="file" @ref=inputElement class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="title">@LocalService.Get("Title", currentUser.Lang)</label>
+                                    <input @bind="documentModel.Title" class="form-control" />
+                                </div>
 
+                                <div class="form-group">
+                                    <label for="description">@LocalService.Get("Description", currentUser.Lang)</label>
+                                    <textarea rows="3" class="form-control" @bind="documentModel.Description"></textarea>
+                                </div>
+
+                                @if (documentModel != null && documentModel.Meta != null && MetaFields != null)
+                                {
+                                    foreach (var meta in documentModel.Meta.OrderBy(x => x.Key))
+                                    {
+                                        var field = MetaFields.FirstOrDefault(x => x.Name == meta.Key);
+                                        if (field != null)
+                                        {
+                                            <div class="form-group">
+                                                <label for="meta_@field.Id">@field.Title</label>
+                                                <input @bind="documentModel.Meta[meta.Key]" class="form-control" />
+                                            </div>
+                                        }
+                                    }
+                                }
+
+                                <div class="form-group">
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: @(progress)%;" aria-valuenow="@(value)" aria-valuemin="0" aria-valuemax="100"> @($"{progress:00}")%</div>
+                                    </div>
+                                    @*<progress max="@max" value="@value" />*@
+                                    <br />
+                                    <textarea style="max-width: 100%;" cols="50" rows="20">@Output</textarea>
+                                </div>
+                                <button @onclick=ReadFile class="btn btn-primary">@LocalService.Get("Upload Document", currentUser.Lang)</button>
+                                <a href="doc/details/@documentModel.DocumentId" class="btn btn-success @gotoDocumentEnabled">@LocalService.Get("Go To Document", currentUser.Lang)</a>
+                                <button @onclick=ClearFile class="btn btn-primary">@LocalService.Get("Reset", currentUser.Lang)</button>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -125,6 +137,7 @@
     public decimal progress;
     public int chunkNo = 1;
     ElementReference inputElement;
+    private string gotoDocumentEnabled = "disabled";
 
     string Output { get; set; }
 
@@ -136,8 +149,8 @@
         Output = string.Empty;
         progress = 0;
         chunkNo = 1;
+        gotoDocumentEnabled = "disabled";
         CreateUploadModel();
-
     }
 
     public async Task ReadFile()
@@ -148,11 +161,12 @@
         progress = 0;
         chunkNo = 1;
         long remainingBytes = 0;
+        gotoDocumentEnabled = "disabled";
 
         this.StateHasChanged();
         var nl = Environment.NewLine;
         var files = (await fileReaderService.CreateReference(inputElement).EnumerateFilesAsync()).ToList();
-        if(files == null || files.Count == 0)
+        if (files == null || files.Count == 0)
         {
             toastService.ShowError("Please select a file to upload");
             return;
@@ -172,7 +186,7 @@
 
         var uploadDocResult = await arcService.UploadDocument(documentModel);
 
-        if(!uploadDocResult.IsOk)
+        if (!uploadDocResult.IsOk)
         {
             this.StateHasChanged();
             toastService.ShowError(uploadDocResult.ErrorMessage);
@@ -225,7 +239,7 @@
                 chunk.Bytes = buffer;
 
                 var r = await arcService.UploadDocumentChunk(chunk);
-                if(!r.IsOk)
+                if (!r.IsOk)
                 {
                     this.StateHasChanged();
                     toastService.ShowError(r.ErrorMessage);
@@ -236,9 +250,9 @@
                 chunkNo++;
                 value += count;
 
-                if(fileInfo.Size - value < BufferSize)
+                if (fileInfo.Size - value < BufferSize)
                 {
-                    BufferSize = (int) (fileInfo.Size - value);
+                    BufferSize = (int)(fileInfo.Size - value);
                     buffer = new byte[BufferSize];
                 }
 
@@ -255,7 +269,8 @@
             stopwatch.Stop();
             Output += $"Done reading file {fileInfo.Name} - {fs.Length} bytes in {stopwatch.ElapsedMilliseconds}ms.{nl}.";
             toastService.ShowSuccess($"Uploaded document {fileInfo.Name} successfully!");
-            await OnParametersSetAsync();
+            gotoDocumentEnabled = string.Empty;
+            
         }
         this.StateHasChanged();
     }
@@ -271,8 +286,6 @@
         await LoadTree();
     }
 
-
-
     protected void CreateUploadModel()
     {
         documentModel = new UploadDocumentViewModel();
@@ -282,19 +295,27 @@
         documentModel.ParentId = selectedNode?.Id;
         documentModel.Storage = Repo.Storage;
         documentModel.UserName = currentUser.UserName;
+        documentModel.ContentType = null;
+        documentModel.Description = null;
+        documentModel.Meta = new Dictionary<string, string>();
+        documentModel.Name = null;
+        documentModel.Size = 0;
+        documentModel.Title = null;
+        documentModel.UploadPath = null;
+        
         SetMeta();
     }
 
     protected void SetMeta()
     {
         documentModel.Meta.Clear();
-        if(Repo != null && Repo.Meta != null)
+        if (Repo != null && Repo.Meta != null)
         {
             foreach (var item in Repo.Meta)
             {
                 documentModel.Meta[item.Key] = item.Value;
             }
-            if(selectedNode != null && selectedNode.Meta != null)
+            if (selectedNode != null && selectedNode.Meta != null)
             {
                 foreach (var item in selectedNode.Meta)
                 {
@@ -302,7 +323,6 @@
                 }
             }
         }
-
 
     }
 
@@ -315,9 +335,9 @@
     private async Task LoadTree()
     {
         TreeItems = await listsService.GetRepositoryFoldersTree(Id);
-        if(TreeItems != null)
+        if (TreeItems != null)
         {
-            if(!string.IsNullOrEmpty(FolderId))
+            if (!string.IsNullOrEmpty(FolderId))
             {
                 if (int.TryParse(FolderId, out int selectedFolderId))
                 {
@@ -341,7 +361,7 @@
     private TreeModel SearchFolder(TreeModel parent, int fid)
     {
         TreeModel result = null;
-        if(parent.Id == fid)
+        if (parent.Id == fid)
         {
             return parent;
         }
@@ -350,7 +370,7 @@
             foreach (var item in parent.Childs)
             {
                 result = SearchFolder(item, fid);
-                if(result != null)
+                if (result != null)
                 {
                     return result;
                 }

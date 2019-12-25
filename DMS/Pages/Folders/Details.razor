@@ -15,130 +15,144 @@
 
 @if (currentUser != null && CurrentFolder != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(CurrentFolder.RepositoryId)))
 {
-    <h3> @LocalService.Get("Folder", currentUser.Lang): @CurrentFolder.Name</h3>
-    <small class="text-secondary font-italic"> @LocalService.Get("created on", currentUser.Lang) @CurrentFolder.CreatedOn.ToString("dd-MM-yyyy")  @LocalService.Get("by", currentUser.Lang) @CurrentFolder.CreatedBy,  @LocalService.Get("last update on", currentUser.Lang) @CurrentFolder.UpdatedOn.ToString("dd-MM-yyyy hh:mm")  @LocalService.Get("by", currentUser.Lang) @CurrentFolder.UpdatedBy</small>
+    <div class="card text-left">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container-fluid">
+                <h1 class="display-4">@LocalService.Get("Folder", currentUser.Lang): @CurrentFolder.Name</h1>
+                <h4>@CurrentFolder.Title</h4>
+                <small>@LocalService.Get("Repository", currentUser.Lang): @CurrentFolder.Repository</small>
+                <hr />
+                <blockquote class="blockquote">
+                    <p class="mb-0">@CurrentFolder.Description</p>
+                    <footer class="blockquote-footer">
+                        @LocalService.Get("created on", currentUser.Lang) @CurrentFolder.CreatedOn.ToString("dd-MM-yyyy")  <cite>@LocalService.Get("by", currentUser.Lang) @CurrentFolder.CreatedBy</cite>,  @LocalService.Get("last update on", currentUser.Lang) @CurrentFolder.UpdatedOn.ToString("dd-MM-yyyy hh:mm")  <cite>@LocalService.Get("by", currentUser.Lang) @CurrentFolder.UpdatedBy</cite>
+                    </footer>
+                </blockquote>
 
-    <div class="row">
-        <div class="col-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="card-title"><h5>@CurrentFolder.Title</h5></div>
-                    <div class="card-text">@CurrentFolder.Description</div>
-                </div>
-                <div class="card-body">
-                    <AuthorizeView Roles="Admin, Archive">
-                        @*<a href="/repos/upload?repoId=@CurrentFolder.RepositoryId&folderId=@CurrentFolder.Id" class="btn btn-secondary"> @LocalService.Get("Upload", currentUser.Lang)</a>*@
-                        <a href="/docs/upload/@CurrentFolder.RepositoryId/@CurrentFolder.Id" class="btn btn-secondary"> @LocalService.Get("Upload", currentUser.Lang)</a>
-                    </AuthorizeView>
-                    <AuthorizeView Roles="Admin">
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#id_AddFolder"> @LocalService.Get("Add Folder", currentUser.Lang)</button>
-                    </AuthorizeView>
-                </div>
-
+                <AuthorizeView Roles="Admin, Archive">
+                    @*<a href="/repos/upload?repoId=@CurrentFolder.RepositoryId&folderId=@CurrentFolder.Id" class="btn btn-secondary"> @LocalService.Get("Upload", currentUser.Lang)</a>*@
+                    <a href="/docs/upload/@CurrentFolder.RepositoryId/@CurrentFolder.Id" role="button" class="btn btn-lg btn-secondary">@LocalService.Get("Upload", currentUser.Lang)</a>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin">
+                    <button type="button" class="btn btn-lg btn-primary" role="button" data-toggle="modal" data-target="#id_AddFolder">@LocalService.Get("Add Folder", currentUser.Lang)</button>
+                </AuthorizeView>
             </div>
         </div>
-    </div>
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-details-tab" data-toggle="tab" href="#nav-details" role="tab" aria-controls="nav-details" aria-selected="true">@LocalService.Get("Folder Details", currentUser.Lang)</a>
+                <a class="nav-item nav-link" id="nav-meta-tab" data-toggle="tab" href="#nav-meta" role="tab" aria-controls="nav-meta" aria-selected="false">@LocalService.Get("Meta Fields", currentUser.Lang)</a>
+                <a class="nav-item nav-link" id="nav-folders-tab" data-toggle="tab" href="#nav-folders" role="tab" aria-controls="nav-folders" aria-selected="false">@LocalService.Get("Folders Tree", currentUser.Lang)</a>
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-details" role="tabpanel" aria-labelledby="nav-details-tab">
+                <div class="card">
+                    <div class="card-body">
 
-    <div class="row mt-3 d-flex flex-grow-1">
-        <div class="col-6 d-flex flex-column flex-grow-1">
-            <div class="card d-flex flex-grow-1 flex-column">
-                <div class="card-body">
-                    <div class="card-title"><h5> @LocalService.Get("Meta Fields", currentUser.Lang)</h5></div>
-                    <AuthorizeView Roles="Admin">
-                        <div class="mb-2">
-                            <EditForm Context="formMetaContext" Model="Item" OnValidSubmit="OnValidSetValue">
-                                <div class="form-inline">
-                                    <div class="form-group mx-sm-3 mb-2">
-                                        <label for="id_name" class="sr-only"> @LocalService.Get("Field Name", currentUser.Lang)</label>
-                                        <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
-                                            @if (Fields == null)
-                                                {
-                                                <option></option>
-                                                }
-                                                else
-                                                {
-                                                    foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                        <dl class="row">
+                            <dt class="col-sm-3">@LocalService.Get("Repository", currentUser.Lang)</dt>
+                            <dd class="col-sm-9">@CurrentFolder.Repository</dd>
+                            <dt class="col-sm-3">@LocalService.Get("Parent Folder", currentUser.Lang)</dt>
+                            <dd class="col-sm-9">@CurrentFolder.Parent</dd>
+                        </dl>
+
+                    </div>
+
+                </div>
+            </div>
+            <div class="tab-pane fade" id="nav-meta" role="tabpanel" aria-labelledby="nav-meta-tab">
+                <div class="card d-flex flex-grow-1 flex-column">
+                    <div class="card-body">
+
+                        <AuthorizeView Roles="Admin">
+                            <div class="mb-2">
+                                <EditForm Context="formMetaContext" Model="Item" OnValidSubmit="OnValidSetValue">
+                                    <div class="form-inline">
+                                        <div class="form-group mb-2">
+                                            <label for="id_name" class="sr-only"> @LocalService.Get("Field Name", currentUser.Lang)</label>
+                                            <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
+                                                <option value=""></option>
+                                                @if (Fields != null)
                                                     {
-                                                    <optgroup label="@group">
-                                                        @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
-                                                            {
-                                                            <option value="@field.Name">@field.Title</option>
-                                                            }
-
-                                                    </optgroup>
+                                                        foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                                                        {
+                                                        <optgroup label="@group">
+                                                            @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
+                                                                {
+                                                                <option value="@field.Name">@field.Title</option>
+                                                                }
+                                                        </optgroup>
+                                                        }
                                                     }
-                                                }
-
-                                        </InputSelect>
+                                            </InputSelect>
+                                        </div>
+                                        <div class="form-group mb-2">
+                                            <label for="id_value" class="sr-only"> @LocalService.Get("Field Value", currentUser.Lang)</label>
+                                            <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
+                                        </div>
+                                        <button type="submit" class="btn btn-success mx-2 mb-2"> @LocalService.Get("Set Value", currentUser.Lang)</button>
                                     </div>
-                                    <div class="form-group mb-2">
-                                        <label for="id_value" class="sr-only"> @LocalService.Get("Field Value", currentUser.Lang)</label>
-                                        <InputText @bind-Value="Item.Value" class="form-control" id="id_value" placeholder="Field Value"></InputText>
-                                    </div>
-                                    <button type="submit" class="btn btn-success mx-2 mb-2"> @LocalService.Get("Set Value", currentUser.Lang)</button>
-                                </div>
-                            </EditForm>
-                        </div>
+                                </EditForm>
+                            </div>
 
-                    </AuthorizeView>
-                    @if (ActiveFields != null)
-                    {
-                        <table class="table table-bordered table-sm col-6">
-                            <tbody>
-                                @foreach (var group in ActiveFields.Select(x => x.Group).Distinct().OrderBy(x => x))
-                                {
-                                    <tr class="bg-dark text-white d-flex">
-                                        <td class="col-12">@group</td>
-                                    </tr>
-                                    @foreach (var meta in ActiveFields.Where(x => x.Group == group).OrderBy(x => x.Name))
+                        </AuthorizeView>
+                        @if (ActiveFields != null)
+                        {
+                            <table class="table table-bordered table-sm col-6">
+                                <tbody>
+                                    @foreach (var group in ActiveFields.Select(x => x.Group).Distinct().OrderBy(x => x))
                                     {
-                                        <tr class="d-flex">
-                                            <td class="bg-light col-6">@meta.Title</td>
-                                            <td class="col-6">@CurrentFolder.Meta[meta.Name]</td>
+                                        <tr class="bg-dark text-white d-flex">
+                                            <td class="col-12">@group</td>
                                         </tr>
+                                        @foreach (var meta in ActiveFields.Where(x => x.Group == group).OrderBy(x => x.Name))
+                                        {
+                                            <tr class="d-flex">
+                                                <td class="bg-light col-6">@meta.Title</td>
+                                                <td class="col-6">@CurrentFolder.Meta[meta.Name]</td>
+                                            </tr>
+                                        }
+
                                     }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
 
-                                }
-                            </tbody>
-                        </table>
-                    }
                 </div>
-
             </div>
+            <div class="tab-pane fade" id="nav-folders" role="tabpanel" aria-labelledby="nav-folders-tab">
+                <div class="card d-flex flex-grow-1 flex-column">
+                    <div class="card-body">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="repo/@CurrentFolder?.RepositoryId">@CurrentFolder?.Repository</a></li>
+                                @if (CurrentFolder.ParentId.HasValue)
+                                {
+                                    <li class="breadcrumb-item"><a href="folders/@CurrentFolder?.ParentId.Value">@CurrentFolder?.Parent</a></li>
+                                }
+                                <li class="breadcrumb-item active" aria-current="page">@CurrentFolder?.Name</li>
+                            </ol>
+                        </nav>
+                        @if (TreeItems != null)
+                        {
+                            <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs?.OrderBy(x => x.Type))" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
+                                <TitleTemplate>
+                                    @if (context.Type == TreeNodeType.Folder)
+                                            {
+                                        <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
+                                            }
+                                            else
+                                            {
+                                        <i class="oi oi-file mr-1"></i>
+                                            }
+                                    <a href="@context.Url">@context.Name</a>
+                                </TitleTemplate>
+                            </Tree>
 
-        </div>
-        <div class="col-6 d-flex flex-column flex-grow-1">
-            <div class="card d-flex flex-grow-1 flex-column">
-                <div class="card-body">
-                    <div class="card-title"><h5> @LocalService.Get("Folders", currentUser.Lang)</h5></div>
-
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="repo/@CurrentFolder?.RepositoryId">@CurrentFolder?.Repository</a></li>
-                            @if (CurrentFolder.ParentId.HasValue)
-                            {
-                                <li class="breadcrumb-item"><a href="folders/@CurrentFolder?.ParentId.Value">@CurrentFolder?.Parent</a></li>
-                            }
-                            <li class="breadcrumb-item active" aria-current="page">@CurrentFolder?.Name</li>
-                        </ol>
-                    </nav>
-                    @if (TreeItems != null)
-                    {
-                        <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs?.OrderBy(x => x.Type))" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
-                            <TitleTemplate>
-                                @if (context.Type == TreeNodeType.Folder)
-                                        {
-                                    <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
-                                        }
-                                        else
-                                        {
-                                    <i class="oi oi-file mr-1"></i>
-                                        }
-                                <a href="@context.Url">@context.Name</a>
-                            </TitleTemplate>
-                        </Tree>
-
-                    }
+                        }
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,0 +1,48 @@
+﻿@using DAS.ViewModels
+@using DAS.Services
+@using DAS.Models
+
+@inject IAdminService adminService
+@inject IListsService listsService
+@inject ICurrentUserService currentUserService
+@inject IToastService toastService
+@inject IJSRuntime JSRuntime
+
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-light">
+            <tr>
+                <th> @LocalService.Get("Repository Name", currentUser.Lang)</th>
+                <th> @LocalService.Get("Title", currentUser.Lang)</th>
+                <th> @LocalService.Get("Storage", currentUser.Lang)</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var repo in Repositories)
+            {
+                <tr>
+                    <td>@repo.Name</td>
+                    <td>@repo.Title</td>
+                    <td>@repo.Storage.ToString()</td>
+                    <td>
+                        <AuthorizeView Roles="Admin">
+                            <a class="btn-sm btn-secondary mr-1" href="repo/edit/@repo.Id"><i class="oi oi-pencil"></i></a>
+                        </AuthorizeView>
+                        <a class="btn-sm btn-secondary mr-1" href="repo/@repo.Id"><i class="oi oi-list-rich"></i></a>
+                        <a class="btn-sm btn-secondary mr-1" href="docs/upload/@repo.Id/"><i class="oi oi-cloud-upload"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+@code {
+
+    [Parameter]
+    public IEnumerable<RepoDetailModel> Repositories { get; set; }
+
+    [Parameter]
+    public AppUser currentUser { get; set; }
+
+}

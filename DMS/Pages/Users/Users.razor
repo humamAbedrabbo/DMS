@@ -9,141 +9,166 @@
 @inject Microsoft.AspNetCore.Identity.UserManager<IdentityUser> userManager
 @inject ICurrentUserService currentUserService
 @inject IToastService toastService
+@inject IJSRuntime JSRuntime
 @inject Microsoft.Extensions.Caching.Memory.IMemoryCache mem
 
-@if(currentUser != null)
+@if (currentUser != null)
 {
     <AuthorizeView Roles="Admin">
-        <h3> @LocalService.Get("Users", currentUser.Lang)</h3>
-        <div class="row mb-3">
-            <div class="col-6">
-                <div class="card">
-                    <div class="card-body">
-                        <EditForm Context="formContext" Model="UserModel" OnValidSubmit="OnValidSubmit">
-                            <div class="form-inline">
-                                <div class="form-group mb-2">
-                                    <label for="inputUserName" class="sr-only"> @LocalService.Get("User Name", currentUser.Lang)</label>
-                                    <input @bind="UserModel.UserName" class="form-control" id="inputUserName" placeholder="@LocalService.Get("User Name", currentUser.Lang)">
-                                </div>
-                                <div class="form-group mx-sm-3 mb-2">
-                                    <label for="inputEmail" class="sr-only"> @LocalService.Get("Email", currentUser.Lang)</label>
-                                    <input @bind="UserModel.Email" type="email" class="form-control" id="inputEmail" placeholder="@LocalService.Get("Email", currentUser.Lang)">
-                                </div>
-                                <button type="submit" class="btn btn-success mb-2"> @LocalService.Get("Add User", currentUser.Lang)</button>
-                            </div>
-                        </EditForm>
-
-                    </div>
+        <div class="card text-left">
+            <div class="jumbotron jumbotron-fluid">
+                <div class="container-fluid">
+                    <h1 class="display-4">@DAS.Services.LocalService.Get("Users")</h1>
+                    <p class="lead">@DAS.Services.LocalService.Get("Managing user accounts").</p>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#dlg_AddUser">
+                        @DAS.Services.LocalService.Get("Add User")
+                    </button>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-6">
-                <div class="card">
-                    <div class="card-body">
-                        @if (AppUsers == null)
-                        {
-                        <p> @LocalService.Get("Loading", currentUser.Lang)...</p>
-                        }
-                        else
-                        {
-                            <table class="table">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>@LocalService.Get("User Name", currentUser.Lang)</th>
-                                        <th>@LocalService.Get("Admin", currentUser.Lang)</th>
-                                        <th>@LocalService.Get("Archive", currentUser.Lang)</th>
-                                        <th>@LocalService.Get("Public", currentUser.Lang)</th>
-                                        <th>@LocalService.Get("Repositories", currentUser.Lang)</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var user in AppUsers)
-                                    {
-                                        <tr class="@(user == CurrentUser ? "bg-info text-light" : "")">
-                                            <td>@user.UserName</td>
-                                            @if (user.IsAdmin)
-                                            {
-                                                <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_ADMIN))"><i class="oi oi-check"></i></a></td>
-                                            }
-                                            else
-                                            {
-                                                <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_ADMIN))"><i class="oi oi-x"></i></a></td>
-                                            }
-                                            @if (user.IsArchive)
-                                            {
-                                                <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_ARCHIVE))"><i class="oi oi-check"></i></a></td>
-                                            }
-                                            else
-                                            {
-                                                <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_ARCHIVE))"><i class="oi oi-x"></i></a></td>
-                                            }
-                                            @if (user.IsPublic)
-                                            {
-                                                <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_PUBLIC))"><i class="oi oi-check"></i></a></td>
-                                            }
-                                            else
-                                            {
-                                                <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_PUBLIC))"><i class="oi oi-x"></i></a></td>
-                                            }
-                                            <td>
-                                                <a class="btn-link" style="cursor:pointer;" @onclick="(() => SelectUser(user))"><i class="oi oi-box"></i></a>
-                                            </td>
-                                            <td>
-                                                <a class="btn-sm @(user.Lang == "ar" ? "btn-primary text-light" : "") mx-2" style="cursor:pointer;" @onclick="@(() => SelectLanguage("ar"))">Ar</a>
-                                                <a class="btn-sm @(user.Lang == "en" ? "btn-primary text-light" : "") mx-2" style="cursor:pointer;" @onclick="@(() => SelectLanguage("en"))">En</a>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        }
-                    </div>
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <a class="nav-item nav-link active" id="nav-accounts-tab" data-toggle="tab" href="#nav-accounts" role="tab" aria-controls="nav-accounts" aria-selected="true">@DAS.Services.LocalService.Get("Accounts")</a>
+                    <a class="nav-item nav-link" id="nav-repos-tab" data-toggle="tab" href="#nav-repos" role="tab" aria-controls="nav-repos" aria-selected="false">@DAS.Services.LocalService.Get("User Repositories")</a>
                 </div>
-            </div>
-
-            <div class="col-6">
-                @if (Repositories != null && Repositories.Count > 0 && CurrentUser != null)
-                {
+            </nav>
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="nav-accounts" role="tabpanel" aria-labelledby="nav-accounts-tab">
                     <div class="card">
                         <div class="card-body">
-                            <div class="card-title">@CurrentUser.UserName @LocalService.Get("Repositories", currentUser.Lang)</div>
-                            <EditForm Context="from" Model="CurrentUser" OnValidSubmit="OnAddRepo">
-                                <div class="form-inline">
-                                    <div class="form-group mb-2">
-                                        <label for="inputRepoToAdd" class="sr-only">@LocalService.Get("Repository", currentUser.Lang)</label>
-                                        <InputSelect @bind-Value="CurrentUser.RepoToAdd" class="form-control" id="inputRepoToAdd">
-                                            <option value=""> -- @LocalService.Get("Select Repository", currentUser.Lang) -- </option>
-                                            @foreach (var item in Repositories.Where(x => !CurrentUser.Repositories.Contains(x.Key)))
-                                                    {
-                                                <option value="@item.Key.ToString()">@item.Value</option>
-                                                    }
-                                        </InputSelect>
-                                    </div>
-                                    <button type="submit" class="btn btn-success mx-2 mb-2">@LocalService.Get("Add", currentUser.Lang)</button>
-                                </div>
-                            </EditForm>
-                            <table class="table mt-2">
-                                <thead class="thead-dark">
-                                    <tr>
-                                        <th>@LocalService.Get("Repository", currentUser.Lang)</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var repoId in CurrentUser.Repositories)
-                                    {
+                            @if (AppUsers == null)
+                            {
+                                <p> @LocalService.Get("Loading", currentUser.Lang)...</p>
+                            }
+                            else
+                            {
+                                <table class="table">
+                                    <thead class="thead-light">
                                         <tr>
-                                            <td>@Repositories[repoId]</td>
-                                            <td><a @onclick="@(() => OnRemoveRepo(repoId))" class="btn-link text-danger" style="cursor: pointer;"><i class="oi oi-trash"></i></a></td>
+                                            <th>@LocalService.Get("User Name", currentUser.Lang)</th>
+                                            <th>@LocalService.Get("Admin", currentUser.Lang)</th>
+                                            <th>@LocalService.Get("Archive", currentUser.Lang)</th>
+                                            <th>@LocalService.Get("Public", currentUser.Lang)</th>
+                                            <th>@LocalService.Get("Repositories", currentUser.Lang)</th>
+                                            <th>@LocalService.Get("Language", currentUser.Lang)</th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var user in AppUsers)
+                                        {
+                                            <tr class="@(user == CurrentUser ? "bg-info text-light" : "")">
+                                                <td>@user.UserName</td>
+                                                @if (user.IsAdmin)
+                                                {
+                                                    <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_ADMIN))"><i class="oi oi-check"></i></a></td>
+                                                }
+                                                else
+                                                {
+                                                    <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_ADMIN))"><i class="oi oi-x"></i></a></td>
+                                                }
+                                                @if (user.IsArchive)
+                                                {
+                                                    <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_ARCHIVE))"><i class="oi oi-check"></i></a></td>
+                                                }
+                                                else
+                                                {
+                                                    <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_ARCHIVE))"><i class="oi oi-x"></i></a></td>
+                                                }
+                                                @if (user.IsPublic)
+                                                {
+                                                    <td><a class="text-success" @onclick="(() => RemoveFromRole(user.UserName, Constants.ROLE_PUBLIC))"><i class="oi oi-check"></i></a></td>
+                                                }
+                                                else
+                                                {
+                                                    <td><a class="text-danger" @onclick="(() => AddToRole(user.UserName, Constants.ROLE_PUBLIC))"><i class="oi oi-x"></i></a></td>
+                                                }
+                                                <td>
+                                                    <a class="btn btn-sm btn-primary" style="cursor:pointer;" @onclick="(() => SelectUser(user))">@LocalService.Get("User Repositories", currentUser.Lang)</a>
+                                                </td>
+                                                <td>
+                                                    <a class="btn btn-sm @(user.Lang == "ar" ? "btn-primary text-light" : "") mx-2" style="cursor:pointer;" @onclick="@(() => SelectLanguage("ar"))">ع</a>
+                                                    <a class="btn btn-sm @(user.Lang == "en" ? "btn-primary text-light" : "") mx-2" style="cursor:pointer;" @onclick="@(() => SelectLanguage("en"))">E</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
                         </div>
                     </div>
-                }
+
+                </div>
+                <div class="tab-pane fade" id="nav-repos" role="tabpanel" aria-labelledby="nav-repos-tab">
+                    @if (Repositories != null && Repositories.Count > 0 && CurrentUser != null)
+                    {
+                        <div class="card">
+                            <div class="card-body">
+                                <EditForm Context="from" Model="CurrentUser" OnValidSubmit="OnAddRepo">
+                                    <div class="form-inline">
+                                        <div class="form-group mb-2">
+                                            <label for="inputRepoToAdd">@LocalService.Get("Select repositories for user", currentUser.Lang): @CurrentUser.UserName</label>
+                                            <InputSelect @bind-Value="CurrentUser.RepoToAdd" class="form-control mx-2" id="inputRepoToAdd">
+                                                <option value=""> -- @LocalService.Get("Select Repository", currentUser.Lang) -- </option>
+                                                @foreach (var item in Repositories.Where(x => !CurrentUser.Repositories.Contains(x.Key)))
+                                                        {
+                                                    <option value="@item.Key.ToString()">@item.Value</option>
+                                                        }
+                                                /**/
+                                            </InputSelect>
+                                        </div>
+                                        <button type="submit" class="btn btn-success mb-2">@LocalService.Get("Add", currentUser.Lang)</button>
+                                    </div>
+                                </EditForm>
+                                <div class="card mt-2">
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var repoId in CurrentUser.Repositories)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                @Repositories[repoId]
+                                                <span class="badge badge-danger badge-pill">
+                                                    <a @onclick="@(() => OnRemoveRepo(repoId))" style="cursor: pointer;"><i class="oi oi-trash"></i></a>
+                                                </span>
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="dlg_AddUser" tabindex="-1" role="dialog" aria-labelledby="dlg_AddUserLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+
+                    <EditForm Context="formContext" Model="UserModel" OnValidSubmit="OnValidSubmit">
+                        <div class="modal-header bg-primary">
+                            <h5 class="modal-title" id="dlg_AddUserLabel">@LocalService.Get("Add User", currentUser.Lang)</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="inputUserName"> @LocalService.Get("User Name", currentUser.Lang)</label>
+                                <input @bind="UserModel.UserName" class="form-control" id="inputUserName" placeholder="@LocalService.Get("User Name", currentUser.Lang)">
+                            </div>
+                            <div class="form-group">
+                                <label for="inputEmail"> @LocalService.Get("Email", currentUser.Lang)</label>
+                                <input @bind="UserModel.Email" type="email" class="form-control" id="inputEmail" placeholder="@LocalService.Get("Email", currentUser.Lang)">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">@LocalService.Get("Close", currentUser.Lang)</button>
+                            <button type="submit" class="btn btn-success mb-2">@LocalService.Get("Add User", currentUser.Lang)</button>
+                        </div>
+                    </EditForm>
+                </div>
             </div>
         </div>
     </AuthorizeView>
@@ -163,24 +188,25 @@
 
     private AppUser currentUser;
 
-    public void SelectUser(AppUser user)
+    public async Task SelectUser(AppUser user)
     {
         CurrentUser = user;
-        if(CurrentUser != null)
+        if (CurrentUser != null)
         {
             CurrentUser.RepoToAdd = null;
+            await JSRuntime.InvokeVoidAsync("showTab", "#nav-repos-tab");
         }
     }
 
     public async Task SelectLanguage(string lang)
     {
-        if(CurrentUser != null && !string.IsNullOrEmpty(lang))
+        if (CurrentUser != null && !string.IsNullOrEmpty(lang))
         {
             var user = await userManager.FindByIdAsync(CurrentUser.Id);
-            if(user != null)
+            if (user != null)
             {
                 var claims = await userManager.GetClaimsAsync(user);
-                if(!claims.Any(x => x.Type == "Lang" && x.Value == lang))
+                if (!claims.Any(x => x.Type == "Lang" && x.Value == lang))
                 {
 
                     await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("Lang", lang));
@@ -201,13 +227,13 @@
 
     public async Task OnAddRepo()
     {
-        if(CurrentUser != null && !string.IsNullOrEmpty(CurrentUser.RepoToAdd))
+        if (CurrentUser != null && !string.IsNullOrEmpty(CurrentUser.RepoToAdd))
         {
             var user = await userManager.FindByIdAsync(CurrentUser.Id);
-            if(user != null)
+            if (user != null)
             {
                 var claims = await userManager.GetClaimsAsync(user);
-                if(!claims.Any(x => x.Type == "RepositoryId" && x.Value == CurrentUser.RepoToAdd))
+                if (!claims.Any(x => x.Type == "RepositoryId" && x.Value == CurrentUser.RepoToAdd))
                 {
 
                     await userManager.AddClaimAsync(user, new System.Security.Claims.Claim("RepositoryId", CurrentUser.RepoToAdd));
@@ -220,13 +246,13 @@
 
     public async Task OnRemoveRepo(int repoId)
     {
-        if(CurrentUser != null)
+        if (CurrentUser != null)
         {
             var user = await userManager.FindByIdAsync(CurrentUser.Id);
-            if(user != null)
+            if (user != null)
             {
                 var claims = await userManager.GetClaimsAsync(user);
-                if(claims.Any(x => x.Type == "RepositoryId" && x.Value == repoId.ToString()))
+                if (claims.Any(x => x.Type == "RepositoryId" && x.Value == repoId.ToString()))
                 {
 
                     await userManager.RemoveClaimAsync(user, new System.Security.Claims.Claim("RepositoryId", repoId.ToString()));
@@ -262,22 +288,25 @@
     public async Task OnValidSubmit()
     {
         var user = await identService.CreateUserAsync(UserModel?.UserName, UserModel?.Email).ConfigureAwait(false);
-        if(user == null)
+        if (user == null)
         {
             toastService.ShowError("Adding user failed", "Error");
         }
         else
         {
+            await JSRuntime.InvokeVoidAsync("closeDialog", "#dlg_AddUser");
             toastService.ShowSuccess($"User {UserModel?.UserName} added successfully", "Success");
             await LoadUsers().ConfigureAwait(false);
         }
+
+        
 
     }
 
     public async Task AddToRole(string userName, string role)
     {
         var result = await identService.AddUserRoleAsync(userName, role).ConfigureAwait(false);
-        if(!result)
+        if (!result)
         {
             toastService.ShowError($"Failed to add user {userName} to {role} role", "Error");
         }
@@ -291,7 +320,7 @@
     public async Task RemoveFromRole(string userName, string role)
     {
         var result = await identService.RemoveUserRoleAsync(userName, role).ConfigureAwait(false);
-        if(!result)
+        if (!result)
         {
             toastService.ShowError($"Failed to remove user {userName} from {role} role", "Error");
         }

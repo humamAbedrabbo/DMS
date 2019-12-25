@@ -14,55 +14,76 @@
 @inject NavigationManager navMgr
 
 
+
 @if (currentUser != null)
 {
-    <h3> @LocalService.Get("Edit Repository", currentUser.Lang): @Repo?.Name</h3>
-    <small class="text-secondary font-italic"> @LocalService.Get("created on", currentUser.Lang) @Repo.CreatedOn.ToString("dd-MM-yyyy")  @LocalService.Get("by", currentUser.Lang) @Repo.CreatedBy,  @LocalService.Get("last update on", currentUser.Lang) @Repo.UpdatedOn.ToString("dd-MM-yyyy hh:mm")  @LocalService.Get("by", currentUser.Lang) @Repo.UpdatedBy</small>
-    <EditForm Model="RepoUpdateModel" OnValidSubmit="OnValidSubmitRepository" class="my-3">
-        <DataAnnotationsValidator />
-        <div class="form-group">
-            <label for="id_title"> @LocalService.Get("Title", currentUser.Lang)</label>
-            <InputText @bind-Value="RepoUpdateModel.Title" class="form-control" id="id_title"></InputText>
-            <ValidationMessage For="@(() => RepoUpdateModel.Title)" />
+    <div class="card text-left">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container-fluid">
+                <h1 class="display-4">@LocalService.Get("Repository", currentUser.Lang) @Repo.Name</h1>
+                <h4>(@Repo.Title)</h4>
+                <hr />
+                <blockquote class="blockquote">
+                    <p class="mb-0">@Repo.Description</p>
+                    <footer class="blockquote-footer">
+                        @LocalService.Get("created on", currentUser.Lang) @Repo.CreatedOn.ToString("dd-MM-yyyy")  <cite>@LocalService.Get("by", currentUser.Lang) @Repo.CreatedBy</cite>,  @LocalService.Get("last update on", currentUser.Lang) @Repo.UpdatedOn.ToString("dd-MM-yyyy hh:mm")  <cite>@LocalService.Get("by", currentUser.Lang) @Repo.UpdatedBy</cite>
+                    </footer>
+                </blockquote>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="id_desc"> @LocalService.Get("Description", currentUser.Lang)</label>
-            <InputTextArea @bind-Value="RepoUpdateModel.Description" class="form-control" id="id_desc"></InputTextArea>
-            <ValidationMessage For="@(() => RepoUpdateModel.Description)" />
-        </div>
-        <a class="btn btn-secondary mr-1" href="repos"> @LocalService.Get("Close", currentUser.Lang)</a>
-        <button class="btn btn-primary" type="submit"> @LocalService.Get("Save", currentUser.Lang)</button>
-    </EditForm>
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-edit-tab" data-toggle="tab" href="#nav-edit" role="tab" aria-controls="nav-edit" aria-selected="true">@LocalService.Get("Edit Repository", currentUser.Lang)</a>
+                <a class="nav-item nav-link" id="nav-meta-tab" data-toggle="tab" href="#nav-meta" role="tab" aria-controls="nav-meta" aria-selected="false">@LocalService.Get("Meta Fields", currentUser.Lang)</a>
 
-    <div class="row">
-        <div class="col-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="card-title"><h5> @LocalService.Get("Meta Fields", currentUser.Lang)</h5></div>
-                    <div class="mb-2">
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-edit" role="tabpanel" aria-labelledby="nav-edit-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <EditForm Model="RepoUpdateModel" OnValidSubmit="OnValidSubmitRepository" class="my-3">
+                            <DataAnnotationsValidator />
+                            <div class="form-group">
+                                <label for="id_title"> @LocalService.Get("Title", currentUser.Lang)</label>
+                                <InputText @bind-Value="RepoUpdateModel.Title" class="form-control" id="id_title"></InputText>
+                                <ValidationMessage For="@(() => RepoUpdateModel.Title)" />
+                            </div>
+                            <div class="form-group">
+                                <label for="id_desc"> @LocalService.Get("Description", currentUser.Lang)</label>
+                                <InputTextArea @bind-Value="RepoUpdateModel.Description" class="form-control" id="id_desc"></InputTextArea>
+                                <ValidationMessage For="@(() => RepoUpdateModel.Description)" />
+                            </div>
+                            <a class="btn btn-secondary mr-1" href="repos"> @LocalService.Get("Close", currentUser.Lang)</a>
+                            <button class="btn btn-primary" type="submit"> @LocalService.Get("Save", currentUser.Lang)</button>
+                        </EditForm>
+                    </div>
+
+                </div>
+            </div>
+            <div class="tab-pane fade" id="nav-meta" role="tabpanel" aria-labelledby="nav-meta-tab">
+                <div class="card">
+                    <div class="card-body">
+
                         <EditForm Context="test" Model="Item" OnValidSubmit="OnValidSetValue">
                             <div class="form-inline">
-                                <div class="form-group mx-sm-3 mb-2">
+                                <div class="form-group mb-2">
                                     <label for="id_name" class="sr-only"> @LocalService.Get("Field Name", currentUser.Lang)</label>
                                     <InputSelect @bind-Value="Item.Name" class="form-control" id="id_name">
-                                        @if (Fields == null)
+                                        <option value=""></option>
+                                        @if (Fields != null)
+                                        {
+                                            foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
                                             {
-                                            <option></option>
-                                            }
-                                            else
-                                            {
-                                                foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
-                                                {
                                                 <optgroup label="@group">
                                                     @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
-                                                        {
+                                                    {
                                                         <option value="@field.Name">@field.Title</option>
-                                                        }
-                                                    /**/
+                                                    }
 
                                                 </optgroup>
-                                                }
                                             }
+                                        }
 
                                     </InputSelect>
                                 </div>
@@ -73,19 +94,15 @@
                                 <button type="submit" class="btn btn-success mx-2 mb-2"> @LocalService.Get("Set Value", currentUser.Lang)</button>
                             </div>
                         </EditForm>
-                    </div>
 
-
-                    @if (ActiveFields != null)
-                    {
-                        <table class="table table-bordered table-sm col-6">
+                        <table class="table table-bordered table-sm col-6 mt-2">
                             <tbody>
-                                @foreach (var group in ActiveFields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                                @foreach (var group in ActiveFields?.Select(x => x.Group).Distinct().OrderBy(x => x))
                                 {
                                     <tr class="bg-dark text-white d-flex">
                                         <td class="col-12">@group</td>
                                     </tr>
-                                    @foreach (var meta in ActiveFields.Where(x => x.Group == group).OrderBy(x => x.Name))
+                                    @foreach (var meta in ActiveFields?.Where(x => x.Group == group).OrderBy(x => x.Name))
                                     {
                                         <tr class="d-flex">
                                             <td class="bg-light col-6">@meta.Title</td>
@@ -96,11 +113,14 @@
                                 }
                             </tbody>
                         </table>
-                    }
-                </div>
 
+                    </div>
+
+                </div>
             </div>
+
         </div>
+
     </div>
 }
 
@@ -126,6 +146,7 @@
             await adminService.SetRepoMetaValue(Repo.Id, Item.Name, Item.Value);
             Repo = await listsService.GetRepositoryById(Id.ToString());
         }
+        StateHasChanged();
     }
 
     public async Task OnValidSubmitRepository()
@@ -138,7 +159,7 @@
             toastService.ShowSuccess($"Repository '{Repo.Name}' updated successfully");
             navMgr.NavigateTo("repos");
         }
-        catch 
+        catch
         {
             toastService.ShowError($"Failed to update repository '{Repo.Name}'");
         }

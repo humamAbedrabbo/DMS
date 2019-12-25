@@ -42,7 +42,8 @@ namespace DAS.Services
                     {
                         appUser = new AppUser
                         {
-                            UserName = "Anonymous"
+                            UserName = "Anonymous",
+                            IsAnonymous = true
                         };
                     }
                 }

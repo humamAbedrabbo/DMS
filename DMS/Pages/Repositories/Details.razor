@@ -32,7 +32,7 @@
                     <a href="/docs/upload/@Repo?.Id/" class="btn btn-lg btn-secondary" role="button"> @LocalService.Get("Upload", currentUser.Lang)</a>
                 </AuthorizeView>
                 <AuthorizeView Roles="Admin">
-                    <button type="button" class="btn btn-lg btn-primary" role="button" data-toggle="modal" data-target="#id_AddFolder"> @LocalService.Get("Add Folder", currentUser.Lang)</button>
+                    <button type="button" class="btn btn-lg btn-primary" role="button" data-toggle="modal" data-target="#dlg_AddFolder"> @LocalService.Get("Add Folder", currentUser.Lang)</button>
                 </AuthorizeView>
             </div>
         </div>
@@ -139,13 +139,13 @@
 
 
     <!-- Modal -->
-    <div class="modal fade" id="id_AddFolder" tabindex="-1" role="dialog" aria-labelledby="label_AddFolder" aria-hidden="true">
+    <div class="modal fade" id="dlg_AddFolder" tabindex="-1" role="dialog" aria-labelledby="dlg_AddFolderLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
 
             <div class="modal-content">
                 <EditForm Model="FolderAddModel" OnValidSubmit="OnValidSubmitFolder">
                     <div class="modal-header bg-primary">
-                        <h5 class="modal-title" id="label_AddFolder"> @LocalService.Get("Add Folder", currentUser.Lang)</h5>
+                        <h5 class="modal-title" id="dlg_AddFolderLabel"> @LocalService.Get("Add Folder", currentUser.Lang)</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -217,6 +217,7 @@
         var folder = await arcService.AddFolder(FolderAddModel);
         if (folder != null)
         {
+            await JSRuntime.InvokeVoidAsync("closeDialog", "#dlg_AddFolder");
             toastService.ShowSuccess($"Folder '{folder.Name}' created successfully");
             await LoadTree();
         }
@@ -225,7 +226,7 @@
             toastService.ShowError($"Failed to create folder '{FolderAddModel.Name}'");
         }
         // $('#myModal').modal('show')
-        await JSRuntime.InvokeVoidAsync("closeDialog", "#id_AddFolder");
+        
     }
 
     protected override async Task OnParametersSetAsync()

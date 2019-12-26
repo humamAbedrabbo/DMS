@@ -126,6 +126,7 @@
         progress = 0;
         chunkNo = 1;
         gotoDocumentEnabled = "disabled";
+        BufferSize = 20480;
         CreateUploadModel();
     }
 
@@ -282,6 +283,7 @@
 
 
         SetMeta();
+        StateHasChanged();
     }
 
     protected void SetMeta()

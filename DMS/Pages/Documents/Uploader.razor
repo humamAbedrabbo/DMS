@@ -19,6 +19,8 @@
 @inject IToastService toastService
 @inject IJSRuntime JSRuntime
 
+
+
 @if (currentUser != null && Repo != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Id)))
 {
     <div class="card text-left">
@@ -150,7 +152,10 @@
         progress = 0;
         chunkNo = 1;
         gotoDocumentEnabled = "disabled";
+        BufferSize = 20480;
+
         CreateUploadModel();
+        
     }
 
     public async Task ReadFile()
@@ -304,6 +309,7 @@
         documentModel.UploadPath = null;
         
         SetMeta();
+        this.StateHasChanged();
     }
 
     protected void SetMeta()

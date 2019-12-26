@@ -15,6 +15,7 @@ namespace DAS.Services
         Task<bool> UploadChunk(ChunkAddModel model);
         Task<UploadDocumentResultViewModel> UploadDocument(UploadDocumentViewModel uploadDocument);
         Task<UploadDocumentChunkResultViewModel> UploadDocumentChunk(UploadDocumentChunkViewModel uploadChunk);
+        Task<UploadDocumentResultViewModel> UploadDocumentForCheckIn(UploadDocumentViewModel uploadDocument);
         Task UploadThumbnail(DocumentThumbnail model);
     }
 }

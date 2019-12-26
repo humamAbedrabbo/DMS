@@ -93,11 +93,11 @@ namespace DAS
             }
 
             // Temporary workaround for https://github.com/aspnet/AspNetCore/issues/13470
-            app.Use(async (context, next) =>
-            {
-                context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
-                await next.Invoke();
-            });
+            //app.Use(async (context, next) =>
+            //{
+            //    context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
+            //    await next.Invoke();
+            //});
 
             //app.UseHttpsRedirection();
             app.UseStaticFiles();

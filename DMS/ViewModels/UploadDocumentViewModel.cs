@@ -22,4 +22,5 @@ namespace DAS.ViewModels
         public string UserName { get; set; }
         public Dictionary<string, string> Meta { get; set; } = new Dictionary<string, string>();
     }
+
 }

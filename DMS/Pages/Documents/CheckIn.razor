@@ -1,5 +1,4 @@
-﻿@page "/docs/upload/{Id:int}/{FolderId}"
-@page "/docs/upload/{Id:int}"
+﻿@page "/docs/checkin/{Id:int}"
 @attribute [Authorize(Roles = "Admin, Archive")]
 
 @using MW.Blazor
@@ -19,7 +18,7 @@
 @inject IToastService toastService
 @inject IJSRuntime JSRuntime
 
-@if (currentUser != null && Repo != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Id)))
+@if (currentUser != null && Doc != null && Repo != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(Repo.Id)))
 {
     <div class="card text-left">
         <div class="jumbotron jumbotron-fluid">
@@ -35,29 +34,13 @@
         </nav>
         <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade show active" id="nav-upload" role="tabpanel" aria-labelledby="nav-upload-tab">
-                <div class="row d-flex flex-grow-1">
-                    <div class="col-4 d-flex flex-column flex-grow-1">
-                        <div class="card d-flex flex-grow-1 flex-column">
-                            <div class="card-body">
-                                <div class="card-title"><h5>@LocalService.Get("Folders", currentUser.Lang)</h5></div>
-                                @if (TreeItems != null)
-                                {
-                                    <Tree Nodes="@TreeItems" ChildSelector="@(item => item.Childs)" @bind-SelectedNode="selectedNode" @bind-ExpandedNodes="ExpandedNodes" HasChildNodes="@(item => item.Childs?.Any() == true)">
-                                        <TitleTemplate>
-                                            <i class="oi oi-folder mr-1" style="color: darkorange;"></i>
-                                            @context.Name
-                                        </TitleTemplate>
-                                    </Tree>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-8 d-flex flex-column flex-grow-1">
+                <div class="row">
+                    <div class="col-12">
                         <div class="card">
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="parentName">@LocalService.Get("Parent Folder", currentUser.Lang)</label>
-                                    <input readonly id="parentName" class="form-control" value="@selectedNode?.Name" />
+                                    <input readonly id="parentName" class="form-control" value="@Doc.Parent" />
                                 </div>
                                 <div class="form-group">
                                     <label for="uploadFile">@LocalService.Get("Select File", currentUser.Lang)</label>
@@ -96,7 +79,7 @@
                                     <br />
                                     <textarea style="max-width: 100%;" cols="50" rows="20">@Output</textarea>
                                 </div>
-                                <button @onclick=ReadFile class="btn btn-primary">@LocalService.Get("Upload Document", currentUser.Lang)</button>
+                                <button @onclick=ReadFile class="btn btn-primary">@LocalService.Get("Check In", currentUser.Lang)</button>
                                 <a href="doc/details/@documentModel.DocumentId" class="btn btn-success @gotoDocumentEnabled">@LocalService.Get("Go To Document", currentUser.Lang)</a>
                                 <button @onclick=ClearFile class="btn btn-primary">@LocalService.Get("Reset", currentUser.Lang)</button>
 
@@ -110,24 +93,17 @@
 }
 
 
+
 @code {
 
     [Parameter]
     public int Id { get; set; }
 
-    [Parameter]
-    public string FolderId { get; set; }
-
     private RepoDetailModel Repo { get; set; } = new RepoDetailModel();
-    private AppUser currentUser;
-    private IEnumerable<TreeModel> TreeItems;
-    private IEnumerable<MetaField> MetaFields;
-
-    IList<TreeModel> ExpandedNodes = new List<TreeModel>();
-
-    private TreeModel selectedNode;
-
+    private DocumentDetailModel Doc { get; set; }
     private UploadDocumentViewModel documentModel = new UploadDocumentViewModel();
+    private AppUser currentUser;
+    private IEnumerable<MetaField> MetaFields;
 
     [Parameter]
     public int BufferSize { get; set; } = 20480;
@@ -174,17 +150,15 @@
 
         var file = files.FirstOrDefault();
 
-
         var fileInfo = await file.ReadFileInfoAsync();
         max += fileInfo.Size;
 
         // Upload the document first
-        documentModel.ParentId = selectedNode?.Id;
         documentModel.Name = fileInfo.Name;
         documentModel.ContentType = fileInfo.Type;
         documentModel.Size = fileInfo.Size;
 
-        var uploadDocResult = await arcService.UploadDocument(documentModel);
+        var uploadDocResult = await arcService.UploadDocumentForCheckIn(documentModel);
 
         if (!uploadDocResult.IsOk)
         {
@@ -195,6 +169,7 @@
 
         documentModel.DocumentId = uploadDocResult.DocumentId;
         documentModel.Version = uploadDocResult.Version;
+        documentModel.UploadPath = uploadDocResult.Path;
 
         // Start uploading file
         var stopwatch = new Stopwatch();
@@ -270,7 +245,7 @@
             Output += $"Done reading file {fileInfo.Name} - {fs.Length} bytes in {stopwatch.ElapsedMilliseconds}ms.{nl}.";
             toastService.ShowSuccess($"Uploaded document {fileInfo.Name} successfully!");
             gotoDocumentEnabled = string.Empty;
-            
+
         }
         this.StateHasChanged();
     }
@@ -278,106 +253,43 @@
     protected override async Task OnParametersSetAsync()
     {
         currentUser = await currentUserService.GetCurrentUserAsync();
-        MetaFields = await listsService.GetMetaFieldsList();
-        Repo = await listsService.GetRepositoryById(Id.ToString());
-        // TreeItems = await listsService.GetRepositoryFoldersTree(Repo.Id);
-        CreateUploadModel();
+        Doc = await listsService.GetDocumentById(Id);
 
-        await LoadTree();
+        Repo = await listsService.GetRepositoryById(Doc.RepositoryId.ToString());
+        MetaFields = await listsService.GetMetaFieldsList();
+
+
+        CreateUploadModel();
     }
 
     protected void CreateUploadModel()
     {
-        documentModel = new UploadDocumentViewModel();
-        documentModel.DocumentId = 0;
-        documentModel.Version = 1;
-        documentModel.RepositoryId = Repo.Id;
-        documentModel.ParentId = selectedNode?.Id;
-        documentModel.Storage = Repo.Storage;
-        documentModel.UserName = currentUser.UserName;
-        documentModel.ContentType = null;
-        documentModel.Description = null;
-        documentModel.Meta = new Dictionary<string, string>();
-        documentModel.Name = null;
-        documentModel.Size = 0;
-        documentModel.Title = null;
-        documentModel.UploadPath = null;
-        
+        documentModel = new UploadDocumentViewModel()
+        {
+            DocumentId = Doc.Id,
+            Version = Doc.Version,
+            RepositoryId = Repo.Id,
+            ParentId = Doc.ParentId,
+            Storage = Repo.Storage,
+            UserName = currentUser.UserName,
+            ContentType = Doc.ContentType,
+            Description = Doc.Description,
+            Name = Doc.Name,
+            Size = Doc.Length,
+            Title = Doc.Title,
+            UploadPath = null
+        };
+
+
         SetMeta();
     }
 
     protected void SetMeta()
     {
-        documentModel.Meta.Clear();
-        if (Repo != null && Repo.Meta != null)
+        documentModel.Meta = new Dictionary<string, string>();
+        foreach (var item in Doc.Meta)
         {
-            foreach (var item in Repo.Meta)
-            {
-                documentModel.Meta[item.Key] = item.Value;
-            }
-            if (selectedNode != null && selectedNode.Meta != null)
-            {
-                foreach (var item in selectedNode.Meta)
-                {
-                    documentModel.Meta[item.Key] = item.Value;
-                }
-            }
+            documentModel.Meta[item.Key] = item.Value;
         }
-
-    }
-
-    protected override void OnInitialized()
-    {
-        ExpandedNodes.Add(TreeItems?.Skip(1).First());
-        ExpandedNodes.Add(TreeItems?.Skip(1).Take(1).First().Childs.Skip(1).First());
-    }
-
-    private async Task LoadTree()
-    {
-        TreeItems = await listsService.GetRepositoryFoldersTree(Id);
-        if (TreeItems != null)
-        {
-            if (!string.IsNullOrEmpty(FolderId))
-            {
-                if (int.TryParse(FolderId, out int selectedFolderId))
-                {
-                    TreeModel result = null;
-                    foreach (var item in TreeItems)
-                    {
-                        result = SearchFolder(item, selectedFolderId);
-                        if (result != null)
-                        {
-                            selectedNode = result;
-                            SetMeta();
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-
-    private TreeModel SearchFolder(TreeModel parent, int fid)
-    {
-        TreeModel result = null;
-        if (parent.Id == fid)
-        {
-            return parent;
-        }
-        if (parent.Childs != null)
-        {
-            foreach (var item in parent.Childs)
-            {
-                result = SearchFolder(item, fid);
-                if (result != null)
-                {
-                    return result;
-                }
-            }
-
-        }
-        return result;
     }
 }
-

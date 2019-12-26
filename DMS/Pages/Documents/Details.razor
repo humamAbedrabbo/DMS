@@ -19,9 +19,12 @@
     <div class="card text-left">
         <div class="jumbotron jumbotron-fluid">
             <div class="container-fluid">
-                <h1 class="display-4">@LocalService.Get("Document Details", currentUser.Lang) @Doc.Name</h1>
-                <h4>@Doc.Title</h4>
-                <small>@LocalService.Get("Repository", currentUser.Lang): @Doc.Repository</small>
+                <h1 class="display-4">@LocalService.Get("Document Details", currentUser.Lang)</h1>
+                <p class="h4 font-italic"><span class="text-muted">@LocalService.Get("Title", currentUser.Lang): </span>@Doc.Title</p>
+                <p class="h5 font-italic"><span class="text-muted">@LocalService.Get("Document Name", currentUser.Lang): </span>@Doc.Name</p>
+                <p class="h6 font-italic"><span class="text-muted">@LocalService.Get("Folder Parent", currentUser.Lang): </span>@Doc.Parent</p>
+                <p class="h6 font-italic"><span class="text-muted">@LocalService.Get("Repository Name", currentUser.Lang): </span>@Doc.Repository</p>
+
                 <hr />
                 <blockquote class="blockquote">
                     <p class="mb-0">@Doc.Description</p>
@@ -37,7 +40,8 @@
                     }
                     else if (Doc.LastOperation == DocumentOperation.CheckedOut)
                     {
-                        <a class="btn btn-lg btn-success mr-1" role="button" href="repos/Checkin?id=@Doc.Id"> @LocalService.Get("Check In", currentUser.Lang)</a>
+                        <a class="btn btn-lg btn-success mr-1" role="button" href="docs/checkin/@Doc.Id"> @LocalService.Get("Check In", currentUser.Lang)</a>
+                        @*<a class="btn btn-lg btn-success mr-1" role="button" href="repos/Checkin?id=@Doc.Id"> @LocalService.Get("Check In", currentUser.Lang)</a>*@
                     }
                 </AuthorizeView>
             </div>
@@ -53,7 +57,6 @@
             <div class="tab-pane fade show active" id="nav-details" role="tabpanel" aria-labelledby="nav-details-tab">
                 <div class="card">
                     <div class="card-body">
-                        <div class="card-title"><h5>@Doc.Title</h5></div>
                         <div class="card-text">@Doc.Description</div>
                         <dl class="row">
                             <dt class="col-sm-3">@LocalService.Get("Repository", currentUser.Lang)</dt>

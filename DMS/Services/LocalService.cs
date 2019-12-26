@@ -10,6 +10,7 @@ namespace DAS.Services
         private static Dictionary<string, string> dic = new Dictionary<string, string> 
         { 
             ["Select File"] = "اختر ملف",
+            ["Document Name"] = "اسم ملف الوثيقة",
             ["Go To Document"] = "فتح صفحة الوثيقة",
             ["Meta field has hierarcial nature. It will be added to all childs in tree structure if it was added to a parent, but it will not be removed automatically"] = "تمتلك الحقول الإضافية خواص توريثية. حيث أنها تضاف تلقائيا على كل فروع الشجرة وذلك بمجر إضافتها على فرع الشجرة الرئيسي ولا تحذف من الفروع بشكل تلقائي",
             ["Meta fields are additional attributes that can be attached to document, folder or repository"] = "الحقول الإضافية هي عبارة عن مجموعة خواص يمكن إلحاقها بوثيقة أو فهرس أو مكتبة",

@@ -18,8 +18,9 @@
     <div class="card text-left">
         <div class="jumbotron jumbotron-fluid">
             <div class="container-fluid">
-                <h1 class="display-4">@LocalService.Get("Repository", currentUser.Lang) @Repo.Name</h1>
-                <h4>@Repo.Title</h4>
+                <h1 class="display-4">@LocalService.Get("Repository Details", currentUser.Lang)</h1>
+                <p class="h4 font-italic"><span class="text-muted">@LocalService.Get("Title", currentUser.Lang): </span>@Repo.Title</p>
+                <p class="h5 font-italic"><span class="text-muted">@LocalService.Get("Repository Name", currentUser.Lang): </span>@Repo.Name</p>
                 <hr />
                 <blockquote class="blockquote">
                     <p class="mb-0">@Repo.Description</p>

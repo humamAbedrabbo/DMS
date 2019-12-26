@@ -18,9 +18,10 @@
     <div class="card text-left">
         <div class="jumbotron jumbotron-fluid">
             <div class="container-fluid">
-                <h1 class="display-4">@LocalService.Get("Folder", currentUser.Lang): @CurrentFolder.Name</h1>
-                <h4>@CurrentFolder.Title</h4>
-                <small>@LocalService.Get("Repository", currentUser.Lang): @CurrentFolder.Repository</small>
+                <h1 class="display-4">@LocalService.Get("Folder Details", currentUser.Lang)</h1>
+                <p class="h4 font-italic"><span class="text-muted">@LocalService.Get("Title", currentUser.Lang): </span>@CurrentFolder.Title</p>
+                <p class="h5 font-italic"><span class="text-muted">@LocalService.Get("Folder Name", currentUser.Lang): </span>@CurrentFolder.Name</p>
+                <p class="h6 font-italic"><span class="text-muted">@LocalService.Get("Repository Name", currentUser.Lang): </span>@CurrentFolder.Repository</p>
                 <hr />
                 <blockquote class="blockquote">
                     <p class="mb-0">@CurrentFolder.Description</p>

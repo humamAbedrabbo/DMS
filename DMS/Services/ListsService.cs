@@ -32,7 +32,7 @@ namespace DAS.Services
 
                 return list;
             }
-            catch
+            catch(Exception ex)
             {
                 throw;
             }

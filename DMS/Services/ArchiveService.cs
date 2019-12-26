@@ -17,11 +17,13 @@ namespace DAS.Services
     {
         private readonly DasContext context;
         private readonly IListsService listsService;
+        private readonly ICurrentUserService currentUserService;
 
-        public ArchiveService(DasContext context, IListsService listsService)
+        public ArchiveService(DasContext context, IListsService listsService, ICurrentUserService currentUserService)
         {
             this.context = context;
             this.listsService = listsService;
+            this.currentUserService = currentUserService;
         }
 
         public async Task<FolderDetailModel> AddFolder(FolderAddModel model)
@@ -1210,6 +1212,153 @@ namespace DAS.Services
             {
                 result.IsOk = false;
                 result.ErrorMessage = "Failed to upload document";
+
+                return result;
+            }
+
+            return result;
+        }
+
+        public async Task<UploadDocumentResultViewModel> UploadDocumentForCheckIn(UploadDocumentViewModel uploadDocument)
+        {
+            UploadDocumentResultViewModel result = new UploadDocumentResultViewModel();
+            var currentUser = await currentUserService.GetCurrentUserAsync();
+            Document doc = null;
+            DateTime dt = DateTime.Now;
+
+            FolderDetailModel folder = null;
+            RepoDetailModel repo = await listsService.GetRepositoryById(uploadDocument.RepositoryId.ToString());
+
+            // Repository Not Found
+            if (repo == null)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "Repository not found";
+                result.DocumentId = uploadDocument.DocumentId;
+                result.Version = uploadDocument.Version;
+
+                return result;
+            }
+
+            if (uploadDocument.ParentId.HasValue)
+            {
+                folder = await listsService.GetFolderById(uploadDocument.ParentId);
+
+                // Folder Not Found
+                if (folder == null)
+                {
+                    result.IsOk = false;
+                    result.ErrorMessage = "Parent folder not found";
+                    result.DocumentId = uploadDocument.DocumentId;
+                    result.Version = uploadDocument.Version;
+
+                    return result;
+                }
+
+                if (folder.RepositoryId != repo.Id)
+                {
+                    result.IsOk = false;
+                    result.ErrorMessage = "Parent folder not found in repository";
+                    result.DocumentId = uploadDocument.DocumentId;
+                    result.Version = uploadDocument.Version;
+
+                    return result;
+                }
+            }
+
+            doc = await context.Documents
+                .Include(x => x.Repository)
+                .Include(x => x.Parent)
+                .Include(x => x.MetaData).ThenInclude(x => x.Field)
+                .Include(x => x.History)
+                .Where(x => x.Id == uploadDocument.DocumentId)
+                .FirstOrDefaultAsync();
+
+            // Document not found
+            if(doc == null)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "Document not found";
+                result.DocumentId = uploadDocument.DocumentId;
+                result.Version = uploadDocument.Version;
+
+                return result;
+            }
+
+            // Document not checked out
+            if(doc.LastOperation != DocumentOperation.CheckedOut)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "Document must be checked out before uploading new version";
+                result.DocumentId = uploadDocument.DocumentId;
+                result.Version = uploadDocument.Version;
+
+                return result;
+            }
+
+            // Document is checked out by different user
+            if (doc.OperationBy != uploadDocument.UserName || !currentUser.IsAdmin)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = $"Document is locked by user '{doc.OperationBy}' since '{doc.OperationDate.ToString("dd/MM/yyyy HH:mm")}'";
+                result.DocumentId = uploadDocument.DocumentId;
+                result.Version = uploadDocument.Version;
+
+                return result;
+            }
+
+            try
+            {
+                doc.Version = doc.Version + 1;
+                uploadDocument.Version = doc.Version;
+                doc.Name = uploadDocument.Name;
+                doc.Title = uploadDocument.Title ?? uploadDocument.Name;
+                doc.ContentType = uploadDocument.ContentType;
+                doc.Length = uploadDocument.Size;
+                doc.Description = uploadDocument.Description;
+                doc.UpdatedBy = uploadDocument.UserName;
+                doc.UpdatedOn = dt;
+                doc.LastOperation = DocumentOperation.CheckedIn;
+                doc.OperationBy = uploadDocument.UserName;
+                doc.OperationDate = dt;
+
+                doc.History.Add(new DocumentHistory
+                {
+                    Document = doc,
+                    Version = doc.Version,
+                    Operation = DocumentOperation.CheckedIn,
+                    OperationBy = uploadDocument.UserName,
+                    OperationOn = dt
+                });
+
+                if (uploadDocument.Meta != null && doc.MetaData != null)
+                {
+                    var fields = doc.MetaData.Select(x => x.Field);
+                    foreach (var meta in uploadDocument.Meta)
+                    {
+                        var field = doc.MetaData.Where(x => x.Field.Name == meta.Key).FirstOrDefault();
+                        if(field != null)
+                        {
+                            field.Value = meta.Value;
+                        }
+                    }
+                }
+
+                await context.SaveChangesAsync();
+
+                result.IsOk = true;
+                result.ErrorMessage = string.Empty;
+                result.DocumentId = doc.Id;
+                result.Version = doc.Version;
+                if (uploadDocument.Storage == StorageType.Directory)
+                {
+                    result.Path = Path.Combine(repo.Path, repo.Id.ToString(), doc.Id.ToString(), doc.Version.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                result.IsOk = false;
+                result.ErrorMessage = "Failed to check in document";
 
                 return result;
             }

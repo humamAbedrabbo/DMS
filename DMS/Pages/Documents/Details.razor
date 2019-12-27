@@ -59,7 +59,7 @@
                             <dt class="col-sm-3">@LocalService.Get("Title", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Doc.Title</dd>
                             <dt class="col-sm-3">@LocalService.Get("Repository", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@Doc.Repository</dd>
+                            <dd class="col-sm-9"><a href="/folders/@Doc.RepositoryId">@Doc.Repository</a></dd>
                             <dt class="col-sm-3">@LocalService.Get("Parent Folder", currentUser.Lang):</dt>
                             <dd class="col-sm-9">
                                 @if (Doc.ParentId.HasValue)

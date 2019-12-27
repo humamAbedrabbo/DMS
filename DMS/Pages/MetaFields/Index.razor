@@ -126,7 +126,7 @@
                             <label for="id_fld_default">@LocalService.Get("Default Value", currentUser.Lang)</label>
                             @if (EditMetaModel.FieldTag == "textarea")
                             {
-                                <textarea id="id_fld_default" rows="3" class="form-control">@EditMetaModel.DefaultValue</textarea>
+                                <InputTextArea id="id_fld_default" @bind-Value="EditMetaModel.DefaultValue" rows="3" class="form-control"></InputTextArea>
                             }
                             else if (MetaFieldModel.FieldTag == "select")
                             {
@@ -201,31 +201,31 @@
                             </div>
 
                         }
-                        <div class="form-group">
-                            <label for="inputDefault">@LocalService.Get("Default Value", currentUser.Lang)</label>
+                    <div class="form-group">
+                        <label for="inputDefault">@LocalService.Get("Default Value", currentUser.Lang)</label>
 
-                            @if (MetaFieldModel.FieldTag == "textarea")
+                        @if (MetaFieldModel.FieldTag == "textarea")
+                        {
+                            <InputTextArea id="id_fld_default" @bind-Value="MetaFieldModel.DefaultValue" rows="3" class="form-control"></InputTextArea>
+                        }
+                        else if (MetaFieldModel.FieldTag == "select")
+                        {
+                            <select id="inputDefault" @bind="MetaFieldModel.DefaultValue" class="form-control">@((MarkupString)MetaFieldModel.FieldTagInputSelectItems)</select>
+                        }
+                        else
+                        {
+                            if (MetaFieldModel.FieldFormat != null)
                             {
-                                <textarea id="inputDefault" rows="3" class="form-control">@MetaFieldModel.DefaultValue</textarea>
-                            }
-                            else if (MetaFieldModel.FieldTag == "select")
-                            {
-                                <select id="inputDefault" @bind="MetaFieldModel.DefaultValue" class="form-control">@((MarkupString)MetaFieldModel.FieldTagInputSelectItems)</select>
+                                <input id="inputDefault" type="@MetaFieldModel.FieldTagInputType" format-value="@MetaFieldModel.FieldFormat" @bind="MetaFieldModel.DefaultValue" class="form-control" />
                             }
                             else
                             {
-                                if (MetaFieldModel.FieldFormat != null)
-                                {
-                                    <input id="inputDefault" type="@MetaFieldModel.FieldTagInputType" format-value="@MetaFieldModel.FieldFormat" @bind="MetaFieldModel.DefaultValue" class="form-control" />
-                                }
-                                else
-                                {
-                                    <input id="inputDefault" type="@MetaFieldModel.FieldTagInputType" @bind="MetaFieldModel.DefaultValue" class="form-control" />
-                                }
+                                <input id="inputDefault" type="@MetaFieldModel.FieldTagInputType" @bind="MetaFieldModel.DefaultValue" class="form-control" />
                             }
+                        }
 
-                            <ValidationMessage For="@(() => MetaFieldModel.DefaultValue)" />
-                        </div>
+                        <ValidationMessage For="@(() => MetaFieldModel.DefaultValue)" />
+                    </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">@LocalService.Get("Close", currentUser.Lang)</button>

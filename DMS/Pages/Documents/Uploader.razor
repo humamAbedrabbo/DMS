@@ -82,10 +82,29 @@
                                         var field = MetaFields.FirstOrDefault(x => x.Name == meta.Key);
                                         if (field != null)
                                         {
-                                            <div class="form-group">
-                                                <label for="meta_@field.Id">@field.Title</label>
-                                                <input @bind="documentModel.Meta[meta.Key]" class="form-control" />
-                                            </div>
+                            <div class="form-group">
+                                <label>@field.Title</label>
+
+                                @if (field.FieldTag == "textarea")
+                                {
+                                    <textarea rows="3" class="form-control">@documentModel.Meta[meta.Key]</textarea>
+                                }
+                                else if (field.FieldTag == "select")
+                                {
+                                    <select @bind="documentModel.Meta[meta.Key]" class="form-control">@((MarkupString)field.FieldTagInputSelectItems)</select>
+                                }
+                                else
+                                {
+                                    if (field.FieldFormat != null)
+                                    {
+                                        <input type="@field.FieldTagInputType" format-value="@field.FieldFormat" @bind="documentModel.Meta[meta.Key]" class="form-control" />
+                                    }
+                                    else
+                                    {
+                                        <input type="@field.FieldTagInputType" @bind="documentModel.Meta[meta.Key]" class="form-control" />
+                                    }
+                                }
+                            </div>
                                         }
                                     }
                                 }

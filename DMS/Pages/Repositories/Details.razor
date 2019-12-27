@@ -213,6 +213,7 @@
         {
             await adminService.SetRepoMetaValue(Repo.Id, Item.Name, Item.Value);
             Repo = await listsService.GetRepositoryById(Id.ToString());
+            Item = new MetaItemEditModel();
         }
     }
 

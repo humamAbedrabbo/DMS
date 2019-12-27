@@ -5,10 +5,13 @@
 @using DAS.Services
 @inject ICurrentUserService currentUserService
 
-<BlazoredToasts Position="ToastPosition.TopCenter"
-                Timeout="2"
-                SuccessIconClass="oi oi-check"
-                ErrorIconClass="oi oi-x" />
+<div style="z-index: 100;">
+    <BlazoredToasts Position="ToastPosition.TopCenter"
+                    Timeout="2"
+                    SuccessIconClass="oi oi-check"
+                    ErrorIconClass="oi oi-x" />
+</div>
+
 
 @if (currentUser != null)
 {

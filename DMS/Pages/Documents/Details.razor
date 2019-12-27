@@ -237,6 +237,7 @@
         {
             await adminService.SetDocumentMetaValue(Doc.Id, Item.Name, Item.Value);
             Doc = await listsService.GetDocumentById(Id, true);
+            Item = new MetaItemEditModel();
         }
     }
 

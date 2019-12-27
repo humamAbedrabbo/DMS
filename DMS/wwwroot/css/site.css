@@ -24,7 +24,11 @@ app {
     height: 3.5rem;
     display: flex;
     align-items: center;
-    z-index: 1;
+    z-index: 10;
+}
+
+.blazored-toast {
+    z-index: 100 !important;
 }
 
 .main {
@@ -104,6 +108,7 @@ app {
 
 .content {
     padding-top: 1.1rem;
+
 }
 
 .navbar-toggler {

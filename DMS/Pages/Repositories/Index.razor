@@ -139,7 +139,7 @@
         {
             toastService.ShowError($"Failed to create repository '{RepoAddModel.Name}'. {ex.Message}");
         }
-        await JSRuntime.InvokeVoidAsync("closeDialog", "#id_AddRepository");
+        await JSRuntime.InvokeVoidAsync("closeDialog", "#dlg_AddRepository");
         RepoAddModel = new RepoAddModel();
         await LoadRepositories();
 

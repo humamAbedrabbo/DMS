@@ -92,9 +92,7 @@
                             <InputSelect @bind-Value="EditMetaModel.FieldType" id="id_fld_type" class="form-control">
                                 <option value="@FieldType.Text">@FieldType.Text.ToString()</option>
                                 <option value="@FieldType.LargeText">@FieldType.LargeText.ToString()</option>
-                                <option value="@FieldType.Boolean">@FieldType.Boolean.ToString()</option>
                                 <option value="@FieldType.Date">@FieldType.Date.ToString()</option>
-                                <option value="@FieldType.DateTime">@FieldType.DateTime.ToString()</option>
                                 <option value="@FieldType.Number">@FieldType.Number.ToString()</option>
                                 <option value="@FieldType.List">@FieldType.List.ToString()</option>
                             </InputSelect>
@@ -155,9 +153,7 @@
                             <select @bind="MetaFieldModel.FieldType" class="form-control" id="inputFieldType">
                                 <option value="@FieldType.Text">@FieldType.Text.ToString()</option>
                                 <option value="@FieldType.LargeText">@FieldType.LargeText.ToString()</option>
-                                <option value="@FieldType.Boolean">@FieldType.Boolean.ToString()</option>
                                 <option value="@FieldType.Date">@FieldType.Date.ToString()</option>
-                                <option value="@FieldType.DateTime">@FieldType.DateTime.ToString()</option>
                                 <option value="@FieldType.Number">@FieldType.Number.ToString()</option>
                                 <option value="@FieldType.List">@FieldType.List.ToString()</option>
                             </select>
@@ -223,6 +219,7 @@
         {
             await adminService.UpdateMetaField(EditMetaModel.Id, EditMetaModel);
             toastService.ShowSuccess($"Meta Field '{EditMetaModel.Title}' updated successfully");
+            EditMetaModel = new MetaField();
         }
         catch
         {
@@ -241,8 +238,9 @@
             var metaField = await adminService.AddMetaField(MetaFieldModel).ConfigureAwait(false);
             if (metaField != null)
             {
-                await JSRuntime.InvokeVoidAsync("closeDialog", "#dlg_EditMeta");
+                await JSRuntime.InvokeVoidAsync("closeDialog", "#dlg_AddMeta");
                 toastService.ShowSuccess($"Field '{MetaFieldModel.Name}' created successfully");
+                MetaFieldModel = new MetaField();
             }
             else
             {

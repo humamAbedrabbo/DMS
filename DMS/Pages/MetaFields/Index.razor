@@ -113,14 +113,36 @@
                             <ValidationMessage For="@(() => EditMetaModel.Title)" />
                         </div>
 
+                        @if (EditMetaModel.FieldType == FieldType.List)
+                        {
                         <div class="form-group">
                             <label for="id_fld_list">@LocalService.Get("List", currentUser.Lang)</label>
                             <InputText @bind-Value="EditMetaModel.ListSource" id="id_fld_list" class="form-control"></InputText>
+                            <input @bind-value="@EditMetaModel.ListSource" id="id_fld_list" class="form-control" />
                             <ValidationMessage For="@(() => EditMetaModel.ListSource)" />
                         </div>
+                        }
                         <div class="form-group">
                             <label for="id_fld_default">@LocalService.Get("Default Value", currentUser.Lang)</label>
-                            <InputText @bind-Value="EditMetaModel.DefaultValue" id="id_fld_default" class="form-control"></InputText>
+                            @if (EditMetaModel.FieldTag == "textarea")
+                            {
+                                <textarea id="id_fld_default" rows="3" class="form-control">@EditMetaModel.DefaultValue</textarea>
+                            }
+                            else if (MetaFieldModel.FieldTag == "select")
+                            {
+                                <select id="id_fld_default" @bind="EditMetaModel.DefaultValue" class="form-control">@((MarkupString)EditMetaModel.FieldTagInputSelectItems)</select>
+                            }
+                            else
+                            {
+                                if (MetaFieldModel.FieldFormat != null)
+                                {
+                                    <input id="id_fld_default" type="@EditMetaModel.FieldTagInputType" format-value="@EditMetaModel.FieldFormat" @bind="EditMetaModel.DefaultValue" class="form-control" />
+                                }
+                                else
+                                {
+                                    <input id="id_fld_default" type="@EditMetaModel.FieldTagInputType" @bind="EditMetaModel.DefaultValue" class="form-control" />
+                                }
+                            }
                             <ValidationMessage For="@(() => EditMetaModel.DefaultValue)" />
                         </div>
                     </div>
@@ -162,23 +184,47 @@
                         <div class="form-group">
                             <label for="inputName"> @LocalService.Get("Field Name", currentUser.Lang)</label>
                             <input @bind="MetaFieldModel.Name" class="form-control" id="inputName" placeholder="@LocalService.Get("Field Name", currentUser.Lang)">
-                            <ValidationMessage For="@(() => EditMetaModel.Name)" />
+                            <ValidationMessage For="@(() => MetaFieldModel.Name)" />
                         </div>
                         <div class="form-group">
                             <label for="inputTitle">@LocalService.Get("Title", currentUser.Lang)</label>
                             <input @bind="MetaFieldModel.Title" class="form-control" id="inputTitle" placeholder="@LocalService.Get("Title", currentUser.Lang)">
-                            <ValidationMessage For="@(() => EditMetaModel.Title)" />
+                            <ValidationMessage For="@(() => MetaFieldModel.Title)" />
                         </div>
 
-                        <div class="form-group">
-                            <label for="inputListSource">@LocalService.Get("List", currentUser.Lang)</label>
-                            <input @bind="MetaFieldModel.ListSource" class="form-control" id="inputListSource" placeholder="@LocalService.Get("List", currentUser.Lang)">
-                            <ValidationMessage For="@(() => EditMetaModel.ListSource)" />
-                        </div>
+                        @if (MetaFieldModel.FieldType == FieldType.List)
+                        {
+                            <div class="form-group">
+                                <label for="inputListSource">@LocalService.Get("List", currentUser.Lang)</label>
+                                <input @bind="MetaFieldModel.ListSource" class="form-control" id="inputListSource" placeholder="@LocalService.Get("List", currentUser.Lang)">
+                                <ValidationMessage For="@(() => MetaFieldModel.ListSource)" />
+                            </div>
+
+                        }
                         <div class="form-group">
                             <label for="inputDefault">@LocalService.Get("Default Value", currentUser.Lang)</label>
-                            <input @bind="MetaFieldModel.DefaultValue" class="form-control" id="inputDefault" placeholder="@LocalService.Get("Default Value", currentUser.Lang)">
-                            <ValidationMessage For="@(() => EditMetaModel.DefaultValue)" />
+
+                            @if (MetaFieldModel.FieldTag == "textarea")
+                            {
+                                <textarea id="inputDefault" rows="3" class="form-control">@MetaFieldModel.DefaultValue</textarea>
+                            }
+                            else if (MetaFieldModel.FieldTag == "select")
+                            {
+                                <select id="inputDefault" @bind="MetaFieldModel.DefaultValue" class="form-control">@((MarkupString)MetaFieldModel.FieldTagInputSelectItems)</select>
+                            }
+                            else
+                            {
+                                if (MetaFieldModel.FieldFormat != null)
+                                {
+                                    <input id="inputDefault" type="@MetaFieldModel.FieldTagInputType" format-value="@MetaFieldModel.FieldFormat" @bind="MetaFieldModel.DefaultValue" class="form-control" />
+                                }
+                                else
+                                {
+                                    <input id="inputDefault" type="@MetaFieldModel.FieldTagInputType" @bind="MetaFieldModel.DefaultValue" class="form-control" />
+                                }
+                            }
+
+                            <ValidationMessage For="@(() => MetaFieldModel.DefaultValue)" />
                         </div>
                     </div>
                     <div class="modal-footer">

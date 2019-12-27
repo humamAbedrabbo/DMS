@@ -19,24 +19,21 @@
         <div class="jumbotron jumbotron-fluid">
             <div class="container-fluid">
                 <h1 class="display-4">@LocalService.Get("Folder Details", currentUser.Lang)</h1>
-                <p class="h4 font-italic"><span class="text-muted">@LocalService.Get("Title", currentUser.Lang): </span>@CurrentFolder.Title</p>
-                <p class="h5 font-italic"><span class="text-muted">@LocalService.Get("Folder Name", currentUser.Lang): </span>@CurrentFolder.Name</p>
-                <p class="h6 font-italic"><span class="text-muted">@LocalService.Get("Repository Name", currentUser.Lang): </span>@CurrentFolder.Repository</p>
                 <hr />
                 <blockquote class="blockquote">
-                    <p class="mb-0">@CurrentFolder.Description</p>
+                    <p class="mb-0">@CurrentFolder.Title</p>
                     <footer class="blockquote-footer">
                         @LocalService.Get("created on", currentUser.Lang) @CurrentFolder.CreatedOn.ToString("dd-MM-yyyy")  <cite>@LocalService.Get("by", currentUser.Lang) @CurrentFolder.CreatedBy</cite>,  @LocalService.Get("last update on", currentUser.Lang) @CurrentFolder.UpdatedOn.ToString("dd-MM-yyyy hh:mm")  <cite>@LocalService.Get("by", currentUser.Lang) @CurrentFolder.UpdatedBy</cite>
                     </footer>
                 </blockquote>
-
-                <AuthorizeView Roles="Admin, Archive">
-                    @*<a href="/repos/upload?repoId=@CurrentFolder.RepositoryId&folderId=@CurrentFolder.Id" class="btn btn-secondary"> @LocalService.Get("Upload", currentUser.Lang)</a>*@
-                    <a href="/docs/upload/@CurrentFolder.RepositoryId/@CurrentFolder.Id" role="button" class="btn btn-lg btn-secondary">@LocalService.Get("Upload", currentUser.Lang)</a>
-                </AuthorizeView>
                 <AuthorizeView Roles="Admin">
                     <button type="button" class="btn btn-lg btn-primary" role="button" data-toggle="modal" data-target="#id_AddFolder">@LocalService.Get("Add Folder", currentUser.Lang)</button>
                 </AuthorizeView>
+                <AuthorizeView Roles="Admin, Archive">
+                    @*<a href="/repos/upload?repoId=@CurrentFolder.RepositoryId&folderId=@CurrentFolder.Id" class="btn btn-secondary"> @LocalService.Get("Upload", currentUser.Lang)</a>*@
+                    <a href="/docs/upload/@CurrentFolder.RepositoryId/@CurrentFolder.Id" role="button" class="btn btn-lg btn-success">@LocalService.Get("Upload", currentUser.Lang)</a>
+                </AuthorizeView>
+
             </div>
         </div>
         <nav>
@@ -52,9 +49,13 @@
                     <div class="card-body">
 
                         <dl class="row">
-                            <dt class="col-sm-3">@LocalService.Get("Repository", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Folder Name", currentUser.Lang):</dt>
+                            <dd class="col-sm-9">@CurrentFolder.Name</dd>
+                            <dt class="col-sm-3">@LocalService.Get("Title", currentUser.Lang):</dt>
+                            <dd class="col-sm-9">@CurrentFolder.Title</dd>
+                            <dt class="col-sm-3">@LocalService.Get("Repository", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@CurrentFolder.Repository</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Parent Folder", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Parent Folder", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@CurrentFolder.Parent</dd>
                         </dl>
 

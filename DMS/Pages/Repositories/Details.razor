@@ -19,21 +19,20 @@
         <div class="jumbotron jumbotron-fluid">
             <div class="container-fluid">
                 <h1 class="display-4">@LocalService.Get("Repository Details", currentUser.Lang)</h1>
-                <p class="h4 font-italic"><span class="text-muted">@LocalService.Get("Title", currentUser.Lang): </span>@Repo.Title</p>
-                <p class="h5 font-italic"><span class="text-muted">@LocalService.Get("Repository Name", currentUser.Lang): </span>@Repo.Name</p>
                 <hr />
                 <blockquote class="blockquote">
-                    <p class="mb-0">@Repo.Description</p>
+                    <p class="mb-0">@Repo?.Title</p>
                     <footer class="blockquote-footer">
                         @LocalService.Get("created on", currentUser.Lang) @Repo.CreatedOn.ToString("dd-MM-yyyy")  <cite>@LocalService.Get("by", currentUser.Lang) @Repo.CreatedBy</cite>,  @LocalService.Get("last update on", currentUser.Lang) @Repo.UpdatedOn.ToString("dd-MM-yyyy hh:mm")  <cite>@LocalService.Get("by", currentUser.Lang) @Repo.UpdatedBy</cite>
                     </footer>
                 </blockquote>
                 <AuthorizeView Roles="Admin">
-                    <a href="/docs/upload/@Repo?.Id/" class="btn btn-lg btn-secondary" role="button"> @LocalService.Get("Upload", currentUser.Lang)</a>
-                </AuthorizeView>
-                <AuthorizeView Roles="Admin">
                     <button type="button" class="btn btn-lg btn-primary" role="button" data-toggle="modal" data-target="#dlg_AddFolder"> @LocalService.Get("Add Folder", currentUser.Lang)</button>
                 </AuthorizeView>
+                <AuthorizeView Roles="Admin">
+                    <a href="/docs/upload/@Repo?.Id/" class="btn btn-lg btn-success" role="button"> @LocalService.Get("Upload", currentUser.Lang)</a>
+                </AuthorizeView>
+
             </div>
         </div>
         <nav>
@@ -48,11 +47,20 @@
                 <div class="card">
                     <div class="card-body">
                         <dl class="row">
-                            <dt class="col-sm-3">@LocalService.Get("Storage", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Repository Name", currentUser.Lang):</dt>
+                            <dd class="col-sm-9">@Repo.Name</dd>
+
+                            <dt class="col-sm-3">@LocalService.Get("Title", currentUser.Lang):</dt>
+                            <dd class="col-sm-9">@Repo.Title</dd>
+
+                            <dt class="col-sm-3">@LocalService.Get("Storage", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Repo.Storage.ToString()</dd>
 
-                            <dt class="col-sm-3">@LocalService.Get("Path", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Path", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Repo.Path</dd>
+
+                            <dt class="col-sm-3">@LocalService.Get("Description", currentUser.Lang):</dt>
+                            <dd class="col-sm-9">@Repo.Description</dd>
                         </dl>
                     </div>
                 </div>
@@ -219,7 +227,9 @@
         {
             await JSRuntime.InvokeVoidAsync("closeDialog", "#dlg_AddFolder");
             toastService.ShowSuccess($"Folder '{folder.Name}' created successfully");
+            FolderAddModel = new FolderAddModel();
             await LoadTree();
+            StateHasChanged();
         }
         else
         {

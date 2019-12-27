@@ -20,14 +20,9 @@
         <div class="jumbotron jumbotron-fluid">
             <div class="container-fluid">
                 <h1 class="display-4">@LocalService.Get("Document Details", currentUser.Lang)</h1>
-                <p class="h4 font-italic"><span class="text-muted">@LocalService.Get("Title", currentUser.Lang): </span>@Doc.Title</p>
-                <p class="h5 font-italic"><span class="text-muted">@LocalService.Get("Document Name", currentUser.Lang): </span>@Doc.Name</p>
-                <p class="h6 font-italic"><span class="text-muted">@LocalService.Get("Folder Parent", currentUser.Lang): </span>@Doc.Parent</p>
-                <p class="h6 font-italic"><span class="text-muted">@LocalService.Get("Repository Name", currentUser.Lang): </span>@Doc.Repository</p>
-
                 <hr />
                 <blockquote class="blockquote">
-                    <p class="mb-0">@Doc.Description</p>
+                    <p class="mb-0">@Doc.Title</p>
                     <footer class="blockquote-footer">
                         @LocalService.Get("created on", currentUser.Lang) @Doc.CreatedOn.ToString("dd-MM-yyyy")  <cite>@LocalService.Get("by", currentUser.Lang) @Doc.CreatedBy</cite>,  @LocalService.Get("last update on", currentUser.Lang) @Doc.UpdatedOn.ToString("dd-MM-yyyy hh:mm")  <cite>@LocalService.Get("by", currentUser.Lang) @Doc.UpdatedBy</cite>
                     </footer>
@@ -59,9 +54,13 @@
                     <div class="card-body">
                         <div class="card-text">@Doc.Description</div>
                         <dl class="row">
-                            <dt class="col-sm-3">@LocalService.Get("Repository", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Document Name", currentUser.Lang):</dt>
+                            <dd class="col-sm-9">@Doc.Name</dd>
+                            <dt class="col-sm-3">@LocalService.Get("Title", currentUser.Lang):</dt>
+                            <dd class="col-sm-9">@Doc.Title</dd>
+                            <dt class="col-sm-3">@LocalService.Get("Repository", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Doc.Repository</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Parent Folder", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Parent Folder", currentUser.Lang):</dt>
                             <dd class="col-sm-9">
                                 @if (Doc.ParentId.HasValue)
                                 {
@@ -72,17 +71,17 @@
                                     @Doc.Parent
                                 }
                             </dd>
-                            <dt class="col-sm-3">@LocalService.Get("Version", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Version", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Doc.Version</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Content Type", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Content Type", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Doc.ContentType</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Size", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Size", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Doc.Length</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Last Operation", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Last Operation", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Doc.LastOperation.ToString()</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Operation On", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Operation On", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Doc.OperationDate</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Operation By", currentUser.Lang)</dt>
+                            <dt class="col-sm-3">@LocalService.Get("Operation By", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Doc.OperationBy</dd>
                         </dl>
                     </div>

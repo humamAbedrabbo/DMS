@@ -54,14 +54,14 @@
                     <div class="card-body">
                         <div class="card-text">@Doc.Description</div>
                         <dl class="row">
-                            <dt class="col-sm-3">@LocalService.Get("Document Name", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@Doc.Name</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Title", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@Doc.Title</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Repository", currentUser.Lang):</dt>
-                            <dd class="col-sm-9"><a href="/repo/@Doc.RepositoryId">@Doc.Repository</a></dd>
-                            <dt class="col-sm-3">@LocalService.Get("Parent Folder", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">
+                            <dt class="col-3">@LocalService.Get("Document Name", currentUser.Lang):</dt>
+                            <dd class="col-8">@Doc.Name</dd>
+                            <dt class="col-3">@LocalService.Get("Title", currentUser.Lang):</dt>
+                            <dd class="col-8">@Doc.Title</dd>
+                            <dt class="col-3">@LocalService.Get("Repository", currentUser.Lang):</dt>
+                            <dd class="col-8"><a href="/repo/@Doc.RepositoryId">@Doc.Repository</a></dd>
+                            <dt class="col-3">@LocalService.Get("Parent Folder", currentUser.Lang):</dt>
+                            <dd class="col-8">
                                 @if (Doc.ParentId.HasValue)
                                 {
                                     <a href="/folders/@Doc.ParentId">@Doc.Parent</a>
@@ -71,18 +71,18 @@
                                     @Doc.Parent
                                 }
                             </dd>
-                            <dt class="col-sm-3">@LocalService.Get("Version", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@Doc.Version</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Content Type", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@Doc.ContentType</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Size", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@DAS.Utils.FileSizeText.ToString(Doc.Length)</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Last Operation", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@Doc.LastOperation.ToString()</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Operation On", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@Doc.OperationDate</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Operation By", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@Doc.OperationBy</dd>
+                            <dt class="col-3">@LocalService.Get("Version", currentUser.Lang):</dt>
+                            <dd class="col-8">@Doc.Version</dd>
+                            <dt class="col-3">@LocalService.Get("Content Type", currentUser.Lang):</dt>
+                            <dd class="col-8">@Doc.ContentType</dd>
+                            <dt class="col-3">@LocalService.Get("Size", currentUser.Lang):</dt>
+                            <dd class="col-8">@DAS.Utils.FileSizeText.ToString(Doc.Length)</dd>
+                            <dt class="col-3">@LocalService.Get("Last Operation", currentUser.Lang):</dt>
+                            <dd class="col-8">@Doc.LastOperation.ToString()</dd>
+                            <dt class="col-3">@LocalService.Get("Operation On", currentUser.Lang):</dt>
+                            <dd class="col-8">@Doc.OperationDate</dd>
+                            <dt class="col-3">@LocalService.Get("Operation By", currentUser.Lang):</dt>
+                            <dd class="col-8">@Doc.OperationBy</dd>
                         </dl>
                     </div>
                 </div>

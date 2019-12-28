@@ -49,14 +49,14 @@
                     <div class="card-body">
 
                         <dl class="row">
-                            <dt class="col-sm-3">@LocalService.Get("Folder Name", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@CurrentFolder.Name</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Title", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@CurrentFolder.Title</dd>
-                            <dt class="col-sm-3">@LocalService.Get("Repository", currentUser.Lang):</dt>
-                            <dd class="col-sm-9"><a href="/repo/@CurrentFolder.RepositoryId">@CurrentFolder.Repository</a></dd>
-                            <dt class="col-sm-3">@LocalService.Get("Parent Folder", currentUser.Lang):</dt>
-                            <dd class="col-sm-9"><a href="/folders/@CurrentFolder.ParentId">@CurrentFolder.Parent</a></dd>
+                            <dt class="col-3">@LocalService.Get("Folder Name", currentUser.Lang):</dt>
+                            <dd class="col-8">@CurrentFolder.Name</dd>
+                            <dt class="col-3">@LocalService.Get("Title", currentUser.Lang):</dt>
+                            <dd class="col-8">@CurrentFolder.Title</dd>
+                            <dt class="col-3">@LocalService.Get("Repository", currentUser.Lang):</dt>
+                            <dd class="col-8"><a href="/repo/@CurrentFolder.RepositoryId">@CurrentFolder.Repository</a></dd>
+                            <dt class="col-3">@LocalService.Get("Parent Folder", currentUser.Lang):</dt>
+                            <dd class="col-8"><a href="/folders/@CurrentFolder.ParentId">@CurrentFolder.Parent</a></dd>
                         </dl>
 
                     </div>

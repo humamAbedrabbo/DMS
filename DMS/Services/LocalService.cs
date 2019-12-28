@@ -14,7 +14,7 @@ namespace DAS.Services
             ["Clear"] = "حذف",
             ["Add Meta Term"] = "أضف شرط حقل",
             ["like"] = "يحتوي",
-            ["like"] = "لايحتوي",
+            ["unlike"] = "لايحتوي",
             ["Search in title"] = "البحث ضمن العنوان",
             ["Search in description"] = "البحث ضمن الشرح التفصيلي",
             ["Search for"] = "البحث عن",

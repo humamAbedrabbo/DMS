@@ -27,7 +27,10 @@
         <div class="jumbotron jumbotron-fluid">
             <div class="container-fluid">
                 <h1 class="display-4">@LocalService.Get("Upload Document", currentUser.Lang)</h1>
-                <p>@LocalService.Get("Repository", currentUser.Lang): @Repo.Name</p>
+                <hr />
+                <blockquote class="blockquote">
+                    <p class="mb-0">@LocalService.Get("Repository", currentUser.Lang): @Repo.Name</p>
+                </blockquote>
             </div>
         </div>
         <nav>

@@ -1,15 +1,205 @@
 ﻿@page "/docs/search"
+@attribute [Authorize(Roles = "Admin, Archive, Public")]
 
 @using DAS.ViewModels
 @using DAS.Models
 @using DAS.Services
 
+@inject IListsService listsService
+@inject ISearchService searchService;
+@inject ICurrentUserService currentUserService
+@inject IJSRuntime JSRuntime;
 
-<h3>Search</h3>
+
+@if (currentUser != null)
+{
+    <div class="card text-left">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container-fluid">
+                <h1 class="display-4">@LocalService.Get("Search", currentUser.Lang)</h1>
+                <p class="lead">@LocalService.Get("Search for documents", currentUser.Lang)</p>
+            </div>
+        </div>
+        <nav>
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <a class="nav-item nav-link active" id="nav-search-tab" data-toggle="tab" href="#nav-search" role="tab" aria-controls="nav-search" aria-selected="true">@LocalService.Get("Search Terms", currentUser.Lang)</a>
+                <a class="nav-item nav-link" id="nav-results-tab" data-toggle="tab" href="#nav-results" role="tab" aria-controls="nav-results" aria-selected="false">@LocalService.Get("Search Results", currentUser.Lang)</a>
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-search" role="tabpanel" aria-labelledby="nav-search-tab">
+                <div class="card">
+                    <div class="card-body">
+                        <EditForm Model="Term" OnValidSubmit="OnSubmitSearch">
+                            <div class="form-group row">
+                                <label for="id_term_type" class="col-sm-2 col-form-label">@LocalService.Get("Search for", currentUser.Lang)</label>
+                                <div class="col-sm-10">
+                                    <InputSelect id="id_term_type" @bind-Value="Term.Type" class="form-control">
+                                        <option value="@SearchEntityType.Repository">@LocalService.Get("Repository", currentUser.Lang)</option>
+                                        <option value="@SearchEntityType.Folder">@LocalService.Get("Folder", currentUser.Lang)</option>
+                                        <option value="@SearchEntityType.Document">@LocalService.Get("Document", currentUser.Lang)</option>
+                                    </InputSelect>
+                                </div>
+                            </div>
+                            <div class="form-group mt-1 row">
+                                <label for="id_term_name" class="col-sm-2 col-form-label">@LocalService.Get("Name", currentUser.Lang)</label>
+                                <div class="col-sm-10">
+                                    <InputText id="id_term_name" @bind-Value="Term.Name" class="form-control"></InputText>
+                                </div>
+                            </div>
+                            <div class="form-group mt-1 row">
+                                <div class="offset-sm-2 col-sm-10">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="id_term_includeTitle" @bind-value="Term.IncludeTitle">
+                                        <label class="form-check-label" for="id_term_includeTitle">@LocalService.Get("Search in title", currentUser.Lang)</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" id="id_term_includeDescription" @bind-value="Term.IncludeDescription">
+                                        <label class="form-check-label" for="id_term_includeDescription">@LocalService.Get("Search in description", currentUser.Lang)</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group mt-1 row">
+                                <div class="col-sm-2">
+                                    <InputSelect @bind-Value="AddMetaSearchTerm.Name" class="form-control">
+                                        <option value=""></option>
+                                        @if (Fields != null)
+                                            {
+                                                foreach (var group in Fields.Select(x => x.Group).Distinct().OrderBy(x => x))
+                                                {
+                                                <optgroup label="@group">
+                                                    @foreach (var field in Fields.Where(x => group == x.Group).OrderBy(x => x.Name))
+                                                        {
+                                                        <option value="@field.Name">@field.Title</option>
+                                                        }
+                                                </optgroup>
+                                                }
+                                            }
+                                    </InputSelect>
+                                </div>
+                                <div class="col-sm-2">
+                                    <InputSelect @bind-Value="AddMetaSearchTerm.Operation" class="form-control">
+                                        <option value="@MetaSearchOperation.EQ">=</option>
+                                        <option value="@MetaSearchOperation.NE">!=</option>
+                                        <option value="@MetaSearchOperation.Like">@LocalService.Get("like", currentUser.Lang)</option>
+                                        <option value="@MetaSearchOperation.Unlike">@LocalService.Get("unlike", currentUser.Lang)</option>
+                                    </InputSelect>
+                                </div>
+                                <div class="col-sm-2">
+                                    @if (!string.IsNullOrEmpty(AddMetaSearchTerm.Name) && Fields != null)
+                                    {
+                                        var field = Fields.FirstOrDefault(x => x.Name == AddMetaSearchTerm.Name);
+                                        if (field != null)
+                                        {
+                                            if (field.FieldTag == "textarea")
+                                            {
+                                                <InputTextArea id="id_value" @bind-Value="@AddMetaSearchTerm.Value" rows="3" class="form-control"></InputTextArea>
+                                            }
+                                            else if (field.FieldTag == "select")
+                                            {
+                                                <select id="id_value" @bind="AddMetaSearchTerm.Value" class="form-control">@((MarkupString)field.FieldTagInputSelectItems)</select>
+                                            }
+                                            else
+                                            {
+                                                if (field.FieldFormat != null)
+                                                {
+                                                    <input id="id_value" type="@field.FieldTagInputType" format-value="@field.FieldFormat" @bind="AddMetaSearchTerm.Value" class="form-control" />
+                                                }
+                                                else
+                                                {
+                                                    <input id="id_value" type="@field.FieldTagInputType" @bind="AddMetaSearchTerm.Value" class="form-control" />
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <InputText @bind-Value="AddMetaSearchTerm.Value" class="form-control" id="id_value" placeholder=" @LocalService.Get("Field Value", currentUser.Lang)"></InputText>
+                                        }
+                                    }
+
+
+                                </div>
+                                <div class="col-sm-2">
+                                    <button type="button" class="btn btn-primary" @onclick="@(() => AddNewMetaSearchTerm())">@LocalService.Get("Add Meta Term", currentUser.Lang)</button>
+                                    <button type="button" class="btn btn-secondary mx-1" @onclick="@(() => ClearNewMetaSearchTerm())">@LocalService.Get("Clear", currentUser.Lang)</button>
+                                </div>
+                            </div>
+                            <div class="form-row mt-1">
+                                <div class="col-10">
+                                    @foreach (var item in Term.MetaTerms)
+                                    {
+                                    <span class="badge badge-pill badge-dark mx-1">
+                                        @item.Name @item.OperationName '@item.Value'
+                                    </span>
+                                    }
+
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success mt-1">@LocalService.Get("Search", currentUser.Lang)</button>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="nav-results" role="tabpanel" aria-labelledby="nav-results-tab">
+                <div class="card mt-3 d-flex flex-grow-1 flex-column">
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            @if (Result != null)
+                            {
+                                @foreach (var item in Result.Results)
+                                {
+                                    <a href="@item.Url" class="list-group-item list-group-item-action"><i class="@item.Icon"></i>@item.Name</a>
+                                }
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 
 @code {
 
+    public SearchTerm Term { get; set; } = new SearchTerm();
+    public SearchResult Result { get; set; }
+    public MetaSearchTerm AddMetaSearchTerm { get; set; } = new MetaSearchTerm();
+    private IEnumerable<MetaField> Fields;
+    private AppUser currentUser;
 
-    
+    public async Task OnSubmitSearch()
+    {
+        Result = await searchService.SearchByTerm(Term);
+        await JSRuntime.InvokeVoidAsync("showTab", "#nav-results-tab");
+    }
 
+    public void AddNewMetaSearchTerm()
+    {
+        if (Term.MetaTerms == null)
+        {
+            Term.MetaTerms = new List<MetaSearchTerm>();
+        }
+        if(!string.IsNullOrEmpty(AddMetaSearchTerm.Name))
+        {
+            Term.MetaTerms.Add(AddMetaSearchTerm);
+            AddMetaSearchTerm = new MetaSearchTerm();
+        }
+       
+    }
+
+    public void ClearNewMetaSearchTerm()
+    {
+        if (Term.MetaTerms != null)
+        {
+            Term.MetaTerms.Clear();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await currentUserService.GetCurrentUserAsync();
+        Fields = await listsService.GetMetaFieldsList();
+    }
 }

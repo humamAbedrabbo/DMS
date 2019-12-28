@@ -12,10 +12,13 @@ namespace DAS.Services
     public class SearchService : ISearchService
     {
         private readonly DasContext context;
+        private readonly ICurrentUserService currentUserService;
+        private AppUser currentUser;
 
-        public SearchService(DasContext context)
+        public SearchService(DasContext context, ICurrentUserService currentUserService)
         {
             this.context = context;
+            this.currentUserService = currentUserService;
         }
 
         public async Task<SearchResult> SearchByTerm(SearchTerm term)
@@ -24,6 +27,8 @@ namespace DAS.Services
             {
                 throw new ArgumentException("Search term is required");
             }
+
+            currentUser = await currentUserService.GetCurrentUserAsync();
 
             SearchResult result = new SearchResult();
             result.Term = term;
@@ -42,6 +47,7 @@ namespace DAS.Services
         {
             var query = context.RepositoryMetaData
                 .Include(x => x.Repository)
+                .Where(x => currentUser != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(x.RepositoryId)))
                 .AsQueryable();
 
             if (term.MetaTerms != null)
@@ -111,6 +117,7 @@ namespace DAS.Services
 
             var query = context.FolderMetaData
                 .Include(x => x.Folder)
+                .Where(x => currentUser != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(x.Folder.RepositoryId)))
                 .AsQueryable();
 
             if (term.MetaTerms != null)
@@ -179,6 +186,7 @@ namespace DAS.Services
         {
             var query = context.DocumentMetaData
                 .Include(x => x.Document)
+                .Where(x => currentUser != null && (currentUser.IsAdmin || currentUser.Repositories.Contains(x.Document.RepositoryId)))
                 .AsQueryable();
 
             if (term.MetaTerms != null)

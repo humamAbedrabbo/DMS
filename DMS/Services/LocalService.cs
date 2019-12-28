@@ -10,6 +10,17 @@ namespace DAS.Services
         private static Dictionary<string, string> dic = new Dictionary<string, string> 
         { 
             ["Select File"] = "اختر ملف",
+            ["Search for documents"] = "ابحث عن الوثائق",
+            ["Clear"] = "حذف",
+            ["Add Meta Term"] = "أضف شرط حقل",
+            ["like"] = "يحتوي",
+            ["like"] = "لايحتوي",
+            ["Search in title"] = "البحث ضمن العنوان",
+            ["Search in description"] = "البحث ضمن الشرح التفصيلي",
+            ["Search for"] = "البحث عن",
+            ["Search Terms"] = "شروط البحث",
+            ["Search Results"] = "نتائج البحث",
+            ["Search"] = "بحث",
             ["Document Name"] = "اسم ملف الوثيقة",
             ["Go To Document"] = "فتح صفحة الوثيقة",
             ["Meta field has hierarcial nature. It will be added to all childs in tree structure if it was added to a parent, but it will not be removed automatically"] = "تمتلك الحقول الإضافية خواص توريثية. حيث أنها تضاف تلقائيا على كل فروع الشجرة وذلك بمجر إضافتها على فرع الشجرة الرئيسي ولا تحذف من الفروع بشكل تلقائي",

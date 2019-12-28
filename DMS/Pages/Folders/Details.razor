@@ -54,7 +54,7 @@
                             <dt class="col-sm-3">@LocalService.Get("Title", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@CurrentFolder.Title</dd>
                             <dt class="col-sm-3">@LocalService.Get("Repository", currentUser.Lang):</dt>
-                            <dd class="col-sm-9"><a href="/folders/@CurrentFolder.RepositoryId">@CurrentFolder.Repository</a></dd>
+                            <dd class="col-sm-9"><a href="/repo/@CurrentFolder.RepositoryId">@CurrentFolder.Repository</a></dd>
                             <dt class="col-sm-3">@LocalService.Get("Parent Folder", currentUser.Lang):</dt>
                             <dd class="col-sm-9"><a href="/folders/@CurrentFolder.ParentId">@CurrentFolder.Parent</a></dd>
                         </dl>

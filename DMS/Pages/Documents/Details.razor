@@ -76,7 +76,7 @@
                             <dt class="col-sm-3">@LocalService.Get("Content Type", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Doc.ContentType</dd>
                             <dt class="col-sm-3">@LocalService.Get("Size", currentUser.Lang):</dt>
-                            <dd class="col-sm-9">@Doc.Length</dd>
+                            <dd class="col-sm-9">@DAS.Utils.FileSizeText.ToString(Doc.Length)</dd>
                             <dt class="col-sm-3">@LocalService.Get("Last Operation", currentUser.Lang):</dt>
                             <dd class="col-sm-9">@Doc.LastOperation.ToString()</dd>
                             <dt class="col-sm-3">@LocalService.Get("Operation On", currentUser.Lang):</dt>
